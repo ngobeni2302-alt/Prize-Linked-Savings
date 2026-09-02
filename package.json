@@ -9,16 +9,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ngobeni2302-alt/MTN_MOMO_MINI-APP.git"
+    "url": "git+https://github.com/ngobeni2302-alt/Prize-Linked-Savings.git",
+    "branch": "Oratile"
   },
   "keywords": [
     "mtn",
     "momo",
     "fintech",
     "hackathon",
-    "mini-app"
+    "mini-app",
+    "prize-linked-savings"
   ],
-  "author": "",
+  "author": "Oratile",
   "license": "ISC",
   "devDependencies": {
     "vite": "^5.4.21"
