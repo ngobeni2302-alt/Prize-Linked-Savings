@@ -74,6 +74,12 @@ function updateWalletUI() {
   const homeWalletEl = document.querySelector('#card-wallet-summary .card-value');
   if (homeWalletEl) homeWalletEl.textContent = formatted;
 
+  const topupCurrentBalEl = document.getElementById('topup-current-wallet-bal');
+  if (topupCurrentBalEl) topupCurrentBalEl.textContent = formatted;
+
+  const createWalletBalEl = document.getElementById('create-pocket-wallet-balance');
+  if (createWalletBalEl) createWalletBalEl.textContent = formatted;
+
   const contribBalEl = document.getElementById('contribute-momo-balance');
   if (contribBalEl) contribBalEl.textContent = formatted;
 
@@ -806,6 +812,68 @@ function renderAuditTrail(pocket) {
 
 
 // ============================================================================
+// TOP UP MOMO WALLET FLOW
+// ============================================================================
+const modalTopup = document.getElementById('modal-topup-wallet');
+const btnHeaderTopup = document.getElementById('btn-header-topup');
+const btnTopupFromCreate = document.getElementById('btn-topup-from-create');
+const btnCloseTopupModal = document.getElementById('btn-close-topup-modal');
+const btnCancelTopup = document.getElementById('btn-cancel-topup');
+const inputTopupAmount = document.getElementById('input-topup-amount');
+const btnProceedTopup = document.getElementById('btn-proceed-topup');
+
+function openTopupModal() {
+  const bal = getWalletBalance();
+  const currentBalEl = document.getElementById('topup-current-wallet-bal');
+  if (currentBalEl) currentBalEl.textContent = `R${bal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  if (inputTopupAmount) inputTopupAmount.value = '';
+  if (modalTopup) modalTopup.classList.add('modal-overlay--active');
+}
+
+function closeTopupModal() {
+  if (modalTopup) modalTopup.classList.remove('modal-overlay--active');
+}
+
+if (btnHeaderTopup) btnHeaderTopup.addEventListener('click', openTopupModal);
+if (btnTopupFromCreate) {
+  btnTopupFromCreate.addEventListener('click', () => {
+    closeCreatePocketModal();
+    openTopupModal();
+  });
+}
+if (btnCloseTopupModal) btnCloseTopupModal.addEventListener('click', closeTopupModal);
+if (btnCancelTopup) btnCancelTopup.addEventListener('click', closeTopupModal);
+
+// Top up chips
+document.querySelectorAll('.topup-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const amt = parseFloat(btn.getAttribute('data-amt')) || 0;
+    if (inputTopupAmount) {
+      inputTopupAmount.value = amt.toFixed(2);
+    }
+  });
+});
+
+if (btnProceedTopup) {
+  btnProceedTopup.addEventListener('click', () => {
+    const amt = parseFloat(inputTopupAmount.value) || 0;
+    if (amt <= 0) {
+      alert("Please enter a valid top-up amount (minimum R10.00).");
+      return;
+    }
+
+    closeTopupModal();
+
+    requestPinAuth(`Confirm Top Up of R${amt.toFixed(2)} to MoMo Wallet`, () => {
+      const newBalance = getWalletBalance() + amt;
+      setWalletBalance(newBalance);
+      showToast(`Topped up R${amt.toFixed(2)}! New MoMo Wallet: R${newBalance.toFixed(2)}`);
+    });
+  });
+}
+
+
+// ============================================================================
 // CREATE POCKET FLOW
 // ============================================================================
 const modalCreatePocket = document.getElementById('modal-create-pocket');
@@ -813,18 +881,50 @@ const btnCreateGroup = document.getElementById('btn-create-group');
 const btnCloseCreateModal = document.getElementById('btn-close-create-modal');
 const btnCancelCreatePocket = document.getElementById('btn-cancel-create-pocket');
 const formCreatePocket = document.getElementById('form-create-pocket');
+const inputCreateInitDeposit = document.getElementById('create-pocket-initial-deposit');
+
+function updateCreatePocketPreviews(initialDeposit) {
+  const walletBal = getWalletBalance();
+  const remainingWallet = Math.max(0, walletBal - initialDeposit);
+
+  const prevDeductionEl = document.getElementById('preview-create-deduction');
+  const prevRemainingEl = document.getElementById('preview-create-remaining-wallet');
+
+  if (prevDeductionEl) prevDeductionEl.textContent = `-R${initialDeposit.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  if (prevRemainingEl) {
+    prevRemainingEl.textContent = `R${remainingWallet.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+    prevRemainingEl.style.color = initialDeposit > walletBal ? '#E11D48' : 'var(--black)';
+  }
+}
 
 function openCreatePocketModal() {
+  const walletBal = getWalletBalance();
+  const createWalletBalEl = document.getElementById('create-pocket-wallet-balance');
+  if (createWalletBalEl) createWalletBalEl.textContent = `R${walletBal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  
+  if (inputCreateInitDeposit) inputCreateInitDeposit.value = '';
+  updateCreatePocketPreviews(0);
+
   if (modalCreatePocket) modalCreatePocket.classList.add('modal-overlay--active');
 }
+
 function closeCreatePocketModal() {
   if (modalCreatePocket) modalCreatePocket.classList.remove('modal-overlay--active');
   if (formCreatePocket) formCreatePocket.reset();
 }
 
+if (inputCreateInitDeposit) {
+  inputCreateInitDeposit.addEventListener('input', () => {
+    const val = parseFloat(inputCreateInitDeposit.value) || 0;
+    updateCreatePocketPreviews(val);
+  });
+}
+
 if (btnCreateGroup) btnCreateGroup.addEventListener('click', openCreatePocketModal);
 if (btnCloseCreateModal) btnCloseCreateModal.addEventListener('click', closeCreatePocketModal);
-if (btnCancelCreatePocket) btnCancelCreatePocket.addEventListener('click', closeCreatePocketModal);if (formCreatePocket) {
+if (btnCancelCreatePocket) btnCancelCreatePocket.addEventListener('click', closeCreatePocketModal);
+
+if (formCreatePocket) {
   formCreatePocket.addEventListener('submit', (e) => {
     e.preventDefault();
     const user = getCurrentUser();
@@ -844,7 +944,7 @@ if (btnCancelCreatePocket) btnCancelCreatePocket.addEventListener('click', close
     if (initialDeposit > 0) {
       const walletBal = getWalletBalance();
       if (initialDeposit > walletBal) {
-        alert(`Insufficient MoMo wallet balance (R${walletBal.toFixed(2)}) for initial deposit of R${initialDeposit.toFixed(2)}.`);
+        alert(`Insufficient MoMo wallet balance (R${walletBal.toFixed(2)}) for initial deposit of R${initialDeposit.toFixed(2)}. Please top up your wallet first.`);
         return;
       }
     }
@@ -2267,6 +2367,8 @@ window.openPersonalDepositModal = openPersonalDepositModal;
 window.closePersonalDepositModal = closePersonalDepositModal;
 window.openPersonalWithdrawModal = openPersonalWithdrawModal;
 window.closePersonalWithdrawModal = closePersonalWithdrawModal;
+window.openTopupModal = openTopupModal;
+window.closeTopupModal = closeTopupModal;
 window.requestPinAuth = requestPinAuth;
 window.closePinModal = closePinModal;
 window.togglePocketTransparency = togglePocketTransparency;

@@ -22,10 +22,13 @@
         <button class="menu-trigger-btn" id="btn-open-menu" aria-label="Open Navigation Menu" style="background: none; border: 2px solid var(--black); border-radius: var(--radius-sm); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 2px 2px 0 var(--black); font-weight: 800;">
           <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <!-- Wallet display -->
-        <div class="header-wallet" id="header-wallet" style="border: none; padding: 0; box-shadow: none;">
-          <span class="wallet-label" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 800; display: block; color: var(--black-muted); line-height: 1;">Wallet</span>
-          <span class="wallet-amount" id="header-wallet-amount" style="font-size: 0.95rem; font-weight: 800; color: var(--black);">R5,450.00</span>
+        <!-- Wallet display + Top Up -->
+        <div class="header-wallet" id="header-wallet" style="border: none; padding: 0; box-shadow: none; display: flex; align-items: center; gap: 8px;">
+          <div>
+            <span class="wallet-label" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 800; display: block; color: var(--black-muted); line-height: 1;">MoMo Wallet</span>
+            <span class="wallet-amount" id="header-wallet-amount" style="font-size: 0.95rem; font-weight: 800; color: var(--black);">R5,450.00</span>
+          </div>
+          <button class="btn btn--primary" id="btn-header-topup" style="padding: 4px 8px; font-size: 0.7rem; font-weight: 800; height: auto; box-shadow: 1.5px 1.5px 0 var(--black);">+ Top Up</button>
         </div>
       </div>
 
@@ -298,6 +301,14 @@
       <p class="modal-subtitle">Pool funds with friends & family toward a target goal with guaranteed 5.5% p.a. yield.</p>
 
       <form id="form-create-pocket" class="pocket-form">
+        <div class="wallet-balance-pill" style="margin-bottom: var(--space-md); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span>Available MoMo Wallet:</span>
+            <strong id="create-pocket-wallet-balance">R5,450.00</strong>
+          </div>
+          <button type="button" class="btn btn--outline" id="btn-topup-from-create" style="padding: 2px 8px; font-size: 0.72rem; font-weight: 800;">+ Top Up</button>
+        </div>
+
         <div class="form-group">
           <label for="create-pocket-name" class="form-label">Pocket Name <span class="required">*</span></label>
           <input type="text" id="create-pocket-name" class="input-field" placeholder="e.g. December Cape Town Trip" required maxlength="40">
@@ -348,7 +359,18 @@
 
         <div class="form-group">
           <label for="create-pocket-initial-deposit" class="form-label">Initial Deposit Amount (ZAR - Optional)</label>
-          <input type="number" id="create-pocket-initial-deposit" class="input-field" placeholder="e.g. 500.00" min="0" step="50">
+          <input type="number" id="create-pocket-initial-deposit" class="input-field" placeholder="0.00" min="0" step="50">
+        </div>
+
+        <div class="contribution-summary-box" id="create-pocket-deduction-box" style="margin-top: 4px; margin-bottom: var(--space-sm);">
+          <div class="contrib-row">
+            <span>Deducted from MoMo Wallet:</span>
+            <strong id="preview-create-deduction" style="color: #E11D48;">-R0.00</strong>
+          </div>
+          <div class="contrib-row">
+            <span>Remaining MoMo Wallet:</span>
+            <strong id="preview-create-remaining-wallet" style="color: var(--black);">R5,450.00</strong>
+          </div>
         </div>
 
         <div class="pocket-policy-box">
@@ -782,6 +804,47 @@
       <div class="modal-actions" style="margin-top: var(--space-lg);">
         <button type="button" class="btn btn--primary" id="btn-confirm-close-pocket" style="background-color: #E11D48; color: #FFFFFF; border-color: #9F1239;">Close & Disburse Payout</button>
         <button type="button" class="btn btn--outline" id="btn-cancel-close-pocket">Keep Pocket Open</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Top Up MoMo Wallet / Cash In ===== -->
+  <div class="modal-overlay" id="modal-topup-wallet">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="btn-close-topup-modal">&times;</button>
+      <div class="modal-header-icon" style="background-color: var(--yellow-light); border-color: var(--black); color: var(--black);">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <h3 class="modal-title">Top Up MoMo Wallet</h3>
+      <p class="modal-subtitle">Add funds to your MTN MoMo wallet balance for target savings & group pockets.</p>
+
+      <div class="wallet-balance-pill" style="margin-bottom: var(--space-md);">
+        <span>Current Available Balance:</span>
+        <strong id="topup-current-wallet-bal">R5,450.00</strong>
+      </div>
+
+      <div class="form-group">
+        <label for="input-topup-amount" class="form-label">Top Up Amount (ZAR)</label>
+        <input type="number" id="input-topup-amount" class="input-field input-field--large" placeholder="0.00" min="50" step="50">
+        <div class="amount-chips-row">
+          <button type="button" class="chip-btn topup-chip" data-amt="500">+R500</button>
+          <button type="button" class="chip-btn topup-chip" data-amt="1000">+R1,000</button>
+          <button type="button" class="chip-btn topup-chip" data-amt="2500">+R2,500</button>
+          <button type="button" class="chip-btn topup-chip" data-amt="5000">+R5,000</button>
+        </div>
+      </div>
+
+      <div class="payout-destination-box" style="margin-top: var(--space-sm);">
+        <span class="payout-dest-label">Source of Funds:</span>
+        <div class="payout-dest-val">
+          <span class="momo-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
+          <span>Linked Bank Card / MoMo Agent Cash-In</span>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: var(--space-lg);">
+        <button type="button" class="btn btn--primary" id="btn-proceed-topup">Authorize Top Up</button>
+        <button type="button" class="btn btn--outline" id="btn-cancel-topup">Cancel</button>
       </div>
     </div>
   </div>
