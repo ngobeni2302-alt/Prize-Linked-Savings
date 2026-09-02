@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="MTN MoMo Enhanced Mini App - Save, Refer, Play, Win. A financial engagement platform built on MTN MoMo." />
-  <title>MTN MoMo Enhanced - Home</title>
+  <title>MTN MoMo Enhanced - Referrals</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -39,82 +39,85 @@
   <!-- ===== MAIN CONTENT AREA ===== -->
   <main class="app-main" id="app-main" style="margin-top: var(--header-height); min-height: calc(100vh - var(--header-height)); padding-bottom: var(--space-xl);">
 
-    <!-- PAGE: Home -->
-    <section class="page" id="page-home" data-page="home">
+    <!-- PAGE: Referrals -->
+    <section class="page" id="page-referrals" data-page="referrals">
       <div class="page-header">
-        <h1>Save & Win</h1>
-        <p class="page-subtitle">Grow your savings and stand a chance to win cash, data, and vouchers!</p>
+        <h1>Referrals</h1>
+        <p class="page-subtitle">Invite friends. Earn free tickets.</p>
       </div>
 
-      <!-- Overview Cards Grid -->
-      <div class="card-grid">
-        <!-- Wallet Summary Card -->
-        <div class="card card--highlight" id="card-wallet-summary">
-          <div class="card-icon">W</div>
-          <h2 class="card-title">Wallet Balance</h2>
-          <p class="card-value">R0.00</p>
-          <p class="card-hint">-- Placeholder: Live wallet balance from MoMo API --</p>
-        </div>
+      <div class="referrals-desktop-layout">
+        <div class="referrals-column">
+          <!-- My Referral Code -->
+          <div class="section" id="section-my-code">
+            <h2 class="section-title">Your Referral Code</h2>
+            <div class="card card--highlight referral-code-card">
+              <p class="referral-code" id="my-referral-code">MOMO-----</p>
+              <p class="card-hint">Share this code — it works once, so make it count</p>
+              <button class="btn btn--primary" id="btn-copy-code">Copy Code</button>
+              <button class="btn btn--outline" id="btn-share-code">Share</button>
+            </div>
+          </div>
 
-        <!-- Savings Summary Card -->
-        <div class="card" id="card-savings-summary">
-          <div class="card-icon">S</div>
-          <h2 class="card-title">Total Savings</h2>
-          <p class="card-value">R0.00</p>
-          <p class="card-hint">-- Placeholder: Combined personal + group savings --</p>
-        </div>
+          <!-- Enter a Referral Code -->
+          <div class="section" id="section-enter-code">
+            <h2 class="section-title">Have a Referral Code?</h2>
+            <div class="card" id="enter-code-card">
+              <div class="input-row">
+                <input type="text" id="input-referral-code" class="input-field" placeholder="MOMO-4521-001" maxlength="14">
+                <button class="btn btn--primary" id="btn-submit-code">Apply</button>
+              </div>
+              <p class="card-hint" id="enter-code-status"></p>
+            </div>
+          </div>
 
-        <!-- Tickets Card -->
-        <div class="card" id="card-tickets-summary">
-          <div class="card-icon">T</div>
-          <h2 class="card-title">Game Tickets</h2>
-          <p class="card-value">0</p>
-          <p class="card-hint">-- Placeholder: Available tickets to play The Ruler --</p>
-        </div>
-
-        <!-- Referral Card -->
-        <div class="card" id="card-referral-summary">
-          <div class="card-icon">R</div>
-          <h2 class="card-title">Referrals</h2>
-          <p class="card-value">0 / 10</p>
-          <p class="card-hint">-- Placeholder: Verified referral count --</p>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="section" id="section-quick-actions">
-        <h2 class="section-title">Quick Actions</h2>
-        <div class="action-grid">
-          <button class="action-btn" id="btn-send-money">
-            <span class="action-btn-icon">S</span>
-            <span class="action-btn-label">Send Money</span>
-          </button>
-          <button class="action-btn" id="btn-buy-airtime">
-            <span class="action-btn-icon">A</span>
-            <span class="action-btn-label">Buy Airtime</span>
-          </button>
-          <button class="action-btn" id="btn-pay-bills">
-            <span class="action-btn-icon">B</span>
-            <span class="action-btn-label">Pay Bills</span>
-          </button>
-          <button class="action-btn" id="btn-cash-in">
-            <span class="action-btn-icon">C</span>
-            <span class="action-btn-label">Cash In</span>
-          </button>
-        </div>
-        <p class="placeholder-note">-- Placeholder: Quick action buttons will trigger MoMo API flows --</p>
-      </div>
-
-      <!-- Recent Activity -->
-      <div class="section" id="section-recent-activity">
-        <h2 class="section-title">Recent Activity</h2>
-        <div class="activity-list">
-          <div class="activity-item">
-            <span class="activity-desc">No recent transactions</span>
-            <span class="activity-amount">--</span>
+          <!-- How It Works -->
+          <div class="section" id="section-referral-how">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps-list">
+              <div class="step-item">
+                <span class="step-number">1</span>
+                <span class="step-text">Share your unique, one-time code with friends</span>
+              </div>
+              <div class="step-item">
+                <span class="step-number">2</span>
+                <span class="step-text">They register on the MoMo app, then enter your code in PLS</span>
+              </div>
+              <div class="step-item">
+                <span class="step-number">3</span>
+                <span class="step-text">System verifies their first real savings deposit</span>
+              </div>
+              <div class="step-item">
+                <span class="step-number">4</span>
+                <span class="step-text">You both instantly earn 1 ticket — plus a bonus every 10 referrals</span>
+              </div>
+            </div>
           </div>
         </div>
-        <p class="placeholder-note">-- Placeholder: Transaction history from MoMo wallet --</p>
+
+        <div class="referrals-column">
+          <!-- Referral Progress -->
+          <div class="section" id="section-referral-progress">
+            <h2 class="section-title">Referral Progress</h2>
+            <p class="card-hint">Earn 1 ticket instantly per completed referral, plus a bonus ticket every 10</p>
+            <div class="milestone-bar">
+              <div class="milestone-fill" id="milestone-fill" style="width: 0%;"></div>
+            </div>
+            <p class="milestone-label" id="milestone-label">0 / 10 verified referrals to earn a bonus ticket</p>
+            <p class="card-hint" id="my-ticket-count">You have 0 tickets</p>
+          </div>
+
+          <!-- Referral List -->
+          <div class="section" id="section-referral-list">
+            <h2 class="section-title">Your Referrals</h2>
+            <div class="activity-list" id="referral-list">
+              <div class="activity-item">
+                <span class="activity-desc">No referrals yet</span>
+                <span class="activity-amount">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -131,7 +134,7 @@
         <button class="drawer-close-btn" id="btn-close-menu">&times;</button>
       </div>
       <nav class="drawer-menu">
-        <a href="index.html" class="drawer-item drawer-item--active" id="drawer-nav-home">
+        <a href="index.html" class="drawer-item" id="drawer-nav-home">
           <span class="drawer-icon">H</span>
           <span class="drawer-label">Home</span>
         </a>
@@ -143,7 +146,7 @@
           <span class="drawer-icon">G</span>
           <span class="drawer-label">The Ruler</span>
         </a>
-        <a href="referrals.html" class="drawer-item" id="drawer-nav-referrals">
+        <a href="referrals.html" class="drawer-item drawer-item--active" id="drawer-nav-referrals">
           <span class="drawer-icon">R</span>
           <span class="drawer-label">Referrals</span>
         </a>

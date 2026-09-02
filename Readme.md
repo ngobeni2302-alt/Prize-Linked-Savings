@@ -5,6 +5,26 @@
 
 ---
 
+## Table of Contents
+
+- [Overview](#overview)
+- [What MTN MoMo SA Currently Does](#what-mtn-momo-sa-currently-does)
+- [How This Concept Enhances MoMo](#how-this-concept-enhances-momo)
+- [Feature Breakdown](#feature-breakdown)
+  - [The Ruler -- 3-Card Rewards Game](#1-the-ruler----3-card-rewards-game)
+  - [Referral System + MoMo Verification](#2-referral-system--momo-verification)
+  - [Referral Backend + MoMo API Integration](#3-referral-backend--momo-api-integration)
+  - [Personal Savings Account](#4-personal-savings-account)
+  - [Group Savings / Digital Stockvel](#5-group-savings--digital-stockvel)
+- [How It All Connects](#how-it-all-connects)
+- [The Loop](#the-loop)
+- [Target Audience](#target-audience)
+- [Hackathon Context](#hackathon-context)
+- [Team](#team)
+- [License](#license)
+
+---
+
 ## Overview
 
 **MTN MoMo Enhanced** takes MTN's existing MoMo mobile wallet -- currently a payments and basic wallet tool for South Africa's 10M+ unbanked and underbanked -- and transforms it into a **financial engagement platform** built around four pillars:
@@ -87,6 +107,14 @@ We're taking MoMo from **"just payments"** to **"Save, Refer, Play, Win"**
 | Save **R1,000** in Personal Savings | 1 entry ticket |
 | Save **R1,000** in Group Savings | 1 entry ticket |
 | Complete **10 successful referrals** | 1 free entry ticket |
+
+### Reward Structure V3
+
+| Tier | Category | Frequency | Included Rewards |
+|---|---|---|---|
+| **Small Wins** | "Instant Top-up" | Frequent | **Telco only:**<br>• **Data:** 100MB, 500MB, 1GB MTN data<br>• **Airtime:** R5, R10, R20 MTN airtime<br>• **Minutes:** 20 mins, 50 mins, 100 mins MTN calls |
+| **Medium Wins** | "Monthly Boost" | Less Frequent | **Small vouchers + telco perks:**<br>• **Retail Vouchers:** R20, R50, R100, R200, R300 Shoprite, Pick n Pay, KFC, Nando’s, Uber Eats<br>• **Airtime/Data bundles:** R50, R100 airtime or 2GB, 5GB data<br>• **Mo Fee Waiver Voucher:** 1 month free MoMo transactions |
+| **Big Wins** | "Major Upgrades" | Rare | **Discount vouchers + high value:**<br>• **Fuel Voucher:** Up to R300 Engen, Shell<br>• **Bill Discount Voucher:** 15% off next electricity, water, or DStv bill (Max discount: R300)<br>• **Tech Discount Voucher:** 15% off any MTN device/accessory purchase (Max discount: R300 - Phones, routers, airtime, data bundles)<br>• **Home/Appliance Discount Voucher:** 15% off furniture/appliances (Max discount: R1,000)<br>• **Streaming Voucher:** 1 month Netflix, Showmax, or DStv |
 
 **The Jackpot: "1 in a Million"**
 

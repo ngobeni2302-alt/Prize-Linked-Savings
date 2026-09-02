@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="MTN MoMo Enhanced Mini App - Save, Refer, Play, Win. A financial engagement platform built on MTN MoMo." />
-  <title>MTN MoMo Enhanced - Home</title>
+  <title>MTN MoMo Enhanced - The Ruler</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -39,82 +39,118 @@
   <!-- ===== MAIN CONTENT AREA ===== -->
   <main class="app-main" id="app-main" style="margin-top: var(--header-height); min-height: calc(100vh - var(--header-height)); padding-bottom: var(--space-xl);">
 
-    <!-- PAGE: Home -->
-    <section class="page" id="page-home" data-page="home">
+    <!-- PAGE: The Ruler Game -->
+    <section class="page" id="page-game" data-page="game">
       <div class="page-header">
-        <h1>Save & Win</h1>
-        <p class="page-subtitle">Grow your savings and stand a chance to win cash, data, and vouchers!</p>
+        <h1>The Ruler</h1>
+        <p class="page-subtitle">3-Card Rewards Game</p>
       </div>
 
-      <!-- Overview Cards Grid -->
-      <div class="card-grid">
-        <!-- Wallet Summary Card -->
-        <div class="card card--highlight" id="card-wallet-summary">
-          <div class="card-icon">W</div>
-          <h2 class="card-title">Wallet Balance</h2>
-          <p class="card-value">R0.00</p>
-          <p class="card-hint">-- Placeholder: Live wallet balance from MoMo API --</p>
+      <!-- Ticket Info & Code Selector -->
+      <div class="section" id="section-ticket-info">
+        <h2 class="section-title">Your Tickets & Ruler Codes</h2>
+        
+        <div class="ticket-selector-container">
+          <label for="ticket-code-select" class="ticket-select-label">Select Active Ticket Code:</label>
+          <div class="ticket-code-input-group">
+            <select id="ticket-code-select" class="ticket-select">
+              <option value="IND-8492" data-type="IND" data-name="Personal Savings">IND-8492 (Individual Personal Savings)</option>
+              <option value="GRP-3D1E88ZA" data-type="GRP" data-name="Stokvel Sundays" data-members="5">GRP-3D1E88ZA (Group: Stokvel Sundays - 5 members)</option>
+              <option value="IND-9921" data-type="IND" data-name="Referral Reward">IND-9921 (Individual Referral Reward)</option>
+              <option value="GRP-77K29X" data-type="GRP" data-name="Family Pool" data-members="4">GRP-77K29X (Group: Family Pool - 4 members)</option>
+            </select>
+          </div>
         </div>
 
-        <!-- Savings Summary Card -->
-        <div class="card" id="card-savings-summary">
-          <div class="card-icon">S</div>
-          <h2 class="card-title">Total Savings</h2>
-          <p class="card-value">R0.00</p>
-          <p class="card-hint">-- Placeholder: Combined personal + group savings --</p>
-        </div>
-
-        <!-- Tickets Card -->
-        <div class="card" id="card-tickets-summary">
-          <div class="card-icon">T</div>
-          <h2 class="card-title">Game Tickets</h2>
-          <p class="card-value">0</p>
-          <p class="card-hint">-- Placeholder: Available tickets to play The Ruler --</p>
-        </div>
-
-        <!-- Referral Card -->
-        <div class="card" id="card-referral-summary">
-          <div class="card-icon">R</div>
-          <h2 class="card-title">Referrals</h2>
-          <p class="card-value">0 / 10</p>
-          <p class="card-hint">-- Placeholder: Verified referral count --</p>
+        <div class="ticket-summary-grid">
+          <div class="card card--highlight">
+            <h3 class="card-title">Available Tickets</h3>
+            <p class="card-value" id="game-tickets-count">3</p>
+            <div style="margin-top: 8px;">
+              <button class="btn btn--outline" id="btn-add-ticket" style="font-size: 0.75rem; padding: 4px 8px;">+ Add Ticket</button>
+            </div>
+          </div>
+          <div class="card card--highlight">
+            <h3 class="card-title">Active Pool</h3>
+            <p class="card-value" id="active-pool-type" style="font-size: 1rem;">INDIVIDUAL</p>
+          </div>
         </div>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="section" id="section-quick-actions">
-        <h2 class="section-title">Quick Actions</h2>
-        <div class="action-grid">
-          <button class="action-btn" id="btn-send-money">
-            <span class="action-btn-icon">S</span>
-            <span class="action-btn-label">Send Money</span>
+      <!-- Card Game Area -->
+      <div class="section" id="section-card-game">
+        <h2 class="section-title">Pick a Card</h2>
+        
+        <!-- Active Ticket Banner UX Add -->
+        <div class="active-ticket-banner" id="active-ticket-banner">
+          <span class="active-ticket-text" id="active-ticket-text">Using: INDIVIDUAL TICKET (IND-8492)</span>
+        </div>
+
+        <p class="game-instruction" id="game-instruction">Choose 1 of the 3 cards to draw your reward ticket!</p>
+        <div class="game-cards">
+          <button class="game-card" id="game-card-1" data-card="1">
+            <div class="game-card-inner">
+              <div class="game-card-front">?</div>
+              <div class="game-card-back">
+                <span class="reward-text">Card 1</span>
+              </div>
+            </div>
           </button>
-          <button class="action-btn" id="btn-buy-airtime">
-            <span class="action-btn-icon">A</span>
-            <span class="action-btn-label">Buy Airtime</span>
+          <button class="game-card" id="game-card-2" data-card="2">
+            <div class="game-card-inner">
+              <div class="game-card-front">?</div>
+              <div class="game-card-back">
+                <span class="reward-text">Card 2</span>
+              </div>
+            </div>
           </button>
-          <button class="action-btn" id="btn-pay-bills">
-            <span class="action-btn-icon">B</span>
-            <span class="action-btn-label">Pay Bills</span>
-          </button>
-          <button class="action-btn" id="btn-cash-in">
-            <span class="action-btn-icon">C</span>
-            <span class="action-btn-label">Cash In</span>
+          <button class="game-card" id="game-card-3" data-card="3">
+            <div class="game-card-inner">
+              <div class="game-card-front">?</div>
+              <div class="game-card-back">
+                <span class="reward-text">Card 3</span>
+              </div>
+            </div>
           </button>
         </div>
-        <p class="placeholder-note">-- Placeholder: Quick action buttons will trigger MoMo API flows --</p>
+
+        <!-- Result Box -->
+        <div class="win-result-box" id="win-result-box" style="display: none;">
+          <div class="win-result-content">
+            <span class="win-badge" id="win-badge">SMALL WIN</span>
+            <h3 class="win-title" id="win-title">Instant Top-up</h3>
+            <p class="win-prize" id="win-prize">500MB MTN Data</p>
+            <p class="split-details-text" id="win-split-details"></p>
+
+            <!-- Wallet & SMS Delivery Card -->
+            <div class="delivery-status-card" id="delivery-status-card" style="display: none;">
+              <div class="delivery-status-header">
+                <span class="delivery-status-badge" id="delivery-status-badge">DELIVERED</span>
+                <span class="delivery-status-title">Wallet & SMS Alert</span>
+              </div>
+              <p class="delivery-phone-text" id="win-phone-text">Recipient: +27 83 *** 4921 (MTN MoMo Wallet)</p>
+              <div class="sms-preview-box">
+                <span class="sms-label">SMS Alert Delivered:</span>
+                <p class="sms-message" id="win-sms-text">"MTN MoMo: 500MB Data credited to your line."</p>
+              </div>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <button class="btn btn--primary" id="btn-play-again">Play Again</button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Recent Activity -->
-      <div class="section" id="section-recent-activity">
-        <h2 class="section-title">Recent Activity</h2>
-        <div class="activity-list">
-          <div class="activity-item">
-            <span class="activity-desc">No recent transactions</span>
+      <!-- Prize History -->
+      <div class="section" id="section-prize-history">
+        <h2 class="section-title">Prize History</h2>
+        <div class="activity-list" id="prize-history-list">
+          <div class="activity-item" id="prize-history-empty">
+            <span class="activity-desc">No prizes won yet</span>
             <span class="activity-amount">--</span>
           </div>
         </div>
-        <p class="placeholder-note">-- Placeholder: Transaction history from MoMo wallet --</p>
       </div>
     </section>
 
@@ -131,7 +167,7 @@
         <button class="drawer-close-btn" id="btn-close-menu">&times;</button>
       </div>
       <nav class="drawer-menu">
-        <a href="index.html" class="drawer-item drawer-item--active" id="drawer-nav-home">
+        <a href="index.html" class="drawer-item" id="drawer-nav-home">
           <span class="drawer-icon">H</span>
           <span class="drawer-label">Home</span>
         </a>
@@ -139,7 +175,7 @@
           <span class="drawer-icon">S</span>
           <span class="drawer-label">Savings</span>
         </a>
-        <a href="game.html" class="drawer-item" id="drawer-nav-game">
+        <a href="game.html" class="drawer-item drawer-item--active" id="drawer-nav-game">
           <span class="drawer-icon">G</span>
           <span class="drawer-label">The Ruler</span>
         </a>
