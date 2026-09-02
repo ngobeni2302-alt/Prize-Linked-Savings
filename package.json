@@ -1,7 +1,7 @@
 {
   "name": "mtn-momo-mini-app",
   "version": "1.0.0",
-  "description": "Prize Linked Savings: From Wallet to Wealth + Fun",
+  "description": "MTN MoMo Enhanced: From Wallet to Wealth + Fun",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

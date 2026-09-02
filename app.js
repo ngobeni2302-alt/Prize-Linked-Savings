@@ -1,5 +1,5 @@
 /* ================================================
-   Prize Linked Savings - JavaScript
+   MTN MoMo Enhanced Mini App - JavaScript
    Pockets (Group Savings), Personal Savings, Referrals & The Ruler Game
    ================================================ */
 
@@ -1299,7 +1299,7 @@ function openInviteModal() {
   document.getElementById('display-pocket-join-code').textContent = pocket.join_code;
   document.getElementById('invite-capacity-text').textContent = `${metrics.memberCount} / ${pocket.member_cap || 20} Members`;
 
-  const shareText = `Join my Prize Linked Savings Pocket "${pocket.name}" to pool funds with 5.5% interest! Use Join Code: ${pocket.join_code}`;
+  const shareText = `Join my MTN MoMo Savings Pocket "${pocket.name}" to pool funds with 5.5% interest! Use Join Code: ${pocket.join_code}`;
   const shareUrl = `https://www.mtn.co.za/momo/pockets/?code=${pocket.join_code}`;
 
   const whatsapp = document.getElementById('pocket-share-whatsapp');
@@ -1360,7 +1360,7 @@ function openStatementModal() {
   const contentEl = document.getElementById('statement-preview-content');
   if (contentEl) {
     let text = `=======================================================\n`;
-    text += `PRIZE LINKED SAVINGS - GROUP SAVINGS AUDIT STATEMENT\n`;
+    text += `MTN MOMO ENHANCED - GROUP SAVINGS AUDIT STATEMENT\n`;
     text += `=======================================================\n`;
     text += `Pocket Name   : ${pocket.name}\n`;
     text += `Purpose       : ${CATEGORY_MAP[pocket.purpose_category]?.label || 'General'}\n`;
@@ -1375,7 +1375,7 @@ function openStatementModal() {
       text += `[${i+1}] ${new Date(log.time).toLocaleString()} | ${log.actor_name}: ${log.action}\n`;
     });
     text += `=======================================================\n`;
-    text += `Certified Authentic by Prize Linked Savings & African Bank Infrastructure\n`;
+    text += `Certified Authentic by MTN MoMo & African Bank Infrastructure\n`;
 
     contentEl.textContent = text;
   }
@@ -1767,7 +1767,7 @@ gameCards.forEach(card => {
               : `Recipient: +27 83 *** 4921 (MTN MoMo Wallet)`;
           }
           if (winSmsText) {
-            winSmsText.textContent = `"Prize Linked Savings Alert: You won ${reward.prize}! Ref: ${reward.code}."`;
+            winSmsText.textContent = `"MTN MoMo Alert: You won ${reward.prize}! Ref: ${reward.code}."`;
           }
         } else {
           deliveryStatusCard.style.display = 'none';
