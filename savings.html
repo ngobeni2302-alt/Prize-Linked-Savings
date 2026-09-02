@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="MTN MoMo Enhanced Mini App - Save, Refer, Play, Win. A financial engagement platform built on MTN MoMo." />
-  <title>Prized-Linked-Savings - Home</title>
+  <title>MTN MoMo Enhanced - Savings</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -39,82 +39,41 @@
   <!-- ===== MAIN CONTENT AREA ===== -->
   <main class="app-main" id="app-main" style="margin-top: var(--header-height); min-height: calc(100vh - var(--header-height)); padding-bottom: var(--space-xl);">
 
-    <!-- PAGE: Home -->
-    <section class="page" id="page-home" data-page="home">
+    <!-- PAGE: Savings -->
+    <section class="page" id="page-savings" data-page="savings">
       <div class="page-header">
-        <h1>Save & Win</h1>
-        <p class="page-subtitle">Grow your savings and stand a chance to win cash, data, and vouchers!</p>
+        <h1>Savings</h1>
+        <p class="page-subtitle">Personal and Group Savings</p>
       </div>
 
-      <!-- Overview Cards Grid -->
-      <div class="card-grid">
-        <!-- Wallet Summary Card -->
-        <div class="card card--highlight" id="card-wallet-summary">
-          <div class="card-icon">W</div>
-          <h2 class="card-title">Wallet Balance</h2>
+      <!-- Personal Savings -->
+      <div class="section" id="section-personal-savings">
+        <h2 class="section-title">Personal Savings</h2>
+        <div class="card card--highlight">
+          <h3 class="card-title">My Savings Balance</h3>
           <p class="card-value">R0.00</p>
-          <p class="card-hint">-- Placeholder: Live wallet balance from MoMo API --</p>
+          <p class="card-hint">-- Placeholder: Individual savings balance --</p>
         </div>
-
-        <!-- Savings Summary Card -->
-        <div class="card" id="card-savings-summary">
-          <div class="card-icon">S</div>
-          <h2 class="card-title">Total Savings</h2>
-          <p class="card-value">R0.00</p>
-          <p class="card-hint">-- Placeholder: Combined personal + group savings --</p>
+        <div class="savings-actions">
+          <button class="btn btn--primary" id="btn-deposit-personal">Deposit</button>
+          <button class="btn btn--outline" id="btn-withdraw-personal">Withdraw</button>
         </div>
-
-        <!-- Tickets Card -->
-        <div class="card" id="card-tickets-summary">
-          <div class="card-icon">T</div>
-          <h2 class="card-title">Game Tickets</h2>
-          <p class="card-value">0</p>
-          <p class="card-hint">-- Placeholder: Available tickets to play The Ruler --</p>
-        </div>
-
-        <!-- Referral Card -->
-        <div class="card" id="card-referral-summary">
-          <div class="card-icon">R</div>
-          <h2 class="card-title">Referrals</h2>
-          <p class="card-value">0 / 10</p>
-          <p class="card-hint">-- Placeholder: Verified referral count --</p>
-        </div>
+        <p class="placeholder-note">-- Placeholder: Deposit/withdraw flows, savings history, ticket earning tracker (every R1,000 = 1 ticket) --</p>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="section" id="section-quick-actions">
-        <h2 class="section-title">Quick Actions</h2>
-        <div class="action-grid">
-          <button class="action-btn" id="btn-send-money">
-            <span class="action-btn-icon">S</span>
-            <span class="action-btn-label">Send Money</span>
-          </button>
-          <button class="action-btn" id="btn-buy-airtime">
-            <span class="action-btn-icon">A</span>
-            <span class="action-btn-label">Buy Airtime</span>
-          </button>
-          <button class="action-btn" id="btn-pay-bills">
-            <span class="action-btn-icon">B</span>
-            <span class="action-btn-label">Pay Bills</span>
-          </button>
-          <button class="action-btn" id="btn-cash-in">
-            <span class="action-btn-icon">C</span>
-            <span class="action-btn-label">Cash In</span>
-          </button>
+      <!-- Group Savings / Stockvel -->
+      <div class="section" id="section-group-savings">
+        <h2 class="section-title">Group Savings / Stockvel</h2>
+        <div class="card">
+          <h3 class="card-title">My Groups</h3>
+          <p class="card-value">No groups yet</p>
+          <p class="card-hint">-- Placeholder: List of user's stokvel groups --</p>
         </div>
-        <p class="placeholder-note">-- Placeholder: Quick action buttons will trigger MoMo API flows --</p>
-      </div>
-
-      <!-- Recent Activity -->
-      <div class="section" id="section-recent-activity">
-        <h2 class="section-title">Recent Activity</h2>
-        <div class="activity-list">
-          <div class="activity-item">
-            <span class="activity-desc">No recent transactions</span>
-            <span class="activity-amount">--</span>
-          </div>
+        <div class="savings-actions">
+          <button class="btn btn--primary" id="btn-create-group">Create Group</button>
+          <button class="btn btn--outline" id="btn-join-group">Join Group</button>
         </div>
-        <p class="placeholder-note">-- Placeholder: Transaction history from MoMo wallet --</p>
+        <p class="placeholder-note">-- Placeholder: Stokvel savings balance, payouts, alerts --</p>
       </div>
     </section>
 
@@ -131,11 +90,11 @@
         <button class="drawer-close-btn" id="btn-close-menu">&times;</button>
       </div>
       <nav class="drawer-menu">
-        <a href="index.html" class="drawer-item drawer-item--active" id="drawer-nav-home">
+        <a href="index.html" class="drawer-item" id="drawer-nav-home">
           <span class="drawer-icon">H</span>
           <span class="drawer-label">Home</span>
         </a>
-        <a href="savings.html" class="drawer-item" id="drawer-nav-savings">
+        <a href="savings.html" class="drawer-item drawer-item--active" id="drawer-nav-savings">
           <span class="drawer-icon">S</span>
           <span class="drawer-label">Savings</span>
         </a>

@@ -1,298 +1,252 @@
-# MTN MoMo Enhanced: From Wallet to Wealth + Fun
+# MTN MoMo Enhanced: Comprehensive Product Specification
 
 > **MTN Fintech Summit 2026 -- 24-Hour Hackathon Entry**  
-> Built in South Africa. Built for Africa.
+> *From Wallet to Wealth + Fun — Built in South Africa. Built for Africa.*
 
 ---
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [What MTN MoMo SA Currently Does](#what-mtn-momo-sa-currently-does)
-- [How This Concept Enhances MoMo](#how-this-concept-enhances-momo)
-- [Feature Breakdown](#feature-breakdown)
-  - [The Ruler -- 3-Card Rewards Game](#1-the-ruler----3-card-rewards-game)
-  - [Referral System + MoMo Verification](#2-referral-system--momo-verification)
-  - [Referral Backend + MoMo API Integration](#3-referral-backend--momo-api-integration)
-  - [Personal Savings Account](#4-personal-savings-account)
-  - [Group Savings / Digital Stockvel](#5-group-savings--digital-stockvel)
-- [How It All Connects](#how-it-all-connects)
-- [The Loop](#the-loop)
-- [Target Audience](#target-audience)
-- [Hackathon Context](#hackathon-context)
-- [Team](#team)
+- [1. Core Concept & Platform Overview](#1-core-concept--platform-overview)
+  - [Partner Network & Banking Infrastructure](#partner-network--banking-infrastructure)
+- [2. Interest Rate Restructuring (−2.00% Offset)](#2-interest-rate-restructuring-200-offset)
+  - [Sustainable Reward Funding Model](#sustainable-reward-funding-model)
+  - [Personal Target Savings](#personal-target-savings)
+  - [Group / Stokvel Savings](#group--stokvel-savings)
+- [3. Savings Rules, Minimum Periods & Early Withdrawal Penalties](#3-savings-rules-minimum-periods--early-withdrawal-penalties)
+  - [Goal-Based Target Savings](#goal-based-target-savings)
+  - [Minimum Lock-Up Period](#minimum-lock-up-period)
+  - [Early Withdrawal Penalties](#early-withdrawal-penalties)
+- [4. Scratch Card & Reward Mechanics](#4-scratch-card--reward-mechanics)
+  - [Guaranteed Win Mechanism](#guaranteed-win-mechanism)
+  - [A. Savings Scratch Cards (Tiered by Savings Goal Size)](#a-savings-scratch-cards-tiered-by-savings-goal-size)
+  - [B. Referral Scratch Cards (Flat Rate, Untiered)](#b-referral-scratch-cards-flat-rate-untiered)
+- [5. Reward & Action Summary Matrix](#5-reward--action-summary-matrix)
+- [6. Complete System Architecture & Data Model](#6-complete-system-architecture--data-model)
+- [7. The Growth & Engagement Loop](#7-the-growth--engagement-loop)
+- [8. Target Audience & Market Impact](#8-target-audience--market-impact)
+- [9. Hackathon Context & Team](#9-hackathon-context--team)
 - [License](#license)
 
 ---
 
-## Overview
+## 1. Core Concept & Platform Overview
 
-**MTN MoMo Enhanced** takes MTN's existing MoMo mobile wallet -- currently a payments and basic wallet tool for South Africa's 10M+ unbanked and underbanked -- and transforms it into a **financial engagement platform** built around four pillars:
-
-| Pillar | Description |
-|---|---|
-| **Save to Win** | Every R1,000 saved (personal or group) earns 1 game ticket |
-| **Refer to Earn** | Bring 10 new MoMo users and earn 1 free game ticket |
-| **Play to Reward** | Pick a card in "The Ruler" game and win airtime, data, cash, or vouchers |
-| **Community + Individual** | Save alone or digitise your stokvel -- both are rewarded |
-
-**In short:**
-
-> **Current MoMo** = move money.  
-> **Enhanced MoMo** = move money + grow money + have fun doing it.
-
-This keeps MoMo relevant, drives registrations, increases wallet balances, and makes saving a habit instead of a chore.
-
----
-
-## What MTN MoMo SA Currently Does
-
-MTN MoMo is a mobile wallet in partnership with **UBank**, accessible via the MoMo app or USSD `*120*151#` on **any network**.
-
-### Core Features
-
-| Feature | Details |
-|---|---|
-| **Send & Receive Money** | P2P transfers -- send money to anyone |
-| **Buy** | Airtime, data bundles, prepaid electricity |
-| **Pay Bills** | Municipal bills, DStv, and more |
-| **Wallet Accounts** | Yello & Yello Plus |
-| **Cash In / Cash Out** | MTN stores and UBank branches |
-| **Cross-Network** | Works for any mobile network in SA |
-| **No Fees** | No monthly fees, no minimum balance |
-
-### Wallet Account Tiers
-
-| Tier | Daily Limit | Monthly Limit |
-|---|---|---|
-| **Yello** | R3,500 | R20,000 |
-| **Yello Plus** | R10,000 | R40,000 |
-
-### What MTN Has Announced (Upcoming)
-
-- Savings account functionality
-- Loyalty rewards program
-
-**Target:** 10M+ unbanked / underbanked South Africans doing basic payments.
-
----
-
-## How This Concept Enhances MoMo
-
-We're taking MoMo from **"just payments"** to **"Save, Refer, Play, Win"**
-
-| Current MoMo | Enhanced With This Concept |
-|---|---|
-| **Wallet:** Store money, send, pay bills | **+ Personal Savings Account:** Save individually. Every R1,000 = 1 game ticket |
-| **Transactions only** | **+ Group Savings / Stockvel:** Pool money with others. Every R1,000 = 1 game ticket. Separate prize pool |
-| **No engagement loop** | **+ "The Ruler" 3-Card Rewards Game:** Use tickets to pick a card and win airtime, data, cash, vouchers |
-| **No referral incentives** | **+ Referral System:** Unique code `MOMO-[Last4Digits]`. 10 verified MoMo referrals = 1 free ticket |
-| **No gamification** | **+ "1 in a Million" Jackpot:** Every 1,000,000th play across all users wins a big "wow" prize |
-| **Target:** Unbanked doing basic payments | **Target:** Unbanked + Savers + Social users. Financial inclusion + fun |
-
----
-
-## Feature Breakdown
-
-### 1. The Ruler -- 3-Card Rewards Game
-
-> *Person 1 -- Concept & Game Design*
-
-**What it is:** A 3-card pick game. The user picks 1 of 3 cards and wins whatever is behind it.
-
-**How you earn tickets to play:**
-
-| Action | Reward |
-|---|---|
-| Save **R1,000** in Personal Savings | 1 entry ticket |
-| Save **R1,000** in Group Savings | 1 entry ticket |
-| Complete **10 successful referrals** | 1 free entry ticket |
-
-### Reward Structure V3
-
-| Tier | Category | Frequency | Included Rewards |
-|---|---|---|---|
-| **Small Wins** | "Instant Top-up" | Frequent | **Telco only:**<br>• **Data:** 100MB, 500MB, 1GB MTN data<br>• **Airtime:** R5, R10, R20 MTN airtime<br>• **Minutes:** 20 mins, 50 mins, 100 mins MTN calls |
-| **Medium Wins** | "Monthly Boost" | Less Frequent | **Small vouchers + telco perks:**<br>• **Retail Vouchers:** R20, R50, R100, R200, R300 Shoprite, Pick n Pay, KFC, Nando’s, Uber Eats<br>• **Airtime/Data bundles:** R50, R100 airtime or 2GB, 5GB data<br>• **Mo Fee Waiver Voucher:** 1 month free MoMo transactions |
-| **Big Wins** | "Major Upgrades" | Rare | **Discount vouchers + high value:**<br>• **Fuel Voucher:** Up to R300 Engen, Shell<br>• **Bill Discount Voucher:** 15% off next electricity, water, or DStv bill (Max discount: R300)<br>• **Tech Discount Voucher:** 15% off any MTN device/accessory purchase (Max discount: R300 - Phones, routers, airtime, data bundles)<br>• **Home/Appliance Discount Voucher:** 15% off furniture/appliances (Max discount: R1,000)<br>• **Streaming Voucher:** 1 month Netflix, Showmax, or DStv |
-
-**The Jackpot: "1 in a Million"**
-
-- The system counts **every play across ALL users globally**
-- **Every 1,000,000th play wins a massive "wow" prize**
-- After someone wins, the counter resets to 0 and starts counting again
-- This keeps it exciting -- **anyone** could be the lucky millionth play
-
-**Prize Pool Separation:**
-
-> Prizes won from **Personal Savings** tickets are not the same as prizes won from **Group Savings** tickets.  
-> Each pool is independent.
-
----
-
-### 2. Referral System + MoMo Verification
-
-> *Person 2 -- Referral Growth Engine*
-
-**What it is:** A viral growth mechanism to expand MoMo's user base through word-of-mouth.
-
-**How it works:**
-
-1. **Every user gets 1 permanent, unique referral code:**
-   ```
-   MOMO-[Last 4 Digits of Your Number]
-   ```
-   *Example:* If your number ends in `9274`, your code is `MOMO-9274`. Guaranteed unique.
-
-2. A friend signs up using your code and you get notified:
-   > *"Someone used your referral!"*
-
-3. **Verification:** The system checks if the referred person has or registers an active MTN MoMo account.
-
-4. **Reward:** At **10 verified referrals** = **1 free entry ticket** for The Ruler game.
-
----
-
-### 3. Referral Backend + MoMo API Integration
-
-> *Person 3 & 4 -- Backend Infrastructure*
-
-**What it is:** The engine that powers Person 2's referral system.
-
-**Responsibilities:**
-
-- **MoMo API Integration** -- Verify that referred users are real, active MoMo accounts
-- **Fraud Detection** -- Prevent fake accounts, duplicate referrals, and gaming the system
-- **Referral Tracking** -- Count verified referrals per user and automatically issue tickets at the 10-referral milestone
-- **Validation** -- Ensure every referral represents a genuine, active MoMo user
-
----
-
-### 4. Personal Savings Account
-
-> *Person 4 -- Individual Savings*
-
-**What it is:** A digital savings wallet inside MoMo for individual users.
-
-**How it works:**
-
-- Save money **for yourself** -- this is "me" money
-- **Every R1,000 saved = 1 entry ticket** for The Ruler rewards game
-- No group involvement required
-- Encourages consistent saving habits through gamified incentives
-- Builds on MTN's announced "savings account" feature
-
----
-
-### 5. Group Savings / Digital Stockvel
-
-> *Person 5 -- Community Savings*
-
-**What it is:** A group pooling system that digitises the traditional South African **stokvel** (community savings group).
-
-**How it works:**
-
-- **Create or join a group** with friends, family, or coworkers
-- Everyone contributes together
-- **Track balances and payouts** transparently within the app
-- **Every R1,000 saved as a group = 1 entry ticket** for The Ruler rewards game
-- **Separate prize pool** from personal savings -- group wins benefit the group
-
-**Why it matters:**  
-Stokvels are a massive part of South African culture -- an estimated **R50 billion+** circulates through stokvels annually. Digitising this brings trust, transparency, and rewards to an already powerful savings tradition.
-
----
-
-## How It All Connects
+**MTN MoMo Enhanced** evolves MTN's existing MoMo mobile wallet from a basic transactional tool into an **active financial engagement platform** across Africa, reaching over **50 million monthly active users**.
 
 ```
-+-----------------------------------------------------------+
-|                    MTN MoMo Enhanced                       |
-+-----------------------------------------------------------+
-|                                                           |
-|   Save R1,000              Refer 10 People                |
-|       |                        |                          |
-|       v                        v                          |
-|   Get Ticket               Get Free Ticket                |
-|       |                        |                          |
-|       +------------+-----------+                          |
-|                    v                                      |
-|            Play "The Ruler"                               |
-|            (Pick 1 of 3 Cards)                            |
-|                    |                                      |
-|                    v                                      |
-|            Win Prizes                                     |
-|       (Airtime / Data / Cash / Vouchers)                  |
-|                    |                                      |
-|                    v                                      |
-|      Every 1,000,000th Play = JACKPOT                     |
-|                                                           |
-+-----------------------------------------------------------+
++---------------------------------------------------------------------------------+
+|                               MTN MoMo Enhanced                                 |
+|               From Basic Transactions to Goal-Based Wealth & Rewards            |
++---------------------------------------------------------------------------------+
+|  • Deposit & Withdraw at 6 Retail Chains  • Regulated via African Bank          |
+|  • -2.00% Yield Offset Funding Model     • 100% Guaranteed-Win Scratch Cards    |
+|  • 3-Month Minimum Lock-Up Discipline    • Stokvel Bulk Discount Vouchers (5-20%)|
++---------------------------------------------------------------------------------+
+```
+
+### Partner Network & Banking Infrastructure
+
+In South Africa, users can deposit and withdraw cash through nationwide partner retail chains:
+- **Retail Cash-In / Cash-Out Partners:** Pick n Pay, Boxer, Shoprite, Checkers, Usave, and PEP.
+- **Banking Infrastructure:** The underlying financial and banking infrastructure operates in partnership with licensed entities like **African Bank**.
+
+---
+
+## 2. Interest Rate Restructuring (−2.00% Offset)
+
+### Sustainable Reward Funding Model
+
+To fund digital scratch cards and retail category discounts **without using chance-based lottery draws**, **2% (200 basis points) per annum** is deducted from standard commercial interest yields. This creates a fully self-funding, legally compliant, and sustainable marketing and prize pool.
+
+| Account Type | Standard Bank Yield | Offset (Reward Fund) | Enhanced MoMo Yield (p.a.) |
+|:---|:---:|:---:|:---:|
+| **Commercial Benchmark** | `4.00% – 7.50%` | `−2.00%` | **`2.00% – 5.50%`** |
+| **Personal Target Savings** | `4.00% – 7.50%` | `−2.00%` | **`2.00% – 5.50%`** |
+| **Group / Stokvel Savings** | `4.50% – 8.00%` | `−2.00%` | **`2.50% – 6.00%`** |
+
+### Personal Target Savings
+- **Standard Rate:** `~4.00% – 7.50% p.a.`
+- **Effective MoMo Yield:** `2.00% – 5.50% p.a.`
+- *Note:* The 2.00% offset redirects directly into **personal digital scratch cards**.
+
+### Group / Stokvel Savings
+- **Standard Rate:** `~4.50% – 8.00% p.a.`
+- **Effective MoMo Yield:** `2.50% – 6.00% p.a.`
+- *Note:* The 2.00% offset redirects directly into **bulk retail category discount vouchers**.
+
+---
+
+## 3. Savings Rules, Minimum Periods & Early Withdrawal Penalties
+
+### Goal-Based Target Savings
+Users (individuals or groups) **do not earn tickets simply by reaching a flat R1,000 balance**. Instead, they establish a structured goal:
+- **Custom Savings Target Amount** (e.g., R3,000, R10,000, R50,000)
+- **Target Timeframe** with scheduled monthly contributions
+
+### Minimum Lock-Up Period
+> [!IMPORTANT]
+> Every personal or group savings goal requires a **minimum lock period of 3 months**. Funds must remain committed for at least 3 months to qualify for rewards and accrued interest.
+
+### Early Withdrawal Penalties
+If a user or group withdraws funds before reaching their chosen end date or minimum 3-month timeframe:
+1. **Interest Forfeiture:** They automatically forfeit **all interest** accrued on that goal.
+2. **Scratch Ticket Forfeiture:** They forfeit **all unclaimed scratch tickets** associated with that goal.
+3. **Referrer Invalidation:** If the user was referred by someone, the referrer's pending referral ticket is **also forfeited and invalidated**.
+
+---
+
+## 4. Scratch Card & Reward Mechanics
+
+> [!NOTE]
+> All games and chance-based card-pick draws are replaced with **digital scratch cards**. **Every scratch card generated is a guaranteed win.**
+
+### A. Savings Scratch Cards (Tiered by Savings Goal Size)
+
+Scratch cards earned through completed savings goals scale in value based on the total target amount saved upon fulfilling the minimum 3-month lock.
+
+#### Personal Target Savings (Minimum 3-Month Lock)
+- **Bronze Tier (`R1,000 – R4,999`):** Tier 1 scratch cards (e.g., R15 – R25 Airtime / Data)
+- **Silver Tier (`R5,000 – R14,999`):** Tier 2 scratch cards (e.g., R30 Voice Minutes / Airtime)
+- **Gold Tier (`R15,000+`):** Tier 3 scratch cards (e.g., R45 Airtime / High-Value Data)
+- **Constraint:** *All personal rewards are strictly capped under R50 in value.*
+
+#### Group / Stokvel Savings (Minimum 3-Month Lock)
+- **Bronze Group Tier (`R1,000 – R9,999 pooled`):** Unlocks a **5% Category Discount Voucher**
+- **Silver Group Tier (`R10,000 – R49,999 pooled`):** Unlocks a **10% Category Discount Voucher**
+- **Gold Group Tier (`R50,000+ pooled`):** Unlocks a **20% Category Discount Voucher**
+
+---
+
+### B. Referral Scratch Cards (Flat Rate, Untiered)
+
+- **Single-Sided:** Only the **referrer** receives a scratch ticket. The referred friend receives no referral ticket.
+- **No Tiers for Referrals:** The size of the friend's investment does not affect the referrer's card — referring someone who saves R20,000 awards the same standard scratch card as referring someone who saves R1,000.
+- **Activation Criteria:** For the referrer's ticket to be issued, the referred user must:
+  1. Register using the referral code (`MOMO-[Last4Digits]`)
+  2. Complete their chosen savings goal with a minimum lock period of **>30 days / 3 months**
+  3. Reach their promised target savings amount **without early withdrawal**
+- **Reward Cap:** Always yields a random airtime, voice minute, or data prize **under R50 in value**.
+
+---
+
+## 5. Reward & Action Summary Matrix
+
+| Action Taken | Minimum Lock / Condition | Ticket Tiering | Revealed Reward | Prize Value Limit |
+|:---|:---|:---:|:---|:---:|
+| **Personal Saving** | Complete goal (Min. 3 months) | **Tiered**<br>(Bronze, Silver, Gold) | Data, Voice Minutes, or Airtime | **Under R50** |
+| **Group Saving** | Complete goal (Min. 3 months) | **Tiered**<br>(Bronze, Silver, Gold) | Retail Category Discount Vouchers (5%–20%) | **Scales with Group Tier** |
+| **Refer a Friend** | Friend hits goal & min. lock time | **Untiered / Flat Rate** | Data, Voice Minutes, or Airtime | **Under R50** |
+
+---
+
+## 6. Complete System Architecture & Data Model
+
+The platform schema enforces minimum lock-up periods, goal tracking, single-sided referral statuses, and guaranteed-win scratch tickets:
+
+```sql
+-- Track personal and group target savings goals
+CREATE TABLE savings_goals (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id),
+    goal_type VARCHAR(20) NOT NULL,            -- 'personal' or 'group'
+    target_amount NUMERIC(10,2) NOT NULL,
+    current_balance NUMERIC(10,2) DEFAULT 0.00,
+    start_date DATE DEFAULT CURRENT_DATE,
+    end_date DATE NOT NULL,                     -- Enforces minimum 3-month gap
+    is_withdrawn_early BOOLEAN DEFAULT FALSE,   -- Forfeits interest and tickets if TRUE
+    is_completed BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Track single-sided referrals and lock conditions
+CREATE TABLE referrals (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    referrer_id UUID REFERENCES users(id),
+    referred_id UUID REFERENCES users(id),
+    code_used VARCHAR(20) NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending',       -- 'pending', 'activated', 'forfeited'
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Store digital scratch tickets
+CREATE TABLE tickets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id),
+    source VARCHAR(20) NOT NULL,                -- 'personal_savings', 'group_savings', 'referral'
+    tier VARCHAR(20) DEFAULT 'flat_rate',       -- 'flat_rate' (referral), 'bronze', 'silver', 'gold'
+    reward_type VARCHAR(20) NOT NULL,           -- 'data', 'minutes', 'airtime', 'retail_discount'
+    reward_value_zar NUMERIC(5,2),              -- Max 49.99 ZAR for personal/referrals
+    discount_percentage INT DEFAULT 0,          -- 5, 10, or 20 for group cards
+    is_scratched BOOLEAN DEFAULT FALSE,         -- Updated to TRUE upon scratch action in PWA
+    created_at TIMESTAMP DEFAULT NOW()
+);
 ```
 
 ---
 
-## The Loop
+## 7. The Growth & Engagement Loop
 
 ```
-Save --> Earn Tickets --> Play --> Win --> Refer Friends --> More People Save --> Repeat
++------------------------------------------------------------------------------------+
+|                                THE MOMO REWARD LOOP                                 |
++------------------------------------------------------------------------------------+
+|                                                                                    |
+|    1. Set Target Goal (Min 3-Month Lock)                                           |
+|            |                                                                       |
+|            v                                                                       |
+|    2. Save Consistently via Retail Partners (Pick n Pay, Shoprite, PEP, Boxer)     |
+|            |                                                                       |
+|            v                                                                       |
+|    3. Complete Goal Without Early Withdrawal                                       |
+|            |                                                                       |
+|            +-----------------------------------+-----------------------------------+
+|            |                                   |                                   |
+|            v                                   v                                   v
+|    [Personal Savings]                  [Group / Stokvel]                   [Referral Engine]
+|    Earn Tiered Scratch Card            Earn Group Retail Voucher           Referrer Earns Flat Card
+|    (Bronze/Silver/Gold < R50)          (5%, 10%, 20% Category Off)         (Data/Minutes/Airtime < R50)
+|            |                                   |                                   |
+|            +-----------------------------------+-----------------------------------+
+|                                                |
+|                                                v
+|                                  4. Scratch & Win (100% Guaranteed)
+|                                                |
+|                                                v
+|                              5. Reinvest & Invite More Peers (Viral Loop)
++------------------------------------------------------------------------------------+
 ```
-
-This creates a **self-reinforcing cycle**:
-
-1. **Saving** earns tickets -- users save more
-2. **Playing** rewards users -- users want more tickets
-3. **Referring** earns free tickets -- user base grows
-4. **More users** = more saves = more plays = bigger jackpot excitement
-5. **Jackpot** keeps 65M+ users coming back
 
 ---
 
-## Target Audience
+## 8. Target Audience & Market Impact
 
-| Segment | Why They'll Use It |
-|---|---|
-| **Unbanked / Underbanked** | No-fee wallet + savings + rewards = financial inclusion |
-| **Young Professionals** | Gamified savings makes growing money fun |
-| **Stokvel Members** | Digital group savings with transparency + bonus rewards |
-| **Social Users** | Referral system turns every user into a growth agent |
-| **Existing MoMo Users** | New reasons to increase wallet balance and stay engaged |
+| Segment | Market Fit & Value Proposition |
+|:---|:---|
+| **Unbanked / Underbanked** | Cash in/out via local retail stores (PEP, Shoprite, Usave, Boxer, Pick n Pay) with regulated security through African Bank. |
+| **Disciplined Savers** | Goal-based target accounts offering competitive yield (`2.00% – 5.50% p.a.`) plus guaranteed digital scratch rewards. |
+| **Stokvels & Social Groups** | Modernized group savings with transparent tracking and bulk retail category discount vouchers (5%–20%). |
+| **Network Growth Advocates** | Clean, single-sided referral incentives (`MOMO-[Last4Digits]`) rewarding verified long-term savings behavior. |
 
 ---
 
-## Hackathon Context
+## 9. Hackathon Context & Team
 
 > ### MTN Fintech Summit 2026 -- 24-Hour Hackathon
->
 > **South Africa, it's your move.**
 >
-> Think you can build the next game-changing Mini App?
->
-> The MTN Fintech Summit 24-Hour Hackathon is calling on the brightest developers, designers, and innovators to build solutions that could reach **millions of MoMo users across Africa**.
->
-> Build a Mini App.  
-> Compete for exciting prizes.  
-> Fast-track your solution into the MoMo ecosystem.
->
-> If you've got the skills, creativity, and drive to solve real-world challenges -- **this is your moment**.
->
-> Open exclusively to participants based in South Africa.
->
-> **Applications close on 21 August 2026.** Don't miss your chance to showcase your talent, solve real-world fintech challenges, and build the future of digital payments.
+> Built for the MTN Fintech Summit Hackathon to deliver a production-ready, highly engaging Mini App expanding the MTN MoMo ecosystem across South Africa and the African continent.
 
-**#MTNFintechSummit2026** · **#MoMoHackathon** · **#MaximumVelocityAsOne** · **#BuildWithMoMo** · **#SouthAfrica** · **#Innovation** · **#Fintech** · **#Developers** · **#MiniApps**
+**#MTNFintechSummit2026** · **#MoMoHackathon** · **#MaximumVelocityAsOne** · **#BuildWithMoMo** · **#SouthAfrica** · **#Fintech** · **#MiniApps**
 
----
+### Core Team & Responsibilities
 
-## Team
-
-| Role | Responsibility |
-|---|---|
-| **Person 1** | Rewards Game "The Ruler" -- concept, game design, jackpot mechanics |
-| **Person 2** | Referral System -- referral codes, verification flow, growth engine |
-| **Person 3** | Backend Support -- MoMo API integration, fraud detection |
-| **Person 4** | Personal Savings Account -- individual wallet, ticket issuance |
-| **Person 5** | Group Savings / Digital Stockvel -- group pooling, payout tracking |
+| Role | Domain & Focus Areas |
+|:---|:---|
+| **Fintech Product Lead** | Core specifications, financial sustainability model (−2.00% offset), banking partnerships |
+| **UX & Frontend Engineer** | Interactive PWA interface, digital scratch card canvas animations, responsive UI |
+| **Backend & Data Architect** | PostgreSQL schema design (`savings_goals`, `referrals`, `tickets`), lock-up enforcement |
+| **Growth & Integrations** | Single-sided referral validation engine, MoMo partner retail cash-in/out touchpoints |
 
 ---
 
@@ -300,10 +254,3 @@ This creates a **self-reinforcing cycle**:
 
 This project was built for the **MTN Fintech Summit 2026 Hackathon**.  
 All rights reserved. 2026.
-
----
-
-<p align="center">
-  <strong>Current MoMo = move money.</strong><br>
-  <strong>Enhanced MoMo = move money + grow money + have fun doing it.</strong>
-</p>

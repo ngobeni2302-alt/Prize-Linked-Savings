@@ -44,7 +44,7 @@ Press `Ctrl + C` in the terminal to stop the dev server.
 ```
 MTN_MOMO_MINI-APP/
   index.html      -- Main HTML with all 4 pages
-  style.css       -- Full styling (60% white, 30% yellow, 10% black)
+  style.css       -- Full styling (60% white, 30% yellow, 10% #004f71)
   app.js          -- Page navigation and placeholder interactions
   package.json    -- Project config and scripts
   README.md       -- Product concept and hackathon context
