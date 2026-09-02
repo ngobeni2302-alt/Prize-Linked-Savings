@@ -11,9 +11,9 @@
   --yellow: #FFCB05;
   --yellow-light: #FFE066;
   --yellow-dark: #E6B800;
-  --black: #000000;
-  --black-soft: #1A1A1A;
-  --black-muted: #333333;
+  --black: #004f71;
+  --black-soft: #003b54;
+  --black-muted: #1a6282;
 
   /* Semantic */
   --bg-primary: var(--white);
@@ -39,9 +39,9 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 1px 3px rgba(0, 79, 113, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 79, 113, 0.12);
+  --shadow-lg: 0 8px 24px rgba(0, 79, 113, 0.16);
 
   /* Transitions */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -339,8 +339,114 @@ h1, h2, h3, h4 {
 }
 
 .btn-icon {
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1em;
+  height: 1.1em;
   line-height: 1;
+  vertical-align: middle;
+}
+
+.btn-icon svg,
+.icon-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.svg-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25em;
+  height: 1.25em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+}
+
+.svg-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.menu-trigger-btn svg {
+  width: 20px;
+  height: 20px;
+  color: var(--black);
+}
+
+.card-icon svg {
+  width: 24px;
+  height: 24px;
+  color: var(--black);
+}
+
+.action-btn-icon svg {
+  width: 22px;
+  height: 22px;
+  color: var(--black);
+}
+
+.drawer-icon svg {
+  width: 20px;
+  height: 20px;
+  color: var(--black);
+}
+
+.pocket-card-icon svg {
+  width: 24px;
+  height: 24px;
+  color: var(--black);
+}
+
+.pocket-category-icon-large svg {
+  width: 32px;
+  height: 32px;
+  color: var(--black);
+}
+
+.modal-header-icon svg {
+  width: 28px;
+  height: 28px;
+  color: var(--black);
+}
+
+.audit-icon-box svg {
+  width: 18px;
+  height: 18px;
+  color: var(--black);
+}
+
+.preview-icon svg {
+  width: 32px;
+  height: 32px;
+  color: var(--black);
+}
+
+.policy-icon svg {
+  width: 16px;
+  height: 16px;
+  color: var(--black);
+  margin-top: 2px;
+}
+
+.momo-icon svg {
+  width: 16px;
+  height: 16px;
+  color: var(--black);
+}
+
+.pin-header-lock svg {
+  width: 24px;
+  height: 24px;
+  color: var(--yellow);
+}
+
+.welcome-gift-icon svg {
+  width: 36px;
+  height: 36px;
+  color: var(--black);
 }
 
 .savings-actions {

@@ -205,14 +205,14 @@ if (addTicketBtn) {
 const POCKETS_STORAGE_KEY = 'momo_pockets_data';
 
 const CATEGORY_MAP = {
-  travel: { label: 'Travel & Holidays', icon: '✈️' },
-  wedding: { label: 'Wedding & Celebrations', icon: '💍' },
-  education: { label: 'Education / School Fees', icon: '🎓' },
-  emergency: { label: 'Emergency Fund', icon: '🛡️' },
-  housing: { label: 'Rent / Housing Deposit', icon: '🏠' },
-  business: { label: 'Business & Investment', icon: '💼' },
-  asset_purchase: { label: 'Gadget / Asset Purchase', icon: '📱' },
-  other: { label: 'Other Goal', icon: '🌟' }
+  travel: { label: 'Travel & Holidays', iconSvg: '<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3.5c-.5-.5-2.5 0-4 1.5L13.5 8.5 5.3 6.7c-.8-.2-1.6.3-1.8 1.1-.2.8.2 1.6 1 1.9l6 3.5-3.5 3.5-2.8-.7c-.4-.1-.8.1-1.1.4l-.6.6c-.3.3-.3.8 0 1.1l3 2.5 2.5 3c.3.3.8.3 1.1 0l.6-.6c.3-.3.5-.7.4-1.1l-.7-2.8 3.5-3.5 3.5 6c.3.8 1.1 1.2 1.9 1 .8-.2 1.3-1 1.1-1.8z"/></svg>' },
+  wedding: { label: 'Wedding & Celebrations', iconSvg: '<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' },
+  education: { label: 'Education / School Fees', iconSvg: '<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>' },
+  emergency: { label: 'Emergency Fund', iconSvg: '<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' },
+  housing: { label: 'Rent / Housing Deposit', iconSvg: '<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
+  business: { label: 'Business & Investment', iconSvg: '<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>' },
+  asset_purchase: { label: 'Gadget / Asset Purchase', iconSvg: '<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>' },
+  other: { label: 'Other Goal', iconSvg: '<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>' }
 };
 
 function getSeedPockets(currentUser) {
@@ -285,7 +285,7 @@ function getSeedPockets(currentUser) {
       audit_log: [
         { id: 'aud_e1', actor_name: 'Mama Khumalo', action: 'Created Pocket "Family Emergency Fund"', time: new Date(now - 95 * dayMs).toISOString() },
         { id: 'aud_e2', actor_name: currentUser.name, action: 'Deposited R8,000.00', time: new Date(now - 91 * dayMs).toISOString() },
-        { id: 'aud_e3', actor_name: 'System', action: '🎉 Lock period completed (90 Days). 5.5% p.a. interest unlocked!', time: new Date(now - 5 * dayMs).toISOString() }
+        { id: 'aud_e3', actor_name: 'System', action: 'Lock period completed (90 Days). 5.5% p.a. interest unlocked!', time: new Date(now - 5 * dayMs).toISOString() }
       ]
     },
     {
@@ -429,7 +429,9 @@ function renderPocketsHub() {
   if (pockets.length === 0) {
     grid.innerHTML = `
       <div class="card" style="text-align: center; padding: var(--space-xl); grid-column: 1 / -1;">
-        <span style="font-size: 2.5rem; display: block; margin-bottom: var(--space-sm);">👥</span>
+        <span style="display: inline-flex; width: 48px; height: 48px; margin: 0 auto var(--space-sm); color: var(--black);">
+          <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </span>
         <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 4px;">No Savings Pockets Yet</h3>
         <p class="text-muted" style="margin-bottom: var(--space-md);">Create a shared goal with friends or enter an invite code to start pooling funds.</p>
         <div style="display: flex; gap: var(--space-sm); justify-content: center;">
@@ -446,18 +448,18 @@ function renderPocketsHub() {
     const cat = CATEGORY_MAP[pocket.purpose_category] || CATEGORY_MAP.other;
 
     const lockBadge = metrics.isMatured 
-      ? `<span class="status-badge status-badge--verified">🎉 Matured</span>`
-      : `<span class="status-badge status-badge--locked">🔒 ${metrics.daysRemaining}d Left</span>`;
+      ? `<span class="status-badge status-badge--verified">Matured</span>`
+      : `<span class="status-badge status-badge--locked">Lock: ${metrics.daysRemaining}d Left</span>`;
 
     const roleBadge = metrics.isAdmin
-      ? `<span class="pocket-role-pill">👑 Admin</span>`
-      : `<span class="pocket-status-pill">👤 Member</span>`;
+      ? `<span class="pocket-role-pill">Admin</span>`
+      : `<span class="pocket-status-pill">Member</span>`;
 
     return `
       <div class="pocket-card" onclick="openPocketDashboard('${pocket.id}')">
         <div>
           <div class="pocket-card-top">
-            <div class="pocket-card-icon">${cat.icon}</div>
+            <div class="pocket-card-icon">${cat.iconSvg}</div>
             <div class="pocket-card-header-info">
               <div class="pocket-card-tags">
                 <span class="pocket-category-pill">${cat.label}</span>
@@ -492,7 +494,7 @@ function renderPocketsHub() {
         </div>
 
         <div class="pocket-card-footer">
-          <span class="pocket-card-lock-hint">👥 ${metrics.memberCount} Members</span>
+          <span class="pocket-card-lock-hint">${metrics.memberCount} Members</span>
           <span class="btn-back-link" style="padding: 4px 8px; font-size: 0.75rem;">View Dashboard →</span>
         </div>
       </div>
@@ -531,11 +533,11 @@ function openPocketDashboard(pocketId) {
   const nameEl = document.getElementById('pocket-detail-name');
   const noteEl = document.getElementById('pocket-detail-note');
 
-  if (iconEl) iconEl.textContent = cat.icon;
+  if (iconEl) iconEl.innerHTML = cat.iconSvg;
   if (catEl) catEl.textContent = cat.label;
-  if (roleEl) roleEl.innerHTML = metrics.isAdmin ? '👑 Admin' : '👤 Member';
+  if (roleEl) roleEl.textContent = metrics.isAdmin ? 'Admin' : 'Member';
   if (statusEl) {
-    statusEl.textContent = metrics.isMatured ? '🎉 90-Day Lock Matured (5.5% Yield Ready)' : `🔒 ${metrics.daysRemaining} Days Lock Remaining`;
+    statusEl.textContent = metrics.isMatured ? '90-Day Lock Matured (5.5% Yield Ready)' : `${metrics.daysRemaining} Days Lock Remaining`;
     statusEl.className = metrics.isMatured ? 'pocket-status-pill pocket-status-pill--matured' : 'pocket-status-pill';
   }
   if (nameEl) nameEl.textContent = pocket.name;
@@ -556,9 +558,16 @@ function openPocketDashboard(pocketId) {
   if (remainingTextEl) {
     remainingTextEl.textContent = metrics.remainingToGoal > 0 
       ? `R${metrics.remainingToGoal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })} remaining to reach goal`
-      : '🎉 Target goal achieved!';
+      : 'Target goal achieved!';
   }
-  if (membersCountEl) membersCountEl.textContent = `👥 ${metrics.memberCount} Members (${pocket.member_cap || 20} max)`;
+  if (membersCountEl) {
+    membersCountEl.innerHTML = `
+      <span class="btn-icon" style="width: 14px; height: 14px; vertical-align: middle; display: inline-flex;">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      </span>
+      ${metrics.memberCount} Members (${pocket.member_cap || 20} max)
+    `;
+  }
 
   // 4 Metrics Grid
   const statGroupPotEl = document.getElementById('pocket-stat-group-pot');
@@ -590,7 +599,7 @@ function openPocketDashboard(pocketId) {
     if (metrics.isAdmin) {
       adminControlsContainer.innerHTML = `
         <button class="btn-back-link" onclick="togglePocketTransparency('${pocket.id}')" title="Toggle Transparency">
-          ⚙️ Visibility: ${pocket.transparency_level === 'full' ? 'Full' : 'Totals Only'}
+          Visibility: ${pocket.transparency_level === 'full' ? 'Full' : 'Totals Only'}
         </button>
       `;
     } else {
@@ -636,7 +645,7 @@ function renderTransparencyLedger(pocket, user, metrics) {
   if (pocket.transparency_level === 'totals_only') {
     container.innerHTML = `
       <div style="padding: var(--space-md); background-color: var(--white-off); border-radius: var(--radius-sm); border: 1px solid #CBD5E1; text-align: center;">
-        <p style="font-weight: 700; font-size: 0.9rem; margin-bottom: 4px;">🔒 Privacy Mode Enabled</p>
+        <p style="font-weight: 700; font-size: 0.9rem; margin-bottom: 4px;">Privacy Mode Enabled</p>
         <p class="text-muted" style="font-size: 0.8rem;">The Admin has set this Pocket to Totals-Only mode. Individual member deposit amounts are private. Group total is verified by MTN MoMo: <strong>R${metrics.groupTotal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}</strong>.</p>
       </div>
     `;
@@ -671,7 +680,7 @@ function renderTransparencyLedger(pocket, user, metrics) {
         </td>
         <td>
           <span class="status-badge ${m.role === 'admin' ? 'status-badge--verified' : 'status-badge--pending'}" style="font-size: 0.65rem;">
-            ${m.role === 'admin' ? '👑 Admin' : '👤 Member'}
+            ${m.role === 'admin' ? 'Admin' : 'Member'}
           </span>
         </td>
         <td style="font-size: 0.8rem; color: #64748B;">
@@ -743,16 +752,22 @@ function renderAuditTrail(pocket) {
 
   listEl.innerHTML = logs.map(log => {
     const timeStr = new Date(log.time).toLocaleString('en-ZA', { dateStyle: 'short', timeStyle: 'short' });
-    let icon = '📝';
-    if (log.action.includes('Deposited') || log.action.includes('Contributed')) icon = '💳';
-    if (log.action.includes('Joined')) icon = '🔑';
-    if (log.action.includes('Created')) icon = '🎉';
-    if (log.action.includes('Withdrawal')) icon = '💸';
-    if (log.action.includes('Lock') || log.action.includes('Matured')) icon = '🏆';
+    let iconSvg = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
+    if (log.action.includes('Deposited') || log.action.includes('Contributed')) {
+      iconSvg = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>';
+    } else if (log.action.includes('Joined')) {
+      iconSvg = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 2l-2 2m-1.5 1.5L19 7l-2 2-1.5-1.5M15 11l-3 3m0 0l-3-3m3 3V3"/><circle cx="7.5" cy="16.5" r="4.5"/></svg>';
+    } else if (log.action.includes('Created')) {
+      iconSvg = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>';
+    } else if (log.action.includes('Withdrawal') || log.action.includes('Withdrew')) {
+      iconSvg = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    } else if (log.action.includes('Lock') || log.action.includes('Matured')) {
+      iconSvg = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+    }
 
     return `
       <div class="pocket-audit-item">
-        <div class="audit-icon-box">${icon}</div>
+        <div class="audit-icon-box">${iconSvg}</div>
         <div class="audit-content">
           <p class="audit-text"><strong>${escapeHtml(log.actor_name)}</strong>: ${escapeHtml(log.action)}</p>
           <span class="audit-time">${timeStr} • Verified by MoMo</span>
@@ -951,7 +966,7 @@ function verifyJoinCode() {
   const metrics = calculatePocketMetrics(pocket, user);
   const cat = CATEGORY_MAP[pocket.purpose_category] || CATEGORY_MAP.other;
 
-  document.getElementById('join-preview-icon').textContent = cat.icon;
+  document.getElementById('join-preview-icon').innerHTML = cat.iconSvg;
   document.getElementById('join-preview-name').textContent = pocket.name;
   document.getElementById('join-preview-category').textContent = `${cat.label} • ${pocket.purpose_note || ''}`;
   document.getElementById('join-preview-goal').textContent = `R${metrics.goal.toLocaleString('en-ZA')}`;
@@ -961,7 +976,7 @@ function verifyJoinCode() {
 
   if (joinPreviewCard) joinPreviewCard.style.display = 'block';
   if (joinCodeStatus) {
-    joinCodeStatus.textContent = '✓ Valid join code verified!';
+    joinCodeStatus.textContent = 'Valid join code verified!';
     joinCodeStatus.style.color = '#059669';
   }
   if (btnConfirmJoinPocket) btnConfirmJoinPocket.disabled = false;
@@ -1129,7 +1144,7 @@ if (btnProceedContribute) {
       savePockets(pockets);
       closeContributeModal();
       openPocketDashboard(pocket.id);
-      showToast(`Deposited R${amt.toFixed(2)}! +1 Game Ticket earned 🎉`);
+      showToast(`Deposited R${amt.toFixed(2)}! +1 Game Ticket earned`);
     });
   });
 }
@@ -1178,7 +1193,7 @@ function openWithdrawModal() {
     // MATURED: Full principal + interest
     if (lockBanner) {
       lockBanner.className = 'withdrawal-lock-banner withdrawal-lock-banner--success';
-      lockBanner.innerHTML = '<strong>🎉 90-Day Lock Period Met!</strong> You qualify for 100% of your contributed principal PLUS full accrued interest at 5.5% p.a.';
+      lockBanner.innerHTML = '<strong>90-Day Lock Period Met!</strong> You qualify for 100% of your contributed principal PLUS full accrued interest at 5.5% p.a.';
     }
     if (penaltyRow) penaltyRow.style.display = 'none';
     const totalPayout = metrics.myTotal + metrics.myInterest;
@@ -1187,7 +1202,7 @@ function openWithdrawModal() {
     // EARLY: Principal only, interest forfeited
     if (lockBanner) {
       lockBanner.className = 'withdrawal-lock-banner withdrawal-lock-banner--warning';
-      lockBanner.innerHTML = `<strong>⚠️ Early Withdrawal Warning:</strong> This Pocket has ${metrics.daysRemaining} days remaining on its 3-month lock. Withdrawing early returns <strong>principal only</strong>. All accrued interest (+R${metrics.myInterest.toFixed(2)}) is permanently forfeited.`;
+      lockBanner.innerHTML = `<strong>Early Withdrawal Warning:</strong> This Pocket has ${metrics.daysRemaining} days remaining on its 3-month lock. Withdrawing early returns <strong>principal only</strong>. All accrued interest (+R${metrics.myInterest.toFixed(2)}) is permanently forfeited.`;
     }
     if (penaltyRow) penaltyRow.style.display = 'flex';
     if (forfeitVal) forfeitVal.textContent = `-R${metrics.myInterest.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
@@ -1312,8 +1327,10 @@ if (btnCopyPocketCode) {
     const codeEl = document.getElementById('display-pocket-join-code');
     if (codeEl) {
       navigator.clipboard.writeText(codeEl.textContent).then(() => {
-        btnCopyPocketCode.textContent = '✓ Copied Code!';
-        setTimeout(() => { btnCopyPocketCode.textContent = '📋 Copy Join Code'; }, 1500);
+        btnCopyPocketCode.innerHTML = '<span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="20 6 9 17 4 12"/></svg></span> Copied Code!';
+        setTimeout(() => {
+          btnCopyPocketCode.innerHTML = '<span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span> Copy Join Code';
+        }, 1500);
       });
     }
   });

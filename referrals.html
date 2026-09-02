@@ -19,8 +19,8 @@
       <!-- Left Side: Menu Trigger + Wallet -->
       <div class="header-left" style="display: flex; align-items: center; gap: var(--space-md);">
         <!-- Hamburger Menu Button -->
-        <button class="menu-trigger-btn" id="btn-open-menu" style="background: none; border: 2px solid var(--black); border-radius: var(--radius-sm); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 2px 2px 0 var(--black); font-weight: 800; font-size: 1.2rem;">
-          ☰
+        <button class="menu-trigger-btn" id="btn-open-menu" style="background: none; border: 2px solid var(--black); border-radius: var(--radius-sm); width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 2px 2px 0 var(--black); font-weight: 800;">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
         <!-- Wallet display -->
         <div class="header-wallet" id="header-wallet" style="border: none; padding: 0; box-shadow: none;">
@@ -53,9 +53,15 @@
             <h2 class="section-title">Your Referral Code</h2>
             <div class="card card--highlight referral-code-card">
               <p class="referral-code" id="my-referral-code">MOMO-----</p>
-              <p class="card-hint">Share this code — it works once, so make it count</p>
-              <button class="btn btn--primary" id="btn-copy-code">Copy Code</button>
-              <button class="btn btn--outline" id="btn-share-code">Share</button>
+              <p class="card-hint">Share this code with friends — unlocks rewards upon goal completion</p>
+              <button class="btn btn--primary" id="btn-copy-code">
+                <span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>
+                Copy Code
+              </button>
+              <button class="btn btn--outline" id="btn-share-code">
+                <span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>
+                Share
+              </button>
             </div>
           </div>
 
@@ -77,19 +83,19 @@
             <div class="steps-list">
               <div class="step-item">
                 <span class="step-number">1</span>
-                <span class="step-text">Share your unique, one-time code with friends</span>
+                <span class="step-text">Share your unique code (MOMO-[Last4Digits]) with friends</span>
               </div>
               <div class="step-item">
                 <span class="step-number">2</span>
-                <span class="step-text">They register on the MoMo app, then enter your code in PLS</span>
+                <span class="step-text">They register on MoMo and create a Target Savings Goal</span>
               </div>
               <div class="step-item">
                 <span class="step-number">3</span>
-                <span class="step-text">System verifies their first real savings deposit</span>
+                <span class="step-text">Friend saves towards goal with minimum 3-month lock</span>
               </div>
               <div class="step-item">
                 <span class="step-number">4</span>
-                <span class="step-text">You both instantly earn 1 ticket — plus a bonus every 10 referrals</span>
+                <span class="step-text">Referrer receives guaranteed-win digital scratch card</span>
               </div>
             </div>
           </div>
@@ -99,11 +105,11 @@
           <!-- Referral Progress -->
           <div class="section" id="section-referral-progress">
             <h2 class="section-title">Referral Progress</h2>
-            <p class="card-hint">Earn 1 ticket instantly per completed referral, plus a bonus ticket every 10</p>
+            <p class="card-hint">Single-sided rewards: earn 1 scratch card per verified friend goal completion</p>
             <div class="milestone-bar">
               <div class="milestone-fill" id="milestone-fill" style="width: 0%;"></div>
             </div>
-            <p class="milestone-label" id="milestone-label">0 / 10 verified referrals to earn a bonus ticket</p>
+            <p class="milestone-label" id="milestone-label">0 / 10 verified referrals tracked</p>
             <p class="card-hint" id="my-ticket-count">You have 0 tickets</p>
           </div>
 
@@ -135,19 +141,19 @@
       </div>
       <nav class="drawer-menu">
         <a href="index.html" class="drawer-item" id="drawer-nav-home">
-          <span class="drawer-icon">H</span>
+          <span class="drawer-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
           <span class="drawer-label">Home</span>
         </a>
         <a href="savings.html" class="drawer-item" id="drawer-nav-savings">
-          <span class="drawer-icon">S</span>
+          <span class="drawer-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="16" cy="15" r="1.5"/></svg></span>
           <span class="drawer-label">Savings</span>
         </a>
         <a href="game.html" class="drawer-item" id="drawer-nav-game">
-          <span class="drawer-icon">G</span>
+          <span class="drawer-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
           <span class="drawer-label">The Ruler</span>
         </a>
         <a href="referrals.html" class="drawer-item drawer-item--active" id="drawer-nav-referrals">
-          <span class="drawer-icon">R</span>
+          <span class="drawer-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>
           <span class="drawer-label">Referrals</span>
         </a>
       </nav>
@@ -164,7 +170,7 @@
       <div class="share-grid">
         <a href="#" class="share-option share-option--whatsapp" id="share-whatsapp" target="_blank" rel="noopener">
           <span class="share-icon">
-            <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12.031 2c-5.516 0-9.988 4.471-9.988 9.986 0 1.764.46 3.42 1.258 4.877L2 22l5.289-1.387c1.4.764 2.99 1.198 4.678 1.198 5.516 0 9.99-4.471 9.99-9.986S17.547 2 12.031 2zm0 18.286c-1.579 0-3.08-.432-4.38-1.25l-.314-.19-3.255.854.87-3.17-.208-.332c-.896-1.425-1.369-3.08-1.369-4.79 0-4.57; font-weight: 800;"></svg>
+            <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12.031 2c-5.516 0-9.988 4.471-9.988 9.986 0 1.764.46 3.42 1.258 4.877L2 22l5.289-1.387c1.4.764 2.99 1.198 4.678 1.198 5.516 0 9.99-4.471 9.99-9.986S17.547 2 12.031 2zm0 18.286c-1.579 0-3.08-.432-4.38-1.25l-.314-.19-3.255.854.87-3.17-.208-.332c-.896-1.425-1.369-3.08-1.369-4.79 0-4.57 3.71-8.28 8.28-8.28 4.567 0 8.28 3.71 8.28 8.28 0 4.57-3.713 8.28-8.28 8.28z"/></svg>
           </span>
           <span class="share-label">WhatsApp</span>
         </a>
@@ -207,7 +213,9 @@
   <!-- ===== MODAL: Referral Welcome ===== -->
   <div class="modal-overlay" id="modal-welcome">
     <div class="modal-card modal-card--welcome">
-      <div class="welcome-gift-icon">🎁</div>
+      <div class="welcome-gift-icon">
+        <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="2" fill="none"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+      </div>
       <h3 class="modal-title">You've Been Invited!</h3>
       <p class="modal-subtitle">A friend has referred you to MTN MoMo Save & Win. Apply the referral code below to claim your bonus entry ticket once you deposit!</p>
       
