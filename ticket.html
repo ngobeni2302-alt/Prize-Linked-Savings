@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="MTN MoMo Enhanced Mini App - Save, Refer, Play, Win. A financial engagement platform built on MTN MoMo." />
-  <title>Prized-Linked-Savings - Home</title>
+  <title>MTN MoMo Enhanced - Ticket</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -39,88 +39,139 @@
   <!-- ===== MAIN CONTENT AREA ===== -->
   <main class="app-main" id="app-main" style="margin-top: var(--header-height); min-height: calc(100vh - var(--header-height)); padding-bottom: var(--space-xl);">
 
-    <!-- PAGE: Home -->
-    <section class="page" id="page-home" data-page="home">
+    <!-- PAGE: Ticket Game -->
+    <section class="page" id="page-game" data-page="game">
       <div class="page-header">
-        <h1>Save & Win</h1>
-        <p class="page-subtitle">Grow your savings and stand a chance to win cash, data, and vouchers!</p>
+        <h1>Ticket</h1>
+        <p class="page-subtitle">Ticket Rewards & Management</p>
       </div>
 
-      <!-- Overview Cards Grid -->
-      <div class="card-grid">
-        <!-- Wallet Summary Card -->
-        <div class="card card--highlight" id="card-wallet-summary">
-          <div class="card-icon">W</div>
-          <h2 class="card-title">Wallet Balance</h2>
-          <p class="card-value">R0.00</p>
-          <p class="card-hint">-- Placeholder: Live wallet balance from MoMo API --</p>
-        </div>
-
-        <!-- Savings Summary Card -->
-        <div class="card" id="card-savings-summary">
-          <div class="card-icon">S</div>
-          <h2 class="card-title">Total Savings</h2>
-          <p class="card-value">R0.00</p>
-          <p class="card-hint">-- Placeholder: Combined personal + group savings --</p>
-        </div>
-
-        <!-- Tickets Card -->
-        <div class="card" id="card-tickets-summary">
-          <div class="card-icon">T</div>
-          <h2 class="card-title">Game Tickets</h2>
-          <p class="card-value">0</p>
-          <p class="card-hint">-- Placeholder: Available tickets to play Ticket game --</p>
-        </div>
-
-        <!-- Referral Card -->
-        <div class="card" id="card-referral-summary">
-          <div class="card-icon">R</div>
-          <h2 class="card-title">Referrals</h2>
-          <p class="card-value">0 / 10</p>
-          <p class="card-hint">-- Placeholder: Verified referral count --</p>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="section" id="section-quick-actions">
-        <h2 class="section-title">Quick Actions</h2>
-        <div class="action-grid">
-          <button class="action-btn" id="btn-send-money">
-            <span class="action-btn-icon">S</span>
-            <span class="action-btn-label">Send Money</span>
-          </button>
-          <button class="action-btn" id="btn-buy-airtime">
-            <span class="action-btn-icon">A</span>
-            <span class="action-btn-label">Buy Airtime</span>
-          </button>
-          <button class="action-btn" id="btn-pay-bills">
-            <span class="action-btn-icon">B</span>
-            <span class="action-btn-label">Pay Bills</span>
-          </button>
-          <button class="action-btn" id="btn-cash-in">
-            <span class="action-btn-icon">C</span>
-            <span class="action-btn-label">Cash In</span>
-          </button>
-        </div>
-        <p class="placeholder-note">-- Placeholder: Quick action buttons will trigger MoMo API flows --</p>
-      </div>
-
-      <!-- Recent Activity -->
-      <div class="section" id="section-recent-activity">
-        <h2 class="section-title">Recent Activity</h2>
-        <div class="activity-list">
-          <div class="activity-item">
-            <span class="activity-desc">No recent transactions</span>
-            <span class="activity-amount">--</span>
+      <!-- Ticket Info & Code Selector -->
+      <div class="section" id="section-ticket-info">
+        <h2 class="section-title">Your Tickets & Codes</h2>
+        
+        <div class="ticket-selector-container">
+          <label for="ticket-code-select" class="ticket-select-label">Select Active Ticket Code:</label>
+          <div class="ticket-code-input-group">
+            <select id="ticket-code-select" class="ticket-select">
+              <option value="IND-8492" data-type="IND" data-name="Personal Savings">IND-8492 (Individual Personal Savings)</option>
+              <option value="GRP-3D1E88ZA" data-type="GRP" data-name="Stokvel Sundays" data-members="5">GRP-3D1E88ZA (Group: Stokvel Sundays - 5 members)</option>
+              <option value="IND-9921" data-type="IND" data-name="Referral Reward">IND-9921 (Individual Referral Reward)</option>
+              <option value="GRP-77K29X" data-type="GRP" data-name="Family Pool" data-members="4">GRP-77K29X (Group: Family Pool - 4 members)</option>
+            </select>
           </div>
         </div>
-        <p class="placeholder-note">-- Placeholder: Transaction history from MoMo wallet --</p>
+
+        <div class="ticket-summary-grid">
+          <div class="card card--highlight">
+            <h3 class="card-title">Available Tickets</h3>
+            <p class="card-value" id="game-tickets-count">3</p>
+            <div style="margin-top: 8px;">
+              <button class="btn btn--outline" id="btn-add-ticket" style="font-size: 0.75rem; padding: 4px 8px;">+ Add Ticket</button>
+            </div>
+          </div>
+          <div class="card card--highlight">
+            <h3 class="card-title">Active Pool</h3>
+            <p class="card-value" id="active-pool-type" style="font-size: 1rem;">INDIVIDUAL</p>
+          </div>
+        </div>
       </div>
+
+      <!-- Ticket Action Area -->
+      <div class="section" id="section-ticket-action">
+        <!-- Active Ticket Banner -->
+        <div class="active-ticket-banner" id="active-ticket-banner">
+          <span class="active-ticket-text" id="active-ticket-text">Active: INDIVIDUAL TICKET (IND-8492)</span>
+        </div>
+
+        <!-- Dedicated Workspace for /ticket code -->
+        <div id="ticket-workspace" class="ticket-workspace">
+          <!-- Mount point for ticket elements coded in /ticket/ticket.js -->
+        </div>
+      </div>
+
+      <!-- Ticket Prize History -->
+      <div class="section" id="section-game-prizes">
+        <h2 class="section-title">Prize Draw History</h2>
+        <div class="activity-list" id="prize-history-list">
+          <div class="placeholder-note" id="prize-history-empty">No prizes drawn yet this session.</div>
+        </div>
+      </div>
+
+      <!-- Reward Tier Breakdown Table -->
+      <div class="section" id="section-reward-tiers">
+        <h2 class="section-title">Guaranteed Reward Tiers (Backend V3)</h2>
+        <div class="table-container">
+          <table class="tiers-table">
+            <thead>
+              <tr>
+                <th>Tier</th>
+                <th>Target Range</th>
+                <th>Pool Type</th>
+                <th>Sample Rewards</th>
+                <th>Odds</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Tier 1</strong></td>
+                <td>R1,000 - R4,999</td>
+                <td>Individual</td>
+                <td>R15 - R25 Airtime / Data</td>
+                <td><span class="badge badge--success">100% Win</span></td>
+              </tr>
+              <tr>
+                <td><strong>Tier 2</strong></td>
+                <td>R5,000 - R14,999</td>
+                <td>Individual</td>
+                <td>R30 Airtime / Voice</td>
+                <td><span class="badge badge--success">100% Win</span></td>
+              </tr>
+              <tr>
+                <td><strong>Tier 3</strong></td>
+                <td>R15,000+</td>
+                <td>Individual</td>
+                <td>R45 Airtime / Mega Data</td>
+                <td><span class="badge badge--success">100% Win</span></td>
+              </tr>
+              <tr class="highlight-row">
+                <td><strong>Tier 4</strong></td>
+                <td>R1,000 - R9,999</td>
+                <td>Group / Stokvel</td>
+                <td>5% Category Discount Voucher</td>
+                <td><span class="badge badge--success">100% Win (Split)</span></td>
+              </tr>
+              <tr class="highlight-row">
+                <td><strong>Tier 5</strong></td>
+                <td>R10,000 - R49,999</td>
+                <td>Group / Stokvel</td>
+                <td>10% Category Discount Voucher</td>
+                <td><span class="badge badge--success">100% Win (Split)</span></td>
+              </tr>
+              <tr class="highlight-row">
+                <td><strong>Tier 6</strong></td>
+                <td>R50,000+</td>
+                <td>Group / Stokvel</td>
+                <td>20% Category Discount Voucher</td>
+                <td><span class="badge badge--success">100% Win (Split)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Referral</strong></td>
+                <td>Any Deposit</td>
+                <td>Individual</td>
+                <td>R10 - R20 Airtime (Untiered)</td>
+                <td><span class="badge badge--success">100% Win</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </section>
 
   </main>
 
-  <!-- ===== NAVIGATION DRAWER (Popup Tab) ===== -->
+  <!-- ===== NAVIGATION DRAWER ===== -->
   <div class="nav-drawer" id="nav-drawer">
     <div class="drawer-overlay" id="drawer-overlay"></div>
     <div class="drawer-content">
@@ -131,7 +182,7 @@
         <button class="drawer-close-btn" id="btn-close-menu">&times;</button>
       </div>
       <nav class="drawer-menu">
-        <a href="index.html" class="drawer-item drawer-item--active" id="drawer-nav-home">
+        <a href="index.html" class="drawer-item" id="drawer-nav-home">
           <span class="drawer-icon">H</span>
           <span class="drawer-label">Home</span>
         </a>
@@ -139,7 +190,7 @@
           <span class="drawer-icon">S</span>
           <span class="drawer-label">Savings</span>
         </a>
-        <a href="ticket.html" class="drawer-item" id="drawer-nav-ticket">
+        <a href="ticket.html" class="drawer-item drawer-item--active" id="drawer-nav-ticket">
           <span class="drawer-icon">T</span>
           <span class="drawer-label">Ticket</span>
         </a>
@@ -220,6 +271,9 @@
     </div>
   </div>
 
+  <!-- Main app logic -->
   <script type="module" src="/app.js"></script>
+  <!-- User Ticket module (Live linked) -->
+  <script type="module" src="/ticket/ticket.js"></script>
 </body>
 </html>

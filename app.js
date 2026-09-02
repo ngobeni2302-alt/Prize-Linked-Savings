@@ -8,7 +8,8 @@ function navigateTo(pageName) {
   const mapping = {
     'home': 'index.html',
     'savings': 'savings.html',
-    'game': 'game.html',
+    'ticket': 'ticket.html',
+    'game': 'ticket.html',
     'referrals': 'referrals.html'
   };
   window.location.href = mapping[pageName] || 'index.html';
@@ -31,6 +32,20 @@ function updateTicketUI() {
   if (gameTicketsEl) gameTicketsEl.textContent = availableTickets;
   if (homeTicketsEl) homeTicketsEl.textContent = availableTickets;
   if (homeCardValue) homeCardValue.textContent = availableTickets;
+}
+
+// Expose ticket state and methods globally for ticket module
+if (typeof window !== 'undefined') {
+  window.ticketState = {
+    get availableTickets() { return availableTickets; },
+    set availableTickets(val) {
+      availableTickets = val;
+      saveAvailableTickets();
+      updateTicketUI();
+    },
+    saveAvailableTickets,
+    updateTicketUI
+  };
 }
 
 updateTicketUI();
@@ -888,5 +903,5 @@ if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeDrawer);
 if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
 
 console.log('MTN MoMo Enhanced Mini App loaded.');
-console.log('Pages: Home | Savings | The Ruler | Referrals');
+console.log('Pages: Home | Savings | Ticket | Referrals');
 console.log('All interactions are placeholders for future implementation.');
