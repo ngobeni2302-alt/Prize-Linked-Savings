@@ -797,9 +797,7 @@ function closeCreatePocketModal() {
 
 if (btnCreateGroup) btnCreateGroup.addEventListener('click', openCreatePocketModal);
 if (btnCloseCreateModal) btnCloseCreateModal.addEventListener('click', closeCreatePocketModal);
-if (btnCancelCreatePocket) btnCancelCreatePocket.addEventListener('click', closeCreatePocketModal);
-
-if (formCreatePocket) {
+if (btnCancelCreatePocket) btnCancelCreatePocket.addEventListener('click', closeCreatePocketModal);if (formCreatePocket) {
   formCreatePocket.addEventListener('submit', (e) => {
     e.preventDefault();
     const user = getCurrentUser();
@@ -824,6 +822,8 @@ if (formCreatePocket) {
       }
     }
 
+    closeCreatePocketModal();
+
     // Authenticate with MoMo PIN
     const promptMsg = initialDeposit > 0 
       ? `Authorize creation of "${name}" with initial deposit of R${initialDeposit.toFixed(2)}`
@@ -831,12 +831,12 @@ if (formCreatePocket) {
 
     requestPinAuth(promptMsg, () => {
       const now = Date.now();
-      const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-      const catCode = category.slice(0, 4).toUpperCase();
-      const joinCode = `POCK-${Math.floor(1000 + Math.random() * 9000)}-${catCode}`;
+      const catCode = (category || 'GEN').slice(0, 4).toUpperCase();
+      const randomCode = Math.floor(1000 + Math.random() * 9000);
+      const joinCode = `POCK-${randomCode}-${catCode}`;
 
       const newPocket = {
-        id: 'pock_' + Math.random().toString(36).substring(2, 9),
+        id: 'pock_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
         name,
         purpose_category: category,
         purpose_note: note,
@@ -855,7 +855,7 @@ if (formCreatePocket) {
         ],
         contributions: [],
         audit_log: [
-          { id: 'aud_' + Date.now(), actor_name: user.name, action: `Created Pocket "${name}" with ${lockDays}-day lock`, time: new Date(now).toISOString() }
+          { id: 'aud_' + Date.now(), actor_name: user.name, action: `Created Pocket "${name}" with ${lockDays}-day lock (Join Code: ${joinCode})`, time: new Date(now).toISOString() }
         ]
       };
 
@@ -883,10 +883,15 @@ if (formCreatePocket) {
       pockets.unshift(newPocket);
       savePockets(pockets);
 
-      closeCreatePocketModal();
       renderPocketsHub();
+      updateActiveTicketOptionsFromPockets();
       openPocketDashboard(newPocket.id);
-      showToast(`Pocket "${name}" created successfully!`);
+      showToast(`Pocket "${name}" created! Join Code: ${joinCode}`);
+
+      // Auto-open invite modal with the new unique code and multi-platform links
+      setTimeout(() => {
+        openInviteModal();
+      }, 400);
     });
   });
 }
@@ -937,7 +942,7 @@ function verifyJoinCode() {
   }
 
   const pockets = getPockets();
-  const pocket = pockets.find(p => p.join_code.toUpperCase() === raw);
+  const pocket = pockets.find(p => (p.join_code || '').toUpperCase() === raw);
 
   if (!pocket) {
     if (joinCodeStatus) {
@@ -966,13 +971,26 @@ function verifyJoinCode() {
   const metrics = calculatePocketMetrics(pocket, user);
   const cat = CATEGORY_MAP[pocket.purpose_category] || CATEGORY_MAP.other;
 
-  document.getElementById('join-preview-icon').innerHTML = cat.iconSvg;
-  document.getElementById('join-preview-name').textContent = pocket.name;
-  document.getElementById('join-preview-category').textContent = `${cat.label} • ${pocket.purpose_note || ''}`;
-  document.getElementById('join-preview-goal').textContent = `R${metrics.goal.toLocaleString('en-ZA')}`;
-  document.getElementById('join-preview-pooled').textContent = `R${metrics.groupTotal.toLocaleString('en-ZA')}`;
-  document.getElementById('join-preview-lock').textContent = `${pocket.lock_period_days || 90} Days (3 Mos)`;
-  document.getElementById('join-preview-members').textContent = `${metrics.memberCount} / ${pocket.member_cap || 20}`;
+  const joinPreviewIcon = document.getElementById('join-preview-icon');
+  if (joinPreviewIcon) joinPreviewIcon.innerHTML = cat.iconSvg;
+  
+  const joinPreviewName = document.getElementById('join-preview-name');
+  if (joinPreviewName) joinPreviewName.textContent = pocket.name;
+  
+  const joinPreviewCategory = document.getElementById('join-preview-category');
+  if (joinPreviewCategory) joinPreviewCategory.textContent = `${cat.label} • ${pocket.purpose_note || ''}`;
+  
+  const joinPreviewGoal = document.getElementById('join-preview-goal');
+  if (joinPreviewGoal) joinPreviewGoal.textContent = `R${metrics.goal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  
+  const joinPreviewPooled = document.getElementById('join-preview-pooled');
+  if (joinPreviewPooled) joinPreviewPooled.textContent = `R${metrics.groupTotal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  
+  const joinPreviewLock = document.getElementById('join-preview-lock');
+  if (joinPreviewLock) joinPreviewLock.textContent = `${pocket.lock_period_days || 90} Days (${metrics.daysRemaining}d remaining)`;
+  
+  const joinPreviewMembers = document.getElementById('join-preview-members');
+  if (joinPreviewMembers) joinPreviewMembers.textContent = `${metrics.memberCount} / ${pocket.member_cap || 20}`;
 
   if (joinPreviewCard) joinPreviewCard.style.display = 'block';
   if (joinCodeStatus) {
@@ -984,14 +1002,26 @@ function verifyJoinCode() {
 
 if (btnVerifyJoinCode) btnVerifyJoinCode.addEventListener('click', verifyJoinCode);
 
+if (inputJoinCode) {
+  inputJoinCode.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      verifyJoinCode();
+    }
+  });
+}
+
 if (btnConfirmJoinPocket) {
   btnConfirmJoinPocket.addEventListener('click', () => {
     if (!verifiedPocketToJoin) return;
     const user = getCurrentUser();
+    const targetPocket = verifiedPocketToJoin;
 
-    requestPinAuth(`Confirm joining "${verifiedPocketToJoin.name}"`, () => {
+    closeJoinPocketModal();
+
+    requestPinAuth(`Confirm joining "${targetPocket.name}"`, () => {
       const pockets = getPockets();
-      const pocket = pockets.find(p => p.id === verifiedPocketToJoin.id);
+      const pocket = pockets.find(p => p.id === targetPocket.id);
       if (!pocket) return;
 
       pocket.members = pocket.members || [];
@@ -1004,7 +1034,7 @@ if (btnConfirmJoinPocket) {
       });
 
       pocket.audit_log = pocket.audit_log || [];
-      pocket.audit_log.push({
+      pocket.audit_log.unshift({
         id: 'aud_' + Date.now(),
         actor_name: user.name,
         action: 'Joined Pocket via join code',
@@ -1012,8 +1042,8 @@ if (btnConfirmJoinPocket) {
       });
 
       savePockets(pockets);
-      closeJoinPocketModal();
       renderPocketsHub();
+      updateActiveTicketOptionsFromPockets();
       openPocketDashboard(pocket.id);
       showToast(`Successfully joined "${pocket.name}"!`);
     });
@@ -1040,7 +1070,13 @@ function openContributeModal() {
   const user = getCurrentUser();
   const metrics = calculatePocketMetrics(pocket, user);
 
-  document.getElementById('contribute-modal-pocket-name').textContent = pocket.name;
+  const pocketNameEl = document.getElementById('contribute-modal-pocket-name');
+  if (pocketNameEl) pocketNameEl.textContent = pocket.name;
+
+  const walletBal = getWalletBalance();
+  const contribBalEl = document.getElementById('contribute-momo-balance');
+  if (contribBalEl) contribBalEl.textContent = `R${walletBal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+
   if (inputContributeAmount) inputContributeAmount.value = '';
   updateContributePreviews(0, metrics);
 
@@ -1052,8 +1088,8 @@ function closeContributeModal() {
 }
 
 function updateContributePreviews(amount, metrics) {
-  const newPersonal = metrics.myTotal + amount;
-  const newGroup = metrics.groupTotal + amount;
+  const newPersonal = (metrics.myTotal || 0) + amount;
+  const newGroup = (metrics.groupTotal || 0) + amount;
 
   const prevPersonalEl = document.getElementById('preview-new-personal-total');
   const prevGroupEl = document.getElementById('preview-new-group-total');
@@ -1104,7 +1140,7 @@ if (btnProceedContribute) {
 
     const walletBal = getWalletBalance();
     if (amt > walletBal) {
-      alert(`Insufficient MoMo wallet funds (R${walletBal.toFixed(2)}). Please deposit into your wallet first.`);
+      alert(`Insufficient MoMo wallet funds (R${walletBal.toFixed(2)}). Please top up your wallet first.`);
       return;
     }
 
@@ -1112,6 +1148,8 @@ if (btnProceedContribute) {
     const pocket = pockets.find(p => p.id === currentSelectedPocketId);
     if (!pocket) return;
     const user = getCurrentUser();
+
+    closeContributeModal();
 
     requestPinAuth(`Confirm deposit of R${amt.toFixed(2)} to "${pocket.name}"`, () => {
       // Deduct wallet
@@ -1142,9 +1180,8 @@ if (btnProceedContribute) {
       updateTicketUI();
 
       savePockets(pockets);
-      closeContributeModal();
       openPocketDashboard(pocket.id);
-      showToast(`Deposited R${amt.toFixed(2)}! +1 Game Ticket earned`);
+      showToast(`Deposited R${amt.toFixed(2)} to "${pocket.name}"! +1 Game Ticket earned`);
     });
   });
 }
@@ -1174,10 +1211,17 @@ function openWithdrawModal() {
     return;
   }
 
-  document.getElementById('withdraw-modal-pocket-name').textContent = pocket.name;
-  document.getElementById('withdraw-principal-val').textContent = `R${metrics.myTotal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
-  document.getElementById('withdraw-interest-val').textContent = `+R${metrics.myInterest.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
-  document.getElementById('withdraw-max-text').textContent = `R${metrics.myTotal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  const nameEl = document.getElementById('withdraw-modal-pocket-name');
+  if (nameEl) nameEl.textContent = pocket.name;
+
+  const principalEl = document.getElementById('withdraw-principal-val');
+  if (principalEl) principalEl.textContent = `R${metrics.myTotal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+
+  const interestEl = document.getElementById('withdraw-interest-val');
+  if (interestEl) interestEl.textContent = `+R${metrics.myInterest.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+
+  const maxTextEl = document.getElementById('withdraw-max-text');
+  if (maxTextEl) maxTextEl.textContent = `R${metrics.myTotal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
   
   if (inputWithdrawAmount) {
     inputWithdrawAmount.value = metrics.myTotal.toFixed(2);
@@ -1239,6 +1283,8 @@ if (btnProceedWithdraw) {
     const interestPayout = (metrics.isMatured && isFullExit) ? metrics.myInterest : 0;
     const totalCreditToWallet = withdrawAmt + interestPayout;
 
+    closeWithdrawModal();
+
     requestPinAuth(`Authorize withdrawal of R${totalCreditToWallet.toFixed(2)} to MoMo Wallet`, () => {
       // Credit wallet
       setWalletBalance(getWalletBalance() + totalCreditToWallet);
@@ -1259,7 +1305,7 @@ if (btnProceedWithdraw) {
       });
 
       // Audit Log
-      const earlyNotice = metrics.isMatured ? 'Matured payout (+ interest)' : 'Early withdrawal (Principal only, interest forfeited)';
+      const earlyNotice = metrics.isMatured ? 'Matured payout (+ 5.5% interest)' : 'Early withdrawal (Principal only, interest forfeited)';
       pocket.audit_log = pocket.audit_log || [];
       pocket.audit_log.unshift({
         id: 'aud_' + Date.now(),
@@ -1269,7 +1315,6 @@ if (btnProceedWithdraw) {
       });
 
       savePockets(pockets);
-      closeWithdrawModal();
       openPocketDashboard(pocket.id);
       showToast(`Withdrew R${totalCreditToWallet.toFixed(2)} to your MoMo account!`);
     });
@@ -1278,13 +1323,14 @@ if (btnProceedWithdraw) {
 
 
 // ============================================================================
-// INVITE FRIENDS / JOIN CODE MODAL
+// INVITE FRIENDS / JOIN CODE MODAL & SOCIAL SHARING
 // ============================================================================
 const modalInvite = document.getElementById('modal-pocket-invite');
 const btnPocketInvite = document.getElementById('btn-pocket-invite');
 const btnCloseInviteModal = document.getElementById('btn-close-invite-modal');
 const btnDoneInvite = document.getElementById('btn-done-invite');
 const btnCopyPocketCode = document.getElementById('btn-copy-pocket-code');
+const btnCopyPocketLink = document.getElementById('btn-copy-pocket-link');
 
 function openInviteModal() {
   if (!currentSelectedPocketId) return;
@@ -1295,15 +1341,31 @@ function openInviteModal() {
   const user = getCurrentUser();
   const metrics = calculatePocketMetrics(pocket, user);
 
-  document.getElementById('invite-pocket-name-label').textContent = pocket.name;
-  document.getElementById('display-pocket-join-code').textContent = pocket.join_code;
-  document.getElementById('invite-capacity-text').textContent = `${metrics.memberCount} / ${pocket.member_cap || 20} Members`;
+  const pocketNameLabel = document.getElementById('invite-pocket-name-label');
+  const codeBox = document.getElementById('display-pocket-join-code');
+  const capacityText = document.getElementById('invite-capacity-text');
+  const linkInput = document.getElementById('pocket-share-link-input');
 
-  const shareText = `Join my MTN MoMo Savings Pocket "${pocket.name}" to pool funds with 5.5% interest! Use Join Code: ${pocket.join_code}`;
+  if (pocketNameLabel) pocketNameLabel.textContent = pocket.name;
+  if (codeBox) codeBox.textContent = pocket.join_code;
+  if (capacityText) capacityText.textContent = `${metrics.memberCount} / ${pocket.member_cap || 20} Members`;
+
+  const shareText = `Join my MTN MoMo Savings Pocket "${pocket.name}" to pool funds with 5.5% p.a. interest! Use Join Code: ${pocket.join_code}`;
   const shareUrl = `https://www.mtn.co.za/momo/pockets/?code=${pocket.join_code}`;
 
+  if (linkInput) {
+    linkInput.value = shareUrl;
+  }
+
+  // Social Sharing Links
   const whatsapp = document.getElementById('pocket-share-whatsapp');
-  if (whatsapp) whatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+  if (whatsapp) whatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + '\n' + shareUrl)}`;
+
+  const facebook = document.getElementById('pocket-share-facebook');
+  if (facebook) facebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+
+  const twitter = document.getElementById('pocket-share-x');
+  if (twitter) twitter.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
 
   const telegram = document.getElementById('pocket-share-telegram');
   if (telegram) telegram.href = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
@@ -1326,10 +1388,24 @@ if (btnCopyPocketCode) {
   btnCopyPocketCode.addEventListener('click', () => {
     const codeEl = document.getElementById('display-pocket-join-code');
     if (codeEl) {
-      navigator.clipboard.writeText(codeEl.textContent).then(() => {
+      navigator.clipboard.writeText(codeEl.textContent.trim()).then(() => {
         btnCopyPocketCode.innerHTML = '<span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><polyline points="20 6 9 17 4 12"/></svg></span> Copied Code!';
         setTimeout(() => {
           btnCopyPocketCode.innerHTML = '<span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span> Copy Join Code';
+        }, 1500);
+      });
+    }
+  });
+}
+
+if (btnCopyPocketLink) {
+  btnCopyPocketLink.addEventListener('click', () => {
+    const linkInput = document.getElementById('pocket-share-link-input');
+    if (linkInput) {
+      navigator.clipboard.writeText(linkInput.value.trim()).then(() => {
+        btnCopyPocketLink.textContent = 'Copied Link!';
+        setTimeout(() => {
+          btnCopyPocketLink.textContent = 'Copy Link';
         }, 1500);
       });
     }
