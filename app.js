@@ -702,35 +702,60 @@ function updateSavingsUI() {
 // Deposit event handler
 const depositBtn = document.getElementById('btn-deposit-personal');
 if (depositBtn) {
-  depositBtn.addEventListener('click', () => {
+  depositBtn.addEventListener('click', async () => {
     const user = getCurrentUser();
-    const currentBalance = getSavingsBalance(user.id);
+
+    const phone = prompt("Enter your MoMo phone number (MSISDN):");
+    if (!phone) return;
+
     const amountStr = prompt("Enter deposit amount into your Savings Pocket (ZAR):", "1000.00");
     if (!amountStr) return;
-    
+
     const amount = parseFloat(amountStr);
     if (isNaN(amount) || amount <= 0) {
       alert("Please enter a valid positive amount.");
       return;
     }
-    
-    const newBalance = currentBalance + amount;
-    setSavingsBalance(user.id, newBalance);
-    updateSavingsUI();
-    
-    // Automatically trigger referral completion on savings deposit!
-    const referrals = getReferrals();
-    const r = referrals.find(ref => ref.referredId === user.id && ref.status === 'linked');
-    
-    if (r) {
-      completeReferral(user.id);
-      availableTickets++;
-      saveAvailableTickets();
-      updateTicketUI();
-      renderReferralPage();
-      alert(`Deposit of R${amount.toFixed(2)} successful! Your referral code ${r.code} has been verified automatically, and you earned a game ticket!`);
-    } else {
-      alert(`Deposit of R${amount.toFixed(2)} successful!`);
+
+    depositBtn.disabled = true;
+    const originalLabel = depositBtn.textContent;
+    depositBtn.textContent = 'Processing...';
+
+    try {
+      const result = await depositToMomo(phone, amount);
+
+      if (result.status === 'SUCCESSFUL') {
+        const currentBalance = getSavingsBalance(user.id);
+        const newBalance = currentBalance + amount;
+        setSavingsBalance(user.id, newBalance);
+        updateSavingsUI();
+
+        // Automatically trigger referral completion on savings deposit!
+        const referrals = getReferrals();
+        const r = referrals.find(ref => ref.referredId === user.id && ref.status === 'linked');
+
+        if (r) {
+          completeReferral(user.id);
+          availableTickets++;
+          saveAvailableTickets();
+          updateTicketUI();
+          renderReferralPage();
+          alert(`Deposit of R${amount.toFixed(2)} successful! Your referral code ${r.code} has been verified automatically, and you earned a game ticket!`);
+        } else {
+          alert(`Deposit of R${amount.toFixed(2)} successful!`);
+        }
+      } else if (result.status === 'FAILED') {
+        alert('Your MoMo payment was declined or cancelled. Your savings balance was not changed.');
+      } else {
+        // TIMEOUT — server gave up polling; payment may still land later
+        alert('We could not confirm your payment in time. If MoMo debited you, check back shortly — your balance will update once confirmed.');
+      }
+    } catch (err) {
+      console.error('Deposit error:', err);
+      alert(`Something went wrong processing your deposit: ${err.message}`);
+    } finally {
+      depositBtn.disabled = false;
+      depositBtn.textContent = originalLabel;
     }
   });
 }
