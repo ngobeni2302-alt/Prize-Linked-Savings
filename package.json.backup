@@ -1,0 +1,21 @@
+{
+  "name": "prize-linked-savings",
+  "version": "1.0.0",
+  "description": "> **MTN Fintech Summit 2026 -- 24-Hour Hackathon Entry**  \r > Built in South Africa. Built for Africa.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ngobeni2302-alt/Prize-Linked-Savings.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ngobeni2302-alt/Prize-Linked-Savings/issues"
+  },
+  "homepage": "https://github.com/ngobeni2302-alt/Prize-Linked-Savings#readme"
+}
