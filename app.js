@@ -1507,6 +1507,109 @@ if (btnDownloadStatementCSV) {
 
 
 // ============================================================================
+// CLOSE & SETTLE POCKET FLOW
+// ============================================================================
+const modalClosePocket = document.getElementById('modal-close-pocket');
+const btnPocketClose = document.getElementById('btn-pocket-close');
+const btnCloseClosePocketModal = document.getElementById('btn-close-close-pocket-modal');
+const btnCancelClosePocket = document.getElementById('btn-cancel-close-pocket');
+const btnConfirmClosePocket = document.getElementById('btn-confirm-close-pocket');
+
+function openClosePocketModal() {
+  if (!currentSelectedPocketId) return;
+  const pockets = getPockets();
+  const pocket = pockets.find(p => p.id === currentSelectedPocketId);
+  if (!pocket) return;
+
+  const user = getCurrentUser();
+  const metrics = calculatePocketMetrics(pocket, user);
+
+  const nameEl = document.getElementById('close-pocket-name-val');
+  const lockEl = document.getElementById('close-pocket-lock-status');
+  const princEl = document.getElementById('close-pocket-principal-val');
+  const intEl = document.getElementById('close-pocket-interest-val');
+  const payoutEl = document.getElementById('close-pocket-payout-total');
+  const subtitleEl = document.getElementById('close-pocket-modal-subtitle');
+
+  if (nameEl) nameEl.textContent = pocket.name;
+  if (princEl) princEl.textContent = `R${metrics.myTotal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+
+  const interestPayout = metrics.isMatured ? metrics.myInterest : 0;
+  const totalPayout = metrics.myTotal + interestPayout;
+
+  if (lockEl) {
+    lockEl.textContent = metrics.isMatured ? 'Matured (100% Principal + 5.5% Interest)' : `Active (${metrics.daysRemaining}d lock remaining - Early Exit)`;
+    lockEl.style.color = metrics.isMatured ? '#059669' : '#D97706';
+  }
+
+  if (intEl) {
+    intEl.textContent = metrics.isMatured 
+      ? `+R${metrics.myInterest.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`
+      : 'R0.00 (Forfeited on early closure)';
+    intEl.className = metrics.isMatured ? 'text-success' : 'text-danger';
+  }
+
+  if (payoutEl) {
+    payoutEl.textContent = `R${totalPayout.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  }
+
+  if (subtitleEl) {
+    subtitleEl.textContent = metrics.myTotal > 0
+      ? `Closing "${pocket.name}" will settle your remaining balance of R${totalPayout.toFixed(2)} directly into your MoMo wallet.`
+      : `Are you sure you want to close and archive the "${pocket.name}" pocket?`;
+  }
+
+  if (modalClosePocket) modalClosePocket.classList.add('modal-overlay--active');
+}
+
+function closeClosePocketModal() {
+  if (modalClosePocket) modalClosePocket.classList.remove('modal-overlay--active');
+}
+
+if (btnPocketClose) btnPocketClose.addEventListener('click', openClosePocketModal);
+if (btnCloseClosePocketModal) btnCloseClosePocketModal.addEventListener('click', closeClosePocketModal);
+if (btnCancelClosePocket) btnCancelClosePocket.addEventListener('click', closeClosePocketModal);
+
+if (btnConfirmClosePocket) {
+  btnConfirmClosePocket.addEventListener('click', () => {
+    if (!currentSelectedPocketId) return;
+    const pockets = getPockets();
+    const pocket = pockets.find(p => p.id === currentSelectedPocketId);
+    if (!pocket) return;
+
+    const user = getCurrentUser();
+    const metrics = calculatePocketMetrics(pocket, user);
+    const interestPayout = metrics.isMatured ? metrics.myInterest : 0;
+    const totalPayout = metrics.myTotal + interestPayout;
+
+    closeClosePocketModal();
+
+    requestPinAuth(`Authorize closure and final settlement of "${pocket.name}"`, () => {
+      // 1. Credit wallet with remaining balance & interest
+      if (totalPayout > 0) {
+        setWalletBalance(getWalletBalance() + totalPayout);
+      }
+
+      // 2. Remove pocket from active pockets list in localStorage
+      const remainingPockets = pockets.filter(p => p.id !== pocket.id);
+      savePockets(remainingPockets);
+
+      // 3. Close dashboard & return to pockets view
+      closePocketDashboard();
+      renderPocketsHub();
+      updateActiveTicketOptionsFromPockets();
+
+      if (totalPayout > 0) {
+        showToast(`Pocket "${pocket.name}" closed! R${totalPayout.toFixed(2)} refunded to your MoMo wallet.`);
+      } else {
+        showToast(`Pocket "${pocket.name}" successfully closed.`);
+      }
+    });
+  });
+}
+
+
+// ============================================================================
 // PERSONAL SAVINGS FLOW
 // ============================================================================
 const SAVINGS_KEY = 'momo_savings_balance';
@@ -2088,6 +2191,8 @@ window.openInviteModal = openInviteModal;
 window.closeInviteModal = closeInviteModal;
 window.openStatementModal = openStatementModal;
 window.closeStatementModal = closeStatementModal;
+window.openClosePocketModal = openClosePocketModal;
+window.closeClosePocketModal = closeClosePocketModal;
 window.openPersonalDepositModal = openPersonalDepositModal;
 window.closePersonalDepositModal = closePersonalDepositModal;
 window.openPersonalWithdrawModal = openPersonalWithdrawModal;

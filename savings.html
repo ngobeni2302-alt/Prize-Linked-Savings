@@ -221,6 +221,9 @@
             <button class="btn btn--outline btn--flex" id="btn-pocket-statement">
               <span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> Statement
             </button>
+            <button class="btn btn--outline btn--flex" id="btn-pocket-close" style="color: #E11D48; border-color: #E11D48;" title="Close & Settle Pocket">
+              <span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span> Close Pocket
+            </button>
           </div>
 
           <!-- Transparency Ledger Section -->
@@ -715,6 +718,56 @@
       <div class="modal-actions" style="margin-top: var(--space-lg);">
         <button type="button" class="btn btn--primary" id="btn-proceed-personal-withdraw">Confirm Withdrawal</button>
         <button type="button" class="btn btn--outline" id="btn-cancel-personal-withdraw">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Close & Settle Pocket ===== -->
+  <div class="modal-overlay" id="modal-close-pocket">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="btn-close-close-pocket-modal">&times;</button>
+      <div class="modal-header-icon" style="background-color: #FEE2E2; border-color: #E11D48; color: #E11D48;">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <h3 class="modal-title">Close & Settle Pocket</h3>
+      <p class="modal-subtitle" id="close-pocket-modal-subtitle">Are you sure you want to close this pocket?</p>
+
+      <div class="withdrawal-breakdown-card" style="margin-top: var(--space-sm);">
+        <div class="breakdown-row">
+          <span>Pocket:</span>
+          <strong id="close-pocket-name-val">December Cape Town Trip</strong>
+        </div>
+        <div class="breakdown-row">
+          <span>Lock Status:</span>
+          <strong id="close-pocket-lock-status">Active (54 Days remaining)</strong>
+        </div>
+        <div class="breakdown-row">
+          <span>My Contributed Principal:</span>
+          <strong id="close-pocket-principal-val">R1,250.00</strong>
+        </div>
+        <div class="breakdown-row" id="close-pocket-interest-row">
+          <span>Accrued Interest (5.5%):</span>
+          <strong id="close-pocket-interest-val" class="text-success">+R0.00</strong>
+        </div>
+        <div class="breakdown-divider"></div>
+        <div class="breakdown-row breakdown-row--total">
+          <span>Total Payout to MoMo Wallet:</span>
+          <strong id="close-pocket-payout-total" style="color: var(--black);">R1,250.00</strong>
+        </div>
+      </div>
+
+      <div class="payout-destination-box" style="margin-top: var(--space-sm);">
+        <span class="payout-dest-label">Payout Destination:</span>
+        <div class="payout-dest-val">
+          <span class="momo-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>
+          <span>MTN MoMo Wallet (+27 83 *** 4921)</span>
+        </div>
+        <p class="payout-security-note">All remaining contributed funds and applicable interest will be automatically settled and credited directly to your registered MoMo account.</p>
+      </div>
+
+      <div class="modal-actions" style="margin-top: var(--space-lg);">
+        <button type="button" class="btn btn--primary" id="btn-confirm-close-pocket" style="background-color: #E11D48; color: #FFFFFF; border-color: #9F1239;">Close & Disburse Payout</button>
+        <button type="button" class="btn btn--outline" id="btn-cancel-close-pocket">Keep Pocket Open</button>
       </div>
     </div>
   </div>
