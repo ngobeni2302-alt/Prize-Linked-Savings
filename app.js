@@ -435,11 +435,15 @@ function renderPocketsHub() {
         <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 4px;">No Savings Pockets Yet</h3>
         <p class="text-muted" style="margin-bottom: var(--space-md);">Create a shared goal with friends or enter an invite code to start pooling funds.</p>
         <div style="display: flex; gap: var(--space-sm); justify-content: center;">
-          <button class="btn btn--primary" onclick="openCreatePocketModal()">Create Pocket</button>
-          <button class="btn btn--outline" onclick="openJoinPocketModal()">Join with Code</button>
+          <button class="btn btn--primary" id="btn-open-create-pocket-empty">Create Pocket</button>
+          <button class="btn btn--outline" id="btn-open-join-pocket-empty">Join with Code</button>
         </div>
       </div>
     `;
+    const btnEmptyCreate = document.getElementById('btn-open-create-pocket-empty');
+    if (btnEmptyCreate) btnEmptyCreate.addEventListener('click', openCreatePocketModal);
+    const btnEmptyJoin = document.getElementById('btn-open-join-pocket-empty');
+    if (btnEmptyJoin) btnEmptyJoin.addEventListener('click', openJoinPocketModal);
     return;
   }
 
@@ -456,7 +460,7 @@ function renderPocketsHub() {
       : `<span class="pocket-status-pill">Member</span>`;
 
     return `
-      <div class="pocket-card" onclick="openPocketDashboard('${pocket.id}')">
+      <div class="pocket-card" data-pocket-id="${pocket.id}" style="cursor: pointer;">
         <div>
           <div class="pocket-card-top">
             <div class="pocket-card-icon">${cat.iconSvg}</div>
@@ -495,11 +499,20 @@ function renderPocketsHub() {
 
         <div class="pocket-card-footer">
           <span class="pocket-card-lock-hint">${metrics.memberCount} Members</span>
-          <span class="btn-back-link" style="padding: 4px 8px; font-size: 0.75rem;">View Dashboard →</span>
+          <span class="btn-back-link btn-view-dashboard" data-pocket-id="${pocket.id}" style="padding: 4px 8px; font-size: 0.75rem;">View Dashboard →</span>
         </div>
       </div>
     `;
   }).join('');
+
+  // Attach click events directly to cards and buttons
+  grid.querySelectorAll('.pocket-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
+      const pId = card.getAttribute('data-pocket-id');
+      if (pId) openPocketDashboard(pId);
+    });
+  });
 }
 
 function escapeHtml(str) {
@@ -1534,26 +1547,87 @@ function updatePersonalSavingsUI() {
   if (savingsSummaryEl) savingsSummaryEl.textContent = formatted;
 }
 
+// ============================================================================
+// PERSONAL SAVINGS FLOW
+// ============================================================================
+const modalPersonalDeposit = document.getElementById('modal-personal-deposit');
+const btnClosePersonalDepositModal = document.getElementById('btn-close-personal-deposit-modal');
+const btnCancelPersonalDeposit = document.getElementById('btn-cancel-personal-deposit');
+const inputPersonalDepositAmount = document.getElementById('input-personal-deposit-amount');
+const btnProceedPersonalDeposit = document.getElementById('btn-proceed-personal-deposit');
+
+const modalPersonalWithdraw = document.getElementById('modal-personal-withdraw');
+const btnClosePersonalWithdrawModal = document.getElementById('btn-close-personal-withdraw-modal');
+const btnCancelPersonalWithdraw = document.getElementById('btn-cancel-personal-withdraw');
+const inputPersonalWithdrawAmount = document.getElementById('input-personal-withdraw-amount');
+const btnProceedPersonalWithdraw = document.getElementById('btn-proceed-personal-withdraw');
+
+function openPersonalDepositModal() {
+  const walletBal = getWalletBalance();
+  const walletDisplay = document.getElementById('personal-deposit-wallet-balance');
+  if (walletDisplay) walletDisplay.textContent = `R${walletBal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  if (inputPersonalDepositAmount) inputPersonalDepositAmount.value = '';
+  if (modalPersonalDeposit) modalPersonalDeposit.classList.add('modal-overlay--active');
+}
+
+function closePersonalDepositModal() {
+  if (modalPersonalDeposit) modalPersonalDeposit.classList.remove('modal-overlay--active');
+}
+
+function openPersonalWithdrawModal() {
+  const user = getCurrentUser();
+  const currentBalance = getPersonalSavingsBalance(user.id);
+  const accruedInterest = currentBalance * 0.045 * (30 / 365);
+
+  const balDisplay = document.getElementById('personal-withdraw-balance-display');
+  const intDisplay = document.getElementById('personal-withdraw-interest-display');
+  const availDisplay = document.getElementById('personal-withdraw-available-display');
+
+  if (balDisplay) balDisplay.textContent = `R${currentBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  if (intDisplay) intDisplay.textContent = `+R${accruedInterest.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  if (availDisplay) availDisplay.textContent = `R${currentBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  if (inputPersonalWithdrawAmount) inputPersonalWithdrawAmount.value = currentBalance.toFixed(2);
+
+  if (modalPersonalWithdraw) modalPersonalWithdraw.classList.add('modal-overlay--active');
+}
+
+function closePersonalWithdrawModal() {
+  if (modalPersonalWithdraw) modalPersonalWithdraw.classList.remove('modal-overlay--active');
+}
+
 const depositPersonalBtn = document.getElementById('btn-deposit-personal');
-if (depositPersonalBtn) {
-  depositPersonalBtn.addEventListener('click', () => {
-    const user = getCurrentUser();
-    const amountStr = prompt("Enter deposit amount into your Personal Savings Pocket (ZAR):", "500.00");
-    if (!amountStr) return;
-    
-    const amount = parseFloat(amountStr);
-    if (isNaN(amount) || amount <= 0) {
-      alert("Please enter a valid positive amount.");
+if (depositPersonalBtn) depositPersonalBtn.addEventListener('click', openPersonalDepositModal);
+if (btnClosePersonalDepositModal) btnClosePersonalDepositModal.addEventListener('click', closePersonalDepositModal);
+if (btnCancelPersonalDeposit) btnCancelPersonalDeposit.addEventListener('click', closePersonalDepositModal);
+
+// Chips for personal deposit
+document.querySelectorAll('.personal-deposit-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const amt = parseFloat(btn.getAttribute('data-amt')) || 0;
+    if (inputPersonalDepositAmount) {
+      inputPersonalDepositAmount.value = amt.toFixed(2);
+    }
+  });
+});
+
+if (btnProceedPersonalDeposit) {
+  btnProceedPersonalDeposit.addEventListener('click', () => {
+    const amount = parseFloat(inputPersonalDepositAmount.value) || 0;
+    if (amount <= 0) {
+      alert("Please enter a valid deposit amount (minimum R10.00).");
       return;
     }
 
     const walletBal = getWalletBalance();
     if (amount > walletBal) {
-      alert(`Insufficient MoMo wallet balance (R${walletBal.toFixed(2)}).`);
+      alert(`Insufficient MoMo wallet balance (R${walletBal.toFixed(2)}). Please top up first.`);
       return;
     }
 
+    closePersonalDepositModal();
+
     requestPinAuth(`Confirm Personal Deposit of R${amount.toFixed(2)}`, () => {
+      const user = getCurrentUser();
       setWalletBalance(getWalletBalance() - amount);
       const currentBalance = getPersonalSavingsBalance(user.id);
       setPersonalSavingsBalance(user.id, currentBalance + amount);
@@ -1575,23 +1649,22 @@ if (depositPersonalBtn) {
 }
 
 const withdrawPersonalBtn = document.getElementById('btn-withdraw-personal');
-if (withdrawPersonalBtn) {
-  withdrawPersonalBtn.addEventListener('click', () => {
+if (withdrawPersonalBtn) withdrawPersonalBtn.addEventListener('click', openPersonalWithdrawModal);
+if (btnClosePersonalWithdrawModal) btnClosePersonalWithdrawModal.addEventListener('click', closePersonalWithdrawModal);
+if (btnCancelPersonalWithdraw) btnCancelPersonalWithdraw.addEventListener('click', closePersonalWithdrawModal);
+
+if (btnProceedPersonalWithdraw) {
+  btnProceedPersonalWithdraw.addEventListener('click', () => {
     const user = getCurrentUser();
     const currentBalance = getPersonalSavingsBalance(user.id);
-    const amountStr = prompt(`Enter withdrawal amount from Personal Savings (Max: R${currentBalance.toFixed(2)}):\n(Note: Early withdrawal returns principal only)`, "500.00");
-    if (!amountStr) return;
-    
-    const amount = parseFloat(amountStr);
-    if (isNaN(amount) || amount <= 0) {
-      alert("Please enter a valid positive amount.");
+    const amount = parseFloat(inputPersonalWithdrawAmount.value) || 0;
+
+    if (amount <= 0 || amount > currentBalance) {
+      alert(`Please enter an amount between R1.00 and R${currentBalance.toFixed(2)}.`);
       return;
     }
-    
-    if (amount > currentBalance) {
-      alert("Insufficient personal savings balance.");
-      return;
-    }
+
+    closePersonalWithdrawModal();
 
     requestPinAuth(`Authorize Personal Savings Withdrawal of R${amount.toFixed(2)}`, () => {
       setPersonalSavingsBalance(user.id, currentBalance - amount);
@@ -2000,11 +2073,44 @@ if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeDrawer);
 if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
 
 
+// --- Expose Global Handlers on window for HTML and External Access ---
+window.openPocketDashboard = openPocketDashboard;
+window.closePocketDashboard = closePocketDashboard;
+window.openCreatePocketModal = openCreatePocketModal;
+window.closeCreatePocketModal = closeCreatePocketModal;
+window.openJoinPocketModal = openJoinPocketModal;
+window.closeJoinPocketModal = closeJoinPocketModal;
+window.openContributeModal = openContributeModal;
+window.closeContributeModal = closeContributeModal;
+window.openWithdrawModal = openWithdrawModal;
+window.closeWithdrawModal = closeWithdrawModal;
+window.openInviteModal = openInviteModal;
+window.closeInviteModal = closeInviteModal;
+window.openStatementModal = openStatementModal;
+window.closeStatementModal = closeStatementModal;
+window.openPersonalDepositModal = openPersonalDepositModal;
+window.closePersonalDepositModal = closePersonalDepositModal;
+window.openPersonalWithdrawModal = openPersonalWithdrawModal;
+window.closePersonalWithdrawModal = closePersonalWithdrawModal;
+window.requestPinAuth = requestPinAuth;
+window.closePinModal = closePinModal;
+window.togglePocketTransparency = togglePocketTransparency;
+window.switchTransparencyTab = switchTransparencyTab;
+window.navigateTo = navigateTo;
+window.showToast = showToast;
+
+
 // --- Initialize Page ---
-document.addEventListener('DOMContentLoaded', () => {
+function initApp() {
   updateWalletUI();
   renderPocketsHub();
   updateActiveTicketOptionsFromPockets();
   renderReferralPage();
   updatePersonalSavingsUI();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}

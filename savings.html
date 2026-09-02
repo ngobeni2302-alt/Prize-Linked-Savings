@@ -638,6 +638,87 @@
     </div>
   </div>
 
+  <!-- ===== MODAL: Personal Savings Deposit ===== -->
+  <div class="modal-overlay" id="modal-personal-deposit">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="btn-close-personal-deposit-modal">&times;</button>
+      <div class="modal-header-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <h3 class="modal-title">Deposit to Personal Savings</h3>
+      <p class="modal-subtitle">Earn 4.5% p.a. + unlock guaranteed digital scratch cards and weekly jackpot tickets.</p>
+
+      <div class="wallet-balance-pill" style="margin-bottom: var(--space-md);">
+        <span>Available MoMo Wallet:</span>
+        <strong id="personal-deposit-wallet-balance">R5,450.00</strong>
+      </div>
+
+      <div class="form-group">
+        <label for="input-personal-deposit-amount" class="form-label">Deposit Amount (ZAR)</label>
+        <input type="number" id="input-personal-deposit-amount" class="input-field input-field--large" placeholder="0.00" min="10" step="10">
+        <div class="amount-chips-row">
+          <button type="button" class="chip-btn personal-deposit-chip" data-amt="100">+R100</button>
+          <button type="button" class="chip-btn personal-deposit-chip" data-amt="250">+R250</button>
+          <button type="button" class="chip-btn personal-deposit-chip" data-amt="500">+R500</button>
+          <button type="button" class="chip-btn personal-deposit-chip" data-amt="1000">+R1,000</button>
+        </div>
+        <p class="form-hint">Minimum deposit is R10.00. Funds earn pro-rated interest daily.</p>
+      </div>
+
+      <div class="modal-actions" style="margin-top: var(--space-lg);">
+        <button type="button" class="btn btn--primary" id="btn-proceed-personal-deposit">Confirm & Pay</button>
+        <button type="button" class="btn btn--outline" id="btn-cancel-personal-deposit">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Personal Savings Withdraw ===== -->
+  <div class="modal-overlay" id="modal-personal-withdraw">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="btn-close-personal-withdraw-modal">&times;</button>
+      <div class="modal-header-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </div>
+      <h3 class="modal-title">Withdraw from Personal Savings</h3>
+      <p class="modal-subtitle">Transfer savings balance directly back to your MTN MoMo wallet.</p>
+
+      <div class="withdrawal-breakdown-card">
+        <div class="breakdown-row">
+          <span>Personal Savings Balance:</span>
+          <strong id="personal-withdraw-balance-display">R1,500.00</strong>
+        </div>
+        <div class="breakdown-row">
+          <span>Accrued Interest (4.5% p.a.):</span>
+          <strong id="personal-withdraw-interest-display" class="text-success">+R18.75</strong>
+        </div>
+        <div class="breakdown-divider"></div>
+        <div class="breakdown-row breakdown-row--total">
+          <span>Available Principal:</span>
+          <strong id="personal-withdraw-available-display">R1,500.00</strong>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: var(--space-md);">
+        <label for="input-personal-withdraw-amount" class="form-label">Withdrawal Amount (ZAR)</label>
+        <input type="number" id="input-personal-withdraw-amount" class="input-field input-field--large" placeholder="0.00" min="10" step="10">
+        <p class="form-hint">Note: 90-day discipline lock applies. Early withdrawal returns principal only.</p>
+      </div>
+
+      <div class="payout-destination-box">
+        <span class="payout-dest-label">Payout Destination:</span>
+        <div class="payout-dest-val">
+          <span class="momo-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>
+          <span>MTN MoMo Wallet (+27 83 *** 4921)</span>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: var(--space-lg);">
+        <button type="button" class="btn btn--primary" id="btn-proceed-personal-withdraw">Confirm Withdrawal</button>
+        <button type="button" class="btn btn--outline" id="btn-cancel-personal-withdraw">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== MODAL: Universal 4-Digit MoMo PIN Authentication ===== -->
   <div class="modal-overlay" id="modal-momo-pin">
     <div class="modal-card modal-card--pin">
