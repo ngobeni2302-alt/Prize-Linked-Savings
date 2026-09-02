@@ -71,8 +71,14 @@ function updateWalletUI() {
   const walletEls = document.querySelectorAll('.wallet-amount');
   walletEls.forEach(el => el.textContent = formatted);
 
+  const homeWalletEl = document.querySelector('#card-wallet-summary .card-value');
+  if (homeWalletEl) homeWalletEl.textContent = formatted;
+
   const contribBalEl = document.getElementById('contribute-momo-balance');
   if (contribBalEl) contribBalEl.textContent = formatted;
+
+  const personalDepositBalEl = document.getElementById('personal-deposit-wallet-balance');
+  if (personalDepositBalEl) personalDepositBalEl.textContent = formatted;
 }
 
 
@@ -1112,11 +1118,21 @@ function closeContributeModal() {
 }
 
 function updateContributePreviews(amount, metrics) {
+  const walletBal = getWalletBalance();
+  const remainingWallet = Math.max(0, walletBal - amount);
   const newPersonal = (metrics.myTotal || 0) + amount;
   const newGroup = (metrics.groupTotal || 0) + amount;
 
+  const prevDeductionEl = document.getElementById('preview-wallet-deduction');
+  const prevRemainingEl = document.getElementById('preview-remaining-wallet');
   const prevPersonalEl = document.getElementById('preview-new-personal-total');
   const prevGroupEl = document.getElementById('preview-new-group-total');
+
+  if (prevDeductionEl) prevDeductionEl.textContent = `-R${amount.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  if (prevRemainingEl) {
+    prevRemainingEl.textContent = `R${remainingWallet.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+    prevRemainingEl.style.color = amount > walletBal ? '#E11D48' : 'var(--black)';
+  }
   if (prevPersonalEl) prevPersonalEl.textContent = `R${newPersonal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
   if (prevGroupEl) prevGroupEl.textContent = `R${newGroup.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
 }
@@ -1651,14 +1667,29 @@ function setPersonalSavingsBalance(userId, amount) {
 
 function updatePersonalSavingsUI() {
   const user = getCurrentUser();
-  const balance = getPersonalSavingsBalance(user.id);
-  const formatted = `R${balance.toFixed(2)}`;
+  const personalBal = getPersonalSavingsBalance(user.id);
+  const formattedPersonal = `R${personalBal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
   
   const mySavingsBalanceEl = document.getElementById('my-personal-savings-val');
+  if (mySavingsBalanceEl) mySavingsBalanceEl.textContent = formattedPersonal;
+
+  const accruedPersonalInterest = personalBal * 0.045 * (30 / 365);
+  const mySavingsInterestEl = document.getElementById('my-personal-savings-interest');
+  if (mySavingsInterestEl) mySavingsInterestEl.textContent = `+R${accruedPersonalInterest.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+
+  // Total Combined Savings (Personal + All Group Pockets) on Home Overview
+  const pockets = getPockets();
+  let totalGroupContributions = 0;
+  pockets.forEach(p => {
+    const metrics = calculatePocketMetrics(p, user);
+    totalGroupContributions += metrics.myTotal;
+  });
+
+  const totalCombinedSavings = personalBal + totalGroupContributions;
   const savingsSummaryEl = document.querySelector('#card-savings-summary .card-value');
-  
-  if (mySavingsBalanceEl) mySavingsBalanceEl.textContent = formatted;
-  if (savingsSummaryEl) savingsSummaryEl.textContent = formatted;
+  if (savingsSummaryEl) {
+    savingsSummaryEl.textContent = `R${totalCombinedSavings.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  }
 }
 
 // ============================================================================
@@ -1676,16 +1707,43 @@ const btnCancelPersonalWithdraw = document.getElementById('btn-cancel-personal-w
 const inputPersonalWithdrawAmount = document.getElementById('input-personal-withdraw-amount');
 const btnProceedPersonalWithdraw = document.getElementById('btn-proceed-personal-withdraw');
 
+function updatePersonalDepositPreviews(amount) {
+  const user = getCurrentUser();
+  const walletBal = getWalletBalance();
+  const currentSavings = getPersonalSavingsBalance(user.id);
+  const remainingWallet = Math.max(0, walletBal - amount);
+  const newSavings = currentSavings + amount;
+
+  const prevDeductionEl = document.getElementById('preview-personal-deduction');
+  const prevRemainingEl = document.getElementById('preview-personal-remaining-wallet');
+  const prevSavingsEl = document.getElementById('preview-personal-new-savings');
+
+  if (prevDeductionEl) prevDeductionEl.textContent = `-R${amount.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+  if (prevRemainingEl) {
+    prevRemainingEl.textContent = `R${remainingWallet.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+    prevRemainingEl.style.color = amount > walletBal ? '#E11D48' : 'var(--black)';
+  }
+  if (prevSavingsEl) prevSavingsEl.textContent = `R${newSavings.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
+}
+
 function openPersonalDepositModal() {
   const walletBal = getWalletBalance();
   const walletDisplay = document.getElementById('personal-deposit-wallet-balance');
   if (walletDisplay) walletDisplay.textContent = `R${walletBal.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}`;
   if (inputPersonalDepositAmount) inputPersonalDepositAmount.value = '';
+  updatePersonalDepositPreviews(0);
   if (modalPersonalDeposit) modalPersonalDeposit.classList.add('modal-overlay--active');
 }
 
 function closePersonalDepositModal() {
   if (modalPersonalDeposit) modalPersonalDeposit.classList.remove('modal-overlay--active');
+}
+
+if (inputPersonalDepositAmount) {
+  inputPersonalDepositAmount.addEventListener('input', () => {
+    const val = parseFloat(inputPersonalDepositAmount.value) || 0;
+    updatePersonalDepositPreviews(val);
+  });
 }
 
 function openPersonalWithdrawModal() {
@@ -1720,6 +1778,7 @@ document.querySelectorAll('.personal-deposit-chip').forEach(btn => {
     const amt = parseFloat(btn.getAttribute('data-amt')) || 0;
     if (inputPersonalDepositAmount) {
       inputPersonalDepositAmount.value = amt.toFixed(2);
+      updatePersonalDepositPreviews(amt);
     }
   });
 });
