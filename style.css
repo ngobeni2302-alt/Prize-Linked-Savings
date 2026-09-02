@@ -1,0 +1,671 @@
+:root {
+    /* Primary palette */
+    --white: #FFFFFF;
+    --white-off: #F7F7F7;
+    --yellow: #FFCB05;
+    --yellow-light: #FFE066;
+    --yellow-dark: #E6B800;
+    --black: #000000;
+    --black-soft: #1A1A1A;
+    --black-muted: #333333;
+
+    /* Semantic */
+    --bg-primary: var(--white);
+    --bg-secondary: var(--white-off);
+    --bg-accent: var(--yellow);
+    --text-primary: var(--black);
+    --text-secondary: var(--black-muted);
+    --text-on-accent: var(--black);
+    --text-on-dark: var(--white);
+
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* Radii */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+    /* Transitions */
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --transition-fast: 150ms var(--ease-out);
+    --transition-base: 250ms var(--ease-out);
+    --transition-slow: 400ms var(--ease-out);
+
+    /* Layout */
+    --header-height: 56px;
+    --nav-height: 64px;
+    --max-width: 480px;
+}
+
+/* --- Reset --- */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-size: inherit;
+}
+
+h1, h2, h3 {
+    line-height: 1.2;
+}
+
+
+/* ================================================
+   HEADER
+   ================================================ */
+.app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    background-color: var(--yellow);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.header-inner {
+    width: 100%;
+    max-width: var(--max-width);
+    padding: 0 var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.brand-logo {
+    width: 32px;
+    height: 32px;
+    background-color: var(--black);
+    color: var(--yellow);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.1rem;
+}
+
+.brand-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--black);
+}
+
+.header-wallet {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.wallet-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--black-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.wallet-amount {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--black);
+}
+
+
+/* ================================================
+   MAIN CONTENT
+   ================================================ */
+.app-main {
+    margin-top: var(--header-height);
+    margin-bottom: var(--nav-height);
+    min-height: calc(100vh - var(--header-height) - var(--nav-height));
+    display: flex;
+    justify-content: center;
+}
+
+/* --- Pages --- */
+.page {
+    display: none;
+    width: 100%;
+    max-width: var(--max-width);
+    padding: var(--space-lg) var(--space-md) var(--space-xl);
+    animation: pageIn var(--transition-base) both;
+}
+
+.page--active {
+    display: block;
+}
+
+@keyframes pageIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.page-header {
+    margin-bottom: var(--space-lg);
+}
+
+.page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--black);
+}
+
+.page-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+}
+
+
+/* ================================================
+   CARDS
+   ================================================ */
+.card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.card {
+    background-color: var(--white);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.card--highlight {
+    border-left: 4px solid var(--yellow);
+}
+
+.card-icon {
+    width: 36px;
+    height: 36px;
+    background-color: var(--yellow);
+    color: var(--black);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: var(--space-sm);
+}
+
+.card-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: var(--space-xs);
+}
+
+.card-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--black);
+}
+
+.card-hint {
+    font-size: 0.7rem;
+    color: #999;
+    margin-top: var(--space-sm);
+    font-style: italic;
+}
+
+
+/* ================================================
+   SECTIONS
+   ================================================ */
+.section {
+    background-color: var(--white);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: var(--space-md);
+}
+
+.placeholder-note {
+    font-size: 0.7rem;
+    color: #BBB;
+    margin-top: var(--space-md);
+    font-style: italic;
+    text-align: center;
+    padding: var(--space-sm);
+    border: 1px dashed #DDD;
+    border-radius: var(--radius-sm);
+    background-color: var(--white-off);
+}
+
+
+/* ================================================
+   ACTION GRID (Quick Actions on Home)
+   ================================================ */
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-sm);
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-md) var(--space-sm);
+    border-radius: var(--radius-md);
+    background-color: var(--white-off);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.action-btn:hover {
+    background-color: var(--yellow-light);
+    transform: translateY(-1px);
+}
+
+.action-btn:active {
+    transform: scale(0.97);
+}
+
+.action-btn-icon {
+    width: 40px;
+    height: 40px;
+    background-color: var(--yellow);
+    color: var(--black);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.action-btn-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+
+/* ================================================
+   ACTIVITY LIST
+   ================================================ */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.activity-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md) 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.activity-amount {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--black);
+}
+
+
+/* ================================================
+   BUTTONS
+   ================================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.btn--primary {
+    background-color: var(--yellow);
+    color: var(--black);
+}
+
+.btn--primary:hover {
+    background-color: var(--yellow-dark);
+    transform: translateY(-1px);
+}
+
+.btn--primary:active {
+    transform: scale(0.97);
+}
+
+.btn--outline {
+    background-color: transparent;
+    color: var(--black);
+    border: 1.5px solid var(--black);
+}
+
+.btn--outline:hover {
+    background-color: var(--black);
+    color: var(--white);
+}
+
+.savings-actions {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+}
+
+
+/* ================================================
+   MILESTONE / PROGRESS BAR
+   ================================================ */
+.milestone-bar {
+    width: 100%;
+    height: 10px;
+    background-color: var(--white-off);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.milestone-fill {
+    height: 100%;
+    background-color: var(--yellow);
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow);
+}
+
+.milestone-label {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: var(--space-sm);
+    text-align: center;
+}
+
+
+/* ================================================
+   JACKPOT BANNER
+   ================================================ */
+.jackpot-banner {
+    background-color: var(--black);
+    color: var(--white);
+    text-align: center;
+}
+
+.jackpot-banner .section-title {
+    color: var(--yellow);
+}
+
+.jackpot-counter {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--yellow);
+    margin-bottom: var(--space-sm);
+}
+
+.jackpot-note {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.jackpot-banner .placeholder-note {
+    background-color: var(--black-soft);
+    border-color: var(--black-muted);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+
+/* ================================================
+   GAME CARDS (The Ruler)
+   ================================================ */
+.game-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+}
+
+.game-card {
+    aspect-ratio: 3 / 4;
+    background-color: var(--yellow);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.game-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: var(--shadow-lg);
+}
+
+.game-card:active {
+    transform: scale(0.96);
+}
+
+.game-card-front {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--black);
+}
+
+.game-card-back {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background-color: var(--white);
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+}
+
+
+/* ================================================
+   REFERRAL CODE CARD
+   ================================================ */
+.referral-code-card {
+    text-align: center;
+}
+
+.referral-code {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--black);
+    letter-spacing: 2px;
+    margin-bottom: var(--space-md);
+    padding: var(--space-md);
+    background-color: var(--white-off);
+    border-radius: var(--radius-sm);
+    border: 2px dashed var(--yellow);
+}
+
+.referral-code-card .btn {
+    margin: var(--space-xs);
+}
+
+
+/* ================================================
+   STEPS LIST (How It Works)
+   ================================================ */
+.steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.step-number {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    background-color: var(--yellow);
+    color: var(--black);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.step-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+
+/* ================================================
+   BOTTOM NAVIGATION
+   ================================================ */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--nav-height);
+    background-color: var(--white);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.nav-item {
+    flex: 1;
+    max-width: calc(var(--max-width) / 4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: var(--space-sm) 0;
+    transition: color var(--transition-fast);
+    color: var(--text-secondary);
+}
+
+.nav-item--active {
+    color: var(--black);
+}
+
+.nav-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-fast);
+}
+
+.nav-item--active .nav-icon {
+    background-color: var(--yellow);
+    color: var(--black);
+}
+
+.nav-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+
+/* ================================================
+   RESPONSIVE
+   ================================================ */
+@media (min-width: 481px) {
+    .app-main {
+        padding-left: var(--space-md);
+        padding-right: var(--space-md);
+    }
+}
