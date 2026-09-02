@@ -1,4 +1,4 @@
-# How to Run the MTN MoMo Enhanced Mini App
+# How to Run the Prize Linked Savings Mini App
 
 ## Prerequisites
 
