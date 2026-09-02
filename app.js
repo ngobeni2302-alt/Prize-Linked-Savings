@@ -1,823 +1,1567 @@
 /* ================================================
-   MTN MoMo Enhanced Mini App - JavaScript
-   Page navigation and placeholder interactions
+   Prized Linked Savings — Powered by MTN MoMo
+   Full App Logic: Savings Goals, Group/Stokvel,
+   Tickets, Referrals, Interest Calculation
+   MTN Fintech Summit 2026 Hackathon
    ================================================ */
 
-// --- Page Navigation ---
-function navigateTo(pageName) {
-  const mapping = {
-    'home': 'index.html',
-    'savings': 'savings.html',
-    'game': 'game.html',
-    'referrals': 'referrals.html'
-  };
-  window.location.href = mapping[pageName] || 'index.html';
+'use strict';
+
+/* ================================================
+   CONSTANTS & STORAGE KEYS
+   ================================================ */
+const KEYS = {
+  USER:          'pls_current_user',
+  WALLET:        'pls_wallet_balance',
+  GOALS:         'pls_savings_goals',
+  GROUPS:        'pls_savings_groups',
+  TICKETS:       'pls_tickets',
+  REFERRAL_CODES:'pls_referral_codes',
+  REFERRALS:     'pls_referrals',
+  TRANSACTIONS:  'pls_transactions',
+};
+
+// Annual interest rates (before −2% offset)
+const RATES = {
+  PERSONAL_MIN: 4.00,
+  PERSONAL_MAX: 7.50,
+  GROUP_MIN:    4.50,
+  GROUP_MAX:    8.00,
+  OFFSET:       2.00,
+};
+
+// Ticket tier thresholds
+const PERSONAL_TIERS = {
+  GOLD:   15000,
+  SILVER:  5000,
+  BRONZE:  1000,
+};
+
+const GROUP_TIERS = {
+  GOLD:   50000,
+  SILVER: 10000,
+  BRONZE:  1000,
+};
+
+/* ================================================
+   UTILITY: localStorage helpers
+   ================================================ */
+function load(key, fallback = null) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+  catch { return fallback; }
+}
+function save(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); }
+  catch (e) { console.warn('Storage error', e); }
 }
 
-
-// --- Ticket State ---
-const AVAILABLE_TICKETS_KEY = 'momo_available_tickets';
-let availableTickets = parseInt(localStorage.getItem(AVAILABLE_TICKETS_KEY) || '3');
-
-function saveAvailableTickets() {
-  localStorage.setItem(AVAILABLE_TICKETS_KEY, availableTickets.toString());
+/* ================================================
+   UTILITY: Toast notifications
+   ================================================ */
+function showToast(msg, type = 'default', duration = 3000) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'toastOut 0.3s var(--ease-out) both';
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
 }
 
-function updateTicketUI() {
-  const gameTicketsEl = document.getElementById('game-tickets-count');
-  const homeTicketsEl = document.getElementById('home-tickets-count');
-  const homeCardValue = document.querySelector('#card-tickets-summary .card-value');
-
-  if (gameTicketsEl) gameTicketsEl.textContent = availableTickets;
-  if (homeTicketsEl) homeTicketsEl.textContent = availableTickets;
-  if (homeCardValue) homeCardValue.textContent = availableTickets;
+/* ================================================
+   UTILITY: Format currency
+   ================================================ */
+function fmt(n) {
+  return 'R' + Number(n || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+function fmtShort(n) {
+  n = Number(n || 0);
+  if (n >= 1000) return 'R' + (n / 1000).toFixed(1) + 'k';
+  return fmt(n);
 }
 
-updateTicketUI();
-
-const addTicketBtn = document.getElementById('btn-add-ticket');
-if (addTicketBtn) {
-  addTicketBtn.addEventListener('click', () => {
-    availableTickets++;
-    saveAvailableTickets();
-    updateTicketUI();
-  });
+/* ================================================
+   UTILITY: Date helpers
+   ================================================ */
+function addMonths(date, months) {
+  const d = new Date(date);
+  d.setMonth(d.getMonth() + months);
+  return d;
+}
+function daysBetween(a, b) {
+  return Math.max(0, Math.floor((new Date(b) - new Date(a)) / 86400000));
+}
+function daysRemaining(endDate) {
+  return Math.max(0, daysBetween(new Date(), endDate));
+}
+function isLockComplete(goal) {
+  return new Date() >= new Date(goal.endDate);
+}
+function formatDate(dateStr) {
+  return new Date(dateStr).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+function countdown(endDate) {
+  const ms = new Date(endDate) - new Date();
+  if (ms <= 0) return { days: 0, hours: 0, minutes: 0 };
+  const days    = Math.floor(ms / 86400000);
+  const hours   = Math.floor((ms % 86400000) / 3600000);
+  const minutes = Math.floor((ms % 3600000) / 60000);
+  return { days, hours, minutes };
 }
 
-
-// --- Ticket Code Selector & Active Pool UI ---
-const ticketCodeSelect = document.getElementById('ticket-code-select');
-const activePoolTypeEl = document.getElementById('active-pool-type');
-const activeTicketTextEl = document.getElementById('active-ticket-text');
-
-function updateActiveTicketInfo() {
-  if (!ticketCodeSelect) return;
-  const selectedOpt = ticketCodeSelect.options[ticketCodeSelect.selectedIndex];
-  const type = selectedOpt.getAttribute('data-type');
-  const code = selectedOpt.value;
-  const name = selectedOpt.getAttribute('data-name');
-  const members = selectedOpt.getAttribute('data-members') || 1;
-
-  if (activePoolTypeEl) {
-    activePoolTypeEl.textContent = type === 'GRP' ? `GROUP (${members} MEMBERS)` : 'INDIVIDUAL';
-  }
-
-  if (activeTicketTextEl) {
-    if (type === 'GRP') {
-      activeTicketTextEl.textContent = `Using: GROUP TICKET for '${name}' (${code})`;
-    } else {
-      activeTicketTextEl.textContent = `Using: INDIVIDUAL TICKET (${code})`;
-    }
-  }
-}
-
-if (ticketCodeSelect) {
-  ticketCodeSelect.addEventListener('change', updateActiveTicketInfo);
-  updateActiveTicketInfo();
-}
-
-
-// --- Combined Reward Pools & Reduced Probability Engine (-50% Win Rate) ---
-
-// 1. INDIVIDUAL POOL (IND-xxxx) - Total Win Rate: ~50.00005%
-const IND_REWARDS = [
-  { tier: "SMALL WIN", category: "Data Top-up", prob: 17.5, badgeClass: "win-badge--small", prizes: ["100MB MTN Data", "500MB MTN Data", "1GB MTN Data"] },
-  { tier: "SMALL WIN", category: "Airtime Top-up", prob: 12.5, badgeClass: "win-badge--small", prizes: ["R5 MTN Airtime", "R10 MTN Airtime", "R20 MTN Airtime"] },
-  { tier: "SMALL WIN", category: "Minutes Top-up", prob: 5.0, badgeClass: "win-badge--small", prizes: ["20 Mins MTN Calls", "50 Mins MTN Calls", "100 Mins MTN Calls"] },
-  { tier: "MEDIUM WIN", category: "Retail Voucher", prob: 7.5, badgeClass: "win-badge--medium", prizes: ["R20 Retail Voucher (Shoprite)", "R50 Retail Voucher (Pick n Pay)", "R100 KFC Voucher", "R200 Nando's Voucher", "R300 Uber Eats Voucher"] },
-  { tier: "MEDIUM WIN", category: "Bundle Perks", prob: 3.0, badgeClass: "win-badge--medium", prizes: ["R50 Airtime Bundle", "R100 Airtime Bundle", "2GB Data Bundle", "5GB Data Bundle"] },
-  { tier: "MEDIUM WIN", category: "Fee Waiver", prob: 2.0, badgeClass: "win-badge--medium", prizes: ["1 Month Free MoMo Transactions (Mo Fee Waiver)"] },
-  { tier: "BIG WIN", category: "Fuel Voucher", prob: 1.0, badgeClass: "win-badge--big", prizes: ["Up to R300 Fuel Voucher (Engen/Shell)"] },
-  { tier: "BIG WIN", category: "Bill Discount", prob: 0.75, badgeClass: "win-badge--big", prizes: ["15% Off Electricity/Water/DStv Bill (Max R300)"] },
-  { tier: "BIG WIN", category: "Tech Discount", prob: 0.5, badgeClass: "win-badge--big", prizes: ["15% Off MTN Device/Accessory Purchase (Max R300)"] },
-  { tier: "BIG WIN", category: "Home Discount", prob: 0.2, badgeClass: "win-badge--big", prizes: ["15% Off Furniture/Appliances (Max R1,000)"] },
-  { tier: "BIG WIN", category: "Streaming Voucher", prob: 0.05, badgeClass: "win-badge--big", prizes: ["1 Month Netflix, Showmax, or DStv Voucher"] },
-  { tier: "JACKPOT", category: "Wow Prize", prob: 0.00005, badgeClass: "win-badge--jackpot", prizes: ["JACKPOT: R50,000 MoMo Cash + Ultimate MTN Device Pack"] }
-];
-
-// 2. GROUP POOL (GRP-xxxx) - Total Win Rate: ~50.0%
-const GRP_REWARDS = [
-  { tier: "GROUP SMALL WIN", category: "Group Data Pot", prob: 25.0, badgeClass: "win-badge--small", type: "pot_data", pots: ["1GB", "5GB", "10GB"] },
-  { tier: "GROUP SMALL WIN", category: "Group Airtime Pot", prob: 10.0, badgeClass: "win-badge--small", type: "pot_airtime", pots: ["R50", "R100", "R200"] },
-  { tier: "GROUP SMALL WIN", category: "Group Minutes Pot", prob: 5.0, badgeClass: "win-badge--small", type: "pot_minutes", pots: ["500 mins", "1000 mins"] },
-  { tier: "GROUP MEDIUM WIN", category: "Group Grocery Voucher", prob: 5.0, badgeClass: "win-badge--medium", type: "per_member_cash", amountPerMember: 20, maxCap: 1000, vendor: "Shoprite/PnP" },
-  { tier: "GROUP MEDIUM WIN", category: "Group Takeaway Voucher", prob: 3.0, badgeClass: "win-badge--medium", type: "per_member_cash", amountPerMember: 30, maxCap: 1500, vendor: "KFC/Nando's/Uber Eats" },
-  { tier: "GROUP MEDIUM WIN", category: "Group Data Bundle", prob: 1.5, badgeClass: "win-badge--medium", type: "per_member_data", dataPerMember: "2GB" },
-  { tier: "GROUP MEDIUM WIN", category: "Group MoMo Fee Waiver", prob: 0.4, badgeClass: "win-badge--medium", type: "group_waiver", text: "1 Month Free MoMo Transactions for ALL Members" },
-  { tier: "GROUP MEDIUM WIN", category: "Group Celebration Voucher", prob: 0.1, badgeClass: "win-badge--medium", type: "per_member_cash", amountPerMember: 50, maxCap: 2000, vendor: "Braai/Event Pool" }
-];
-
-function drawRulerReward(ticketCode, type, groupName, groupMembers) {
-  const roll = Math.random() * 100;
-  let cumulative = 0;
-
-  if (type === 'GRP') {
-    for (const item of GRP_REWARDS) {
-      cumulative += item.prob;
-      if (roll < cumulative) {
-        let prizeStr = "";
-        let splitStr = "";
-
-        if (item.type === "per_member_cash") {
-          const totalVal = Math.min(item.amountPerMember * groupMembers, item.maxCap);
-          const perMemberActual = Math.floor(totalVal / groupMembers);
-          prizeStr = `Total: R${totalVal} ${item.category} (${item.vendor})`;
-          splitStr = `Split: R${perMemberActual} per member for ${groupMembers} members`;
-        } else if (item.type === "per_member_data") {
-          prizeStr = `Total: ${groupMembers * 2}GB Data Bundle`;
-          splitStr = `Split: ${item.dataPerMember} per member for ${groupMembers} members (Cap: 100GB)`;
-        } else if (item.type === "group_waiver") {
-          prizeStr = item.text;
-          splitStr = `Applied to all ${groupMembers} members of '${groupName}'`;
-        } else if (item.type.startsWith("pot_")) {
-          const potVal = item.pots[Math.floor(Math.random() * item.pots.length)];
-          prizeStr = `${item.category}: ${potVal} Shared Pot`;
-          splitStr = `Split equally across ${groupMembers} members of '${groupName}'`;
-        }
-
-        return {
-          isWin: true,
-          type: "GRP",
-          code: ticketCode,
-          tier: item.tier,
-          category: item.category,
-          badgeClass: item.badgeClass,
-          prize: prizeStr,
-          splitDetails: splitStr
-        };
-      }
-    }
-
-    return {
-      isWin: false,
-      type: "GRP",
-      code: ticketCode,
-      tier: "NO WIN",
-      category: "Better Luck Next Time",
-      badgeClass: "win-badge--nowin",
-      prize: "No group prize drawn on this play.",
-      splitDetails: `Ticket ${ticketCode} used on Group Pool '${groupName}'`
-    };
-  } else {
-    // INDIVIDUAL POOL
-    for (const item of IND_REWARDS) {
-      cumulative += item.prob;
-      if (roll < cumulative) {
-        const prizeVal = item.prizes[Math.floor(Math.random() * item.prizes.length)];
-        return {
-          isWin: true,
-          type: "IND",
-          code: ticketCode,
-          tier: item.tier,
-          category: item.category,
-          badgeClass: item.badgeClass,
-          prize: prizeVal,
-          splitDetails: "Direct to your personal MoMo wallet"
-        };
-      }
-    }
-
-    return {
-      isWin: false,
-      type: "IND",
-      code: ticketCode,
-      tier: "NO WIN",
-      category: "Better Luck Next Time",
-      badgeClass: "win-badge--nowin",
-      prize: "No prize won on this draw.",
-      splitDetails: `Ticket ${ticketCode} used on Individual Pool.`
-    };
-  }
-}
-
-function generateSmsAlert(reward, phone = "+27 83 *** 4921") {
-  if (!reward.isWin) {
-    return `"MTN MoMo: No prize drawn for code ${reward.code}. Better luck next time!"`;
-  }
-
-  if (reward.type === "GRP") {
-    return `"MTN MoMo Group Alert: You won ${reward.prize}! ${reward.splitDetails}. SMS alerts sent to all members."`;
-  }
-
-  if (reward.category.includes("Data")) {
-    return `"MTN MoMo Alert: ${reward.prize} has been credited to ${phone}. Valid for 30 days. Ref: ${reward.code}."`;
-  } else if (reward.category.includes("Airtime")) {
-    return `"MTN MoMo Alert: ${reward.prize} top-up successful for ${phone}. Ref: ${reward.code}."`;
-  } else if (reward.category.includes("Minutes")) {
-    return `"MTN MoMo Alert: ${reward.prize} voice minutes added to ${phone}. Ref: ${reward.code}."`;
-  } else if (reward.category.includes("Fee Waiver")) {
-    return `"MTN MoMo Alert: ${reward.prize} activated on ${phone}. Enjoy 0 fees for 30 days!"`;
-  } else {
-    return `"MTN MoMo Voucher Alert: ${reward.prize} has been deposited into your MoMo Wallet and sent via SMS to ${phone}. Ref: ${reward.code}."`;
-  }
-}
-
-// --- The Ruler 3-Card Rewards Game ---
-const gameCards = document.querySelectorAll('.game-card');
-const winResultBox = document.getElementById('win-result-box');
-const winBadge = document.getElementById('win-badge');
-const winTitle = document.getElementById('win-title');
-const winPrize = document.getElementById('win-prize');
-const winSplitDetails = document.getElementById('win-split-details');
-const deliveryStatusCard = document.getElementById('delivery-status-card');
-const deliveryStatusBadge = document.getElementById('delivery-status-badge');
-const winPhoneText = document.getElementById('win-phone-text');
-const winSmsText = document.getElementById('win-sms-text');
-const playAgainBtn = document.getElementById('btn-play-again');
-const prizeHistoryList = document.getElementById('prize-history-list');
-const gameInstruction = document.getElementById('game-instruction');
-
-let gameActive = true;
-
-gameCards.forEach(card => {
-  card.addEventListener('click', () => {
-    if (!gameActive) return;
-
-    if (availableTickets <= 0) {
-      alert("No tickets remaining! Click '+ Add Ticket (Demo)' or save money to earn more tickets.");
-      return;
-    }
-
-    if (card.classList.contains('game-card--flipped')) return;
-
-    gameActive = false;
-
-    // Deduct ticket
-    availableTickets--;
-    saveAvailableTickets();
-    updateTicketUI();
-
-    // Get current ticket code selection
-    const selectedOpt = ticketCodeSelect ? ticketCodeSelect.options[ticketCodeSelect.selectedIndex] : null;
-    const ticketCode = selectedOpt ? selectedOpt.value : "IND-8492";
-    const type = selectedOpt ? selectedOpt.getAttribute('data-type') : "IND";
-    const groupName = selectedOpt ? selectedOpt.getAttribute('data-name') : "Default Pool";
-    const groupMembers = selectedOpt ? parseInt(selectedOpt.getAttribute('data-members') || "5", 10) : 5;
-
-    // Draw reward using Backend Ruler flow
-    const reward = drawRulerReward(ticketCode, type, groupName, groupMembers);
-
-    // Update card back text
-    const backText = card.querySelector('.reward-text');
-    if (backText) backText.textContent = reward.isWin ? (reward.type === "GRP" ? "GROUP WIN" : "WIN") : "NO PRIZE";
-
-    // Flip card
-    card.classList.add('game-card--flipped');
-
-    // Disable other unpicked cards
-    gameCards.forEach(c => {
-      if (c !== card) c.disabled = true;
-    });
-
-    // Reveal result box after flip animation
-    setTimeout(() => {
-      if (winBadge) {
-        winBadge.textContent = reward.tier;
-        winBadge.className = `win-badge ${reward.badgeClass}`;
-      }
-      if (winTitle) winTitle.textContent = reward.category;
-      if (winPrize) winPrize.textContent = reward.prize;
-      if (winSplitDetails) winSplitDetails.textContent = reward.splitDetails;
-
-      if (deliveryStatusCard) {
-        if (reward.isWin) {
-          deliveryStatusCard.style.display = 'block';
-          const smsMessage = generateSmsAlert(reward, "+27 83 *** 4921");
-
-          if (deliveryStatusBadge) {
-            deliveryStatusBadge.textContent = "DELIVERED";
-            deliveryStatusBadge.className = "delivery-status-badge delivery-status-badge--delivered";
-          }
-          if (winPhoneText) {
-            winPhoneText.textContent = reward.type === "GRP" 
-              ? `Recipients: Group '${groupName}' (${groupMembers} MoMo Wallets & Phones)`
-              : `Recipient: +27 83 *** 4921 (MTN MoMo Wallet & SIM)`;
-          }
-          if (winSmsText) {
-            winSmsText.textContent = smsMessage;
-          }
-        } else {
-          deliveryStatusCard.style.display = 'none';
-        }
-      }
-
-      if (winResultBox) winResultBox.style.display = 'block';
-
-      if (gameInstruction) {
-        gameInstruction.textContent = reward.isWin 
-          ? "Congratulations! Reward credited & SMS alert sent."
-          : "No prize drawn this time for code " + reward.code + ". Try again on your next ticket!";
-      }
-
-      // Add to Prize History
-      addPrizeToHistory(reward);
-    }, 600);
-  });
-});
-
-function addPrizeToHistory(reward) {
-  if (!prizeHistoryList) return;
-
-  const emptyMsg = document.getElementById('prize-history-empty');
-  if (emptyMsg) emptyMsg.remove();
-
-  const item = document.createElement('div');
-  item.className = 'activity-item';
-  
-  if (reward.isWin) {
-    item.innerHTML = `
-      <span class="activity-desc"><strong>[${reward.code}] ${reward.tier}:</strong> ${reward.prize} <br><small style="color:#666;">${reward.splitDetails}</small></span>
-      <span class="activity-amount" style="color: #004f71; font-weight:700;">WON</span>
-    `;
-  } else {
-    item.innerHTML = `
-      <span class="activity-desc"><strong>[${reward.code}] NO WIN:</strong> ${reward.category}</span>
-      <span class="activity-amount" style="color: #888; font-weight:600;">TRY AGAIN</span>
-    `;
-  }
-  
-  prizeHistoryList.prepend(item);
-}
-
-if (playAgainBtn) {
-  playAgainBtn.addEventListener('click', () => {
-    // Reset cards
-    gameCards.forEach(card => {
-      card.classList.remove('game-card--flipped');
-      card.disabled = false;
-    });
-
-    if (winResultBox) winResultBox.style.display = 'none';
-    if (gameInstruction) gameInstruction.textContent = 'Choose 1 of the 3 cards to draw your reward ticket!';
-
-    gameActive = true;
-  });
-}
-
-
-// --- Referral System (single-use codes, random suffix, dual ticket rewards) ---
-const REFCODE_KEY   = 'momo_referral_codes'; // { code: { userId, last4, status } } status: 'active' | 'used'
-const REFERRAL_KEY  = 'momo_referrals';       // [{ code, referrerId, referredId, status, createdAt, completedAt }]
-const TICKETS_KEY   = 'momo_tickets';         // { userId: count }
-const CURRENT_USER_KEY = 'momo_current_user';
-
+/* ================================================
+   USER MANAGEMENT
+   ================================================ */
 function getCurrentUser() {
-  let user = JSON.parse(localStorage.getItem(CURRENT_USER_KEY) || 'null');
+  let user = load(KEYS.USER);
   if (!user) {
-    user = { id: 'user_' + Math.random().toString(36).slice(2, 8), phone: '0821234521' };
-    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+    const id = 'usr_' + Math.random().toString(36).slice(2, 10);
+    const phone = '082' + Math.floor(1000000 + Math.random() * 9000000);
+    user = { id, phone, name: 'MoMo User', createdAt: new Date().toISOString() };
+    save(KEYS.USER, user);
   }
   return user;
 }
 
-function getReferralCodes() { return JSON.parse(localStorage.getItem(REFCODE_KEY) || '{}'); }
-function saveReferralCodes(c) { localStorage.setItem(REFCODE_KEY, JSON.stringify(c)); }
-function getReferrals() { return JSON.parse(localStorage.getItem(REFERRAL_KEY) || '[]'); }
-function saveReferrals(r) { localStorage.setItem(REFERRAL_KEY, JSON.stringify(r)); }
-
-function randomSuffix() {
-  return String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+/* ================================================
+   WALLET
+   ================================================ */
+function getWalletBalance() { return load(KEYS.WALLET, 0); }
+function setWalletBalance(n) { save(KEYS.WALLET, Math.max(0, n)); }
+function addToWallet(amount) { setWalletBalance(getWalletBalance() + amount); }
+function deductFromWallet(amount) {
+  const bal = getWalletBalance();
+  if (amount > bal) return false;
+  setWalletBalance(bal - amount);
+  return true;
 }
 
-// Creates a brand new single-use code for this user (called at signup, on refresh, and after each completed referral)
-function createNewReferralCode(userId, last4) {
-  const codes = getReferralCodes();
-  // Retire any previous active codes of this user so only the new one is display-active,
-  // but keep them in the database so they still work if entered by a referred friend.
-  Object.values(codes).forEach(entry => {
-    if (entry.userId === userId && entry.status === 'active') {
-      entry.status = 'retired';
+/* ================================================
+   TRANSACTIONS
+   ================================================ */
+function getTransactions() { return load(KEYS.TRANSACTIONS, []); }
+function addTransaction(type, amount, description, goalId = null) {
+  const txns = getTransactions();
+  txns.unshift({
+    id: 'tx_' + Date.now(),
+    type, // 'credit' | 'debit' | 'interest' | 'prize' | 'referral'
+    amount,
+    description,
+    goalId,
+    date: new Date().toISOString(),
+  });
+  save(KEYS.TRANSACTIONS, txns.slice(0, 100)); // keep latest 100
+}
+
+/* ================================================
+   SAVINGS GOALS
+   ================================================ */
+function getGoals() { return load(KEYS.GOALS, []); }
+function saveGoals(goals) { save(KEYS.GOALS, goals); }
+
+function getGoalTier(amount) {
+  if (amount >= PERSONAL_TIERS.GOLD)   return 'gold';
+  if (amount >= PERSONAL_TIERS.SILVER) return 'silver';
+  if (amount >= PERSONAL_TIERS.BRONZE) return 'bronze';
+  return 'none';
+}
+function getGroupTier(amount) {
+  if (amount >= GROUP_TIERS.GOLD)   return 'gold';
+  if (amount >= GROUP_TIERS.SILVER) return 'silver';
+  if (amount >= GROUP_TIERS.BRONZE) return 'bronze';
+  return 'none';
+}
+function tierLabel(tier) {
+  return { gold: 'Gold', silver: 'Silver', bronze: 'Bronze', flat: 'Flat Rate', none: 'Below minimum', group_gold: 'Gold Group', group_silver: 'Silver Group', group_bronze: 'Bronze Group' }[tier] || tier;
+}
+function tierBadgeClass(tier) {
+  return { gold: 'tier-badge--gold', silver: 'tier-badge--silver', bronze: 'tier-badge--bronze', flat: 'tier-badge--flat', none: 'tier-badge--locked' }[tier] || 'tier-badge--locked';
+}
+
+function calcInterest(goal) {
+  // Simple daily accrual using effective rate (standard - 2% offset)
+  const standardRate = RATES.PERSONAL_MIN + (RATES.PERSONAL_MAX - RATES.PERSONAL_MIN) * 0.5; // midpoint ~5.75%
+  const effectiveRate = standardRate - RATES.OFFSET; // ~3.75%
+  const daysHeld = daysBetween(goal.startDate, new Date());
+  const balance = goal.currentBalance || 0;
+  return balance * (effectiveRate / 100) * (daysHeld / 365);
+}
+
+function calcGroupInterest(group) {
+  const standardRate = RATES.GROUP_MIN + (RATES.GROUP_MAX - RATES.GROUP_MIN) * 0.5; // midpoint ~6.25%
+  const effectiveRate = standardRate - RATES.OFFSET; // ~4.25%
+  const daysHeld = daysBetween(group.startDate, new Date());
+  const balance = group.pooledBalance || 0;
+  return balance * (effectiveRate / 100) * (daysHeld / 365);
+}
+
+function createGoal(userId, name, targetAmount, months, initialDeposit) {
+  const goals = getGoals();
+  const startDate = new Date();
+  const endDate   = addMonths(startDate, months);
+  const monthlyContribution = Math.ceil((targetAmount - (initialDeposit || 0)) / months);
+
+  const goal = {
+    id: 'goal_' + Date.now(),
+    userId,
+    type: 'personal',
+    name,
+    targetAmount: parseFloat(targetAmount),
+    currentBalance: parseFloat(initialDeposit || 0),
+    monthlyContribution,
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString(),
+    months,
+    isWithdrawnEarly: false,
+    isCompleted: false,
+    scratchCardsEarned: [],
+    createdAt: startDate.toISOString(),
+  };
+
+  goals.push(goal);
+  saveGoals(goals);
+
+  if (initialDeposit > 0) {
+    deductFromWallet(initialDeposit);
+    addTransaction('debit', initialDeposit, `Initial deposit → ${name}`, goal.id);
+  }
+
+  return goal;
+}
+
+function depositToGoal(goalId, amount, userId) {
+  const goals = getGoals();
+  const idx = goals.findIndex(g => g.id === goalId && g.userId === userId);
+  if (idx === -1) return { ok: false, msg: 'Goal not found.' };
+
+  const goal = goals[idx];
+  if (goal.isWithdrawnEarly || goal.isCompleted) return { ok: false, msg: 'Goal is closed.' };
+
+  const walletBal = getWalletBalance();
+  if (amount > walletBal) return { ok: false, msg: `Insufficient wallet balance. Available: ${fmt(walletBal)}` };
+
+  deductFromWallet(amount);
+  goals[idx].currentBalance += amount;
+
+  // Check for referral completion on first deposit
+  const referrals = getReferrals();
+  const pendingRef = referrals.find(r => r.referredId === userId && r.status === 'pending');
+  if (pendingRef) {
+    const updatedRef = referrals.find(r => r.id === pendingRef.id);
+    if (updatedRef) {
+      updatedRef.status = 'linked';
+      saveReferrals(referrals);
     }
+  }
+
+  // Check for goal completion
+  let completionMsg = null;
+  if (goals[idx].currentBalance >= goals[idx].targetAmount && isLockComplete(goals[idx])) {
+    completionMsg = completeGoal(goals, idx, userId);
+  }
+
+  saveGoals(goals);
+  addTransaction('debit', amount, `Deposit → ${goal.name}`, goalId);
+  return { ok: true, completionMsg };
+}
+
+function withdrawFromGoal(goalId, amount, userId) {
+  const goals = getGoals();
+  const idx = goals.findIndex(g => g.id === goalId && g.userId === userId);
+  if (idx === -1) return { ok: false, msg: 'Goal not found.' };
+
+  const goal = goals[idx];
+  if (goal.isCompleted) return { ok: false, msg: 'Goal already completed — funds released.' };
+  if (goal.isWithdrawnEarly) return { ok: false, msg: 'Goal already withdrawn.' };
+  if (amount > goal.currentBalance) return { ok: false, msg: `Cannot withdraw more than ${fmt(goal.currentBalance)}.` };
+
+  const isEarly = !isLockComplete(goal);
+  const forfeited = [];
+
+  if (isEarly) {
+    goals[idx].isWithdrawnEarly = true;
+    goals[idx].scratchCardsEarned = []; // forfeit pending cards
+    // Forfeit pending referral card for referrer
+    forfeitReferralForUser(userId);
+    forfeited.push('interest', 'scratch cards');
+  }
+
+  addToWallet(amount);
+  goals[idx].currentBalance -= amount;
+  saveGoals(goals);
+  addTransaction('credit', amount, `Withdrawal ← ${goal.name}${isEarly ? ' (EARLY — penalties applied)' : ''}`, goalId);
+  return { ok: true, isEarly, forfeited };
+}
+
+function completeGoal(goals, idx, userId) {
+  const goal = goals[idx];
+  if (goal.isCompleted) return null;
+
+  goals[idx].isCompleted = true;
+  goals[idx].completedAt = new Date().toISOString();
+
+  // Determine tier and issue scratch card
+  const tier = getGoalTier(goal.targetAmount);
+  if (tier !== 'none') {
+    const card = issueTicket(userId, 'personal_savings', tier, goal.id);
+    goals[idx].scratchCardsEarned.push(card.id);
+
+    // Complete any pending referral (referrer earns a card — single-sided)
+    completeReferralForUser(userId);
+
+    return `Goal "${goal.name}" completed! You earned a ${tierLabel(tier)} scratch card!`;
+  }
+  return null;
+}
+
+/* ================================================
+   GROUP / STOKVEL SAVINGS
+   ================================================ */
+function getGroups() { return load(KEYS.GROUPS, []); }
+function saveGroups(groups) { save(KEYS.GROUPS, groups); }
+
+function generateGroupCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'GRP-';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function createGroup(userId, name, targetAmount, months, initialContribution) {
+  const groups = getGroups();
+
+  // Ensure unique code
+  let code;
+  do { code = generateGroupCode(); } while (groups.find(g => g.code === code));
+
+  const startDate = new Date();
+  const endDate   = addMonths(startDate, months);
+
+  const group = {
+    id: 'grp_' + Date.now(),
+    code,
+    createdBy: userId,
+    name,
+    targetAmount: parseFloat(targetAmount),
+    pooledBalance: parseFloat(initialContribution || 0),
+    months,
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString(),
+    members: [{
+      userId,
+      contribution: parseFloat(initialContribution || 0),
+      joinedAt: startDate.toISOString(),
+      role: 'admin',
+    }],
+    isCompleted: false,
+    isWithdrawnEarly: false,
+    scratchCardsEarned: [],
+    createdAt: startDate.toISOString(),
+  };
+
+  groups.push(group);
+  saveGroups(groups);
+
+  if (initialContribution > 0) {
+    deductFromWallet(initialContribution);
+    addTransaction('debit', initialContribution, `Group contribution → ${name}`, group.id);
+  }
+
+  return group;
+}
+
+function joinGroup(userId, code, contribution) {
+  const groups = getGroups();
+  const idx = groups.findIndex(g => g.code === code.toUpperCase().trim());
+  if (idx === -1) return { ok: false, msg: 'Group code not found. Double-check with your group admin.' };
+
+  const group = groups[idx];
+  if (group.isCompleted || group.isWithdrawnEarly) return { ok: false, msg: 'This group is no longer active.' };
+  if (group.members.find(m => m.userId === userId)) return { ok: false, msg: 'You are already a member of this group.' };
+
+  const walletBal = getWalletBalance();
+  if (contribution > walletBal) return { ok: false, msg: `Insufficient wallet balance. Available: ${fmt(walletBal)}` };
+
+  deductFromWallet(contribution);
+  groups[idx].pooledBalance += contribution;
+  groups[idx].members.push({
+    userId,
+    contribution,
+    joinedAt: new Date().toISOString(),
+    role: 'member',
   });
 
-  let code;
-  do {
-    code = `MOMO-${last4}-${randomSuffix()}`;
-  } while (codes[code]); // guarantee uniqueness even on random collision
-  codes[code] = { userId, last4, status: 'active' };
+  saveGroups(groups);
+  addTransaction('debit', contribution, `Join group → ${group.name}`, group.id);
+  return { ok: true, group: groups[idx] };
+}
+
+function depositToGroup(groupId, amount, userId) {
+  const groups = getGroups();
+  const idx = groups.findIndex(g => g.id === groupId);
+  if (idx === -1) return { ok: false, msg: 'Group not found.' };
+
+  const group = groups[idx];
+  if (!group.members.find(m => m.userId === userId)) return { ok: false, msg: 'You are not a member of this group.' };
+  if (group.isCompleted || group.isWithdrawnEarly) return { ok: false, msg: 'Group is closed.' };
+
+  const walletBal = getWalletBalance();
+  if (amount > walletBal) return { ok: false, msg: `Insufficient wallet balance. Available: ${fmt(walletBal)}` };
+
+  deductFromWallet(amount);
+  groups[idx].pooledBalance += amount;
+  const memberIdx = groups[idx].members.findIndex(m => m.userId === userId);
+  if (memberIdx >= 0) groups[idx].members[memberIdx].contribution += amount;
+
+  // Check group completion
+  let completionMsg = null;
+  if (groups[idx].pooledBalance >= groups[idx].targetAmount && isLockComplete(groups[idx])) {
+    completionMsg = completeGroup(groups, idx);
+  }
+
+  saveGroups(groups);
+  addTransaction('debit', amount, `Group contribution → ${group.name}`, groupId);
+  return { ok: true, completionMsg };
+}
+
+function completeGroup(groups, idx) {
+  const group = groups[idx];
+  if (group.isCompleted) return null;
+
+  groups[idx].isCompleted = true;
+  groups[idx].completedAt = new Date().toISOString();
+
+  const tier = getGroupTier(group.pooledBalance);
+  const memberIds = group.members.map(m => m.userId);
+
+  // Issue a group-type scratch card to each member
+  memberIds.forEach(uid => {
+    const card = issueTicket(uid, 'group_savings', tier, group.id, {
+      groupName: group.name,
+      memberCount: memberIds.length,
+      totalPool: group.pooledBalance,
+    });
+    groups[idx].scratchCardsEarned.push(card.id);
+  });
+
+  return `Group "${group.name}" completed! All ${memberIds.length} members earned a ${tierLabel('group_' + tier)} voucher!`;
+}
+
+/* ================================================
+   SCRATCH TICKETS
+   ================================================ */
+function getTickets() { return load(KEYS.TICKETS, []); }
+function saveTickets(t) { save(KEYS.TICKETS, t); }
+function getUserTickets(userId) {
+  return getTickets().filter(t => t.userId === userId && !t.isScratched);
+}
+
+function issueTicket(userId, source, tier, sourceId, groupMeta = null) {
+  const tickets = getTickets();
+  const ticket = {
+    id: 'tkt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+    userId,
+    source, // 'personal_savings' | 'group_savings' | 'referral'
+    tier,   // 'bronze' | 'silver' | 'gold' | 'flat'
+    sourceId,
+    groupMeta,
+    isScratched: false,
+    reward: null,
+    createdAt: new Date().toISOString(),
+    scratchedAt: null,
+  };
+  tickets.push(ticket);
+  saveTickets(tickets);
+  return ticket;
+}
+
+function scratchTicket(ticketId, userId) {
+  const tickets = getTickets();
+  const idx = tickets.findIndex(t => t.id === ticketId && t.userId === userId && !t.isScratched);
+  if (idx === -1) return null;
+
+  const ticket = tickets[idx];
+  const reward = generateReward(ticket);
+
+  tickets[idx].isScratched = true;
+  tickets[idx].reward = reward;
+  tickets[idx].scratchedAt = new Date().toISOString();
+  saveTickets(tickets);
+
+  addTransaction('prize', reward.valueZar || 0,
+    `Ticket won: ${reward.prize} (${tierLabel(ticket.tier)})`, ticketId);
+
+  return { ticket: tickets[idx], reward };
+}
+
+/* ================================================
+   REWARD ENGINE — 100% GUARANTEED WIN
+   ================================================ */
+const PERSONAL_PRIZES = {
+  bronze: [
+    { icon: 'DATA', prize: '100MB MTN Data', value: 15, type: 'data' },
+    { icon: 'DATA', prize: '250MB MTN Data', value: 18, type: 'data' },
+    { icon: 'AIR', prize: 'R15 MTN Airtime', value: 15, type: 'airtime' },
+    { icon: 'AIR', prize: 'R20 MTN Airtime', value: 20, type: 'airtime' },
+    { icon: 'MIN', prize: '20 MTN Voice Minutes', value: 16, type: 'minutes' },
+  ],
+  silver: [
+    { icon: 'DATA', prize: '500MB MTN Data', value: 25, type: 'data' },
+    { icon: 'DATA', prize: '1GB MTN Data', value: 30, type: 'data' },
+    { icon: 'AIR', prize: 'R25 MTN Airtime', value: 25, type: 'airtime' },
+    { icon: 'AIR', prize: 'R30 MTN Airtime', value: 30, type: 'airtime' },
+    { icon: 'MIN', prize: '50 MTN Voice Minutes', value: 28, type: 'minutes' },
+  ],
+  gold: [
+    { icon: 'DATA', prize: '2GB MTN Data', value: 40, type: 'data' },
+    { icon: 'DATA', prize: '3GB MTN Data', value: 45, type: 'data' },
+    { icon: 'AIR', prize: 'R40 MTN Airtime', value: 40, type: 'airtime' },
+    { icon: 'AIR', prize: 'R45 MTN Airtime', value: 45, type: 'airtime' },
+    { icon: 'MIN', prize: '100 MTN Voice Minutes', value: 42, type: 'minutes' },
+  ],
+  flat: [
+    { icon: 'DATA', prize: '200MB MTN Data', value: 18, type: 'data' },
+    { icon: 'DATA', prize: '500MB MTN Data', value: 22, type: 'data' },
+    { icon: 'AIR', prize: 'R20 MTN Airtime', value: 20, type: 'airtime' },
+    { icon: 'AIR', prize: 'R25 MTN Airtime', value: 25, type: 'airtime' },
+    { icon: 'MIN', prize: '30 MTN Voice Minutes', value: 20, type: 'minutes' },
+  ],
+};
+
+const GROUP_PRIZES = {
+  bronze: {
+    icon: 'VCHR',
+    prize: '5% Off Retail Category',
+    discount: 5,
+    vendor: 'Shoprite / Pick n Pay',
+    type: 'retail_discount',
+  },
+  silver: {
+    icon: 'VCHR',
+    prize: '10% Off Retail Category',
+    discount: 10,
+    vendor: 'Shoprite / Pick n Pay / Checkers',
+    type: 'retail_discount',
+  },
+  gold: {
+    icon: 'VCHR',
+    prize: '20% Off Retail Category',
+    discount: 20,
+    vendor: 'All Partner Retail Stores',
+    type: 'retail_discount',
+  },
+  none: {
+    icon: 'VCHR',
+    prize: '5% Off Retail Category',
+    discount: 5,
+    vendor: 'Shoprite / Pick n Pay',
+    type: 'retail_discount',
+  },
+};
+
+function generateReward(ticket) {
+  if (ticket.source === 'group_savings') {
+    const tier = ticket.tier in GROUP_PRIZES ? ticket.tier : 'bronze';
+    const p = GROUP_PRIZES[tier];
+    const meta = ticket.groupMeta || {};
+    const memberCount = meta.memberCount || 1;
+    return {
+      type: 'retail_discount',
+      prize: p.prize,
+      icon: p.icon,
+      discount: p.discount,
+      vendor: p.vendor,
+      splitDetails: `Applied to all ${memberCount} members of '${meta.groupName || 'your group'}'`,
+      valueZar: 0,
+      tier: ticket.tier,
+      badgeClass: `win-badge--${tier === 'gold' ? 'jackpot' : tier === 'silver' ? 'medium' : 'small'}`,
+      tierLabel: tierLabel('group_' + tier),
+    };
+  }
+
+  // Personal / Referral prizes
+  const pool = PERSONAL_PRIZES[ticket.tier] || PERSONAL_PRIZES.bronze;
+  const p = pool[Math.floor(Math.random() * pool.length)];
+  return {
+    type: p.type,
+    prize: p.prize,
+    icon: p.icon,
+    valueZar: p.value,
+    splitDetails: 'Credited directly to your MTN MoMo wallet & SIM',
+    tier: ticket.tier,
+    badgeClass: `win-badge--${ticket.tier === 'gold' ? 'big' : ticket.tier === 'silver' ? 'medium' : 'small'}`,
+    tierLabel: tierLabel(ticket.tier),
+  };
+}
+
+function generateSmsAlert(reward, phone) {
+  phone = phone || '+27 8X XXX XXXX';
+  if (reward.type === 'retail_discount') {
+    return `"MTN MoMo Group Alert: Your group won ${reward.prize} at ${reward.vendor}! ${reward.splitDetails}."`;
+  }
+  if (reward.type === 'data') {
+    return `"MTN MoMo: ${reward.prize} credited to ${phone}. Valid 30 days. Enjoy!"`;
+  }
+  if (reward.type === 'airtime') {
+    return `"MTN MoMo: ${reward.prize} top-up applied to ${phone}. Use it well!"`;
+  }
+  if (reward.type === 'minutes') {
+    return `"MTN MoMo: ${reward.prize} added to ${phone}. Valid 30 days."`;
+  }
+  return `"MTN MoMo: Prize credited to ${phone}."`;
+}
+
+/* ================================================
+   REFERRAL SYSTEM (SINGLE-SIDED)
+   ================================================ */
+function getReferralCodes() { return load(KEYS.REFERRAL_CODES, {}); }
+function saveReferralCodes(c) { save(KEYS.REFERRAL_CODES, c); }
+function getReferrals() { return load(KEYS.REFERRALS, []); }
+function saveReferrals(r) { save(KEYS.REFERRALS, r); }
+
+function generateReferralCode(userId, last4) {
+  const codes = getReferralCodes();
+  // Retire existing active codes for this user
+  Object.values(codes).forEach(e => {
+    if (e.userId === userId && e.status === 'active') e.status = 'retired';
+  });
+  const suffix = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+  const code = `MOMO-${last4}-${suffix}`;
+  codes[code] = { userId, last4, status: 'active', createdAt: new Date().toISOString() };
   saveReferralCodes(codes);
   return code;
 }
 
-// Returns the user's current active code, generating one if they don't have one
-function getActiveReferralCode(user) {
+function getActiveCode(user) {
   const codes = getReferralCodes();
   const active = Object.entries(codes).find(([, v]) => v.userId === user.id && v.status === 'active');
   if (active) return active[0];
-  return createNewReferralCode(user.id, user.phone.slice(-4));
+  return generateReferralCode(user.id, user.phone.slice(-4));
 }
 
 function normalizeCode(input) {
-  return input.trim().toUpperCase().replace(/\s+/g, '');
+  return (input || '').trim().toUpperCase().replace(/\s+/g, '');
 }
 
 function submitReferralCode(rawCode, user) {
-  const statusEl = document.getElementById('enter-code-status');
   const code = normalizeCode(rawCode);
   const codes = getReferralCodes();
   let entry = codes[code];
 
-  if (statusEl) statusEl.classList.remove('text-danger');
-
-  // For demo/testing across different browsers/machines where codes are not in the local database:
-  // If the code has the MOMO prefix format, auto-simulate/register it so it works!
+  // Auto-register external MOMO codes for cross-device demo
   if (!entry && code.startsWith('MOMO-')) {
     const parts = code.split('-');
-    entry = {
-      userId: 'user_referrer_' + Math.random().toString(36).slice(2, 8),
-      last4: parts[1] || '0000',
-      status: 'active'
-    };
+    entry = { userId: 'usr_ext_' + Math.random().toString(36).slice(2, 8), last4: parts[1] || '0000', status: 'active' };
     codes[code] = entry;
     saveReferralCodes(codes);
   }
 
-  if (!entry) {
-    if (statusEl) {
-      statusEl.textContent = "That code doesn't look right — double check with whoever sent it.";
-      statusEl.classList.add('text-danger');
-    }
-    return;
-  }
-  if (entry.status === 'used') {
-    if (statusEl) {
-      statusEl.textContent = "This code has already been used.";
-      statusEl.classList.add('text-danger');
-    }
-    return;
-  }
-  if (entry.userId === user.id) {
-    if (statusEl) {
-      statusEl.textContent = "You can't use your own code.";
-      statusEl.classList.add('text-danger');
-    }
-    return;
-  }
-  if (getReferrals().some(r => r.referredId === user.id)) {
-    if (statusEl) {
-      statusEl.textContent = "You've already linked a referral code.";
-      statusEl.classList.add('text-danger');
-    }
-    return;
-  }
+  if (!entry)          return { ok: false, msg: "Code not recognized. Ask your friend to double-check." };
+  if (entry.status === 'used') return { ok: false, msg: "This code has already been used." };
+  if (entry.userId === user.id) return { ok: false, msg: "You can't use your own referral code." };
+  if (getReferrals().some(r => r.referredId === user.id)) return { ok: false, msg: "You've already applied a referral code." };
 
-  // Lock the code — single use, forever
-  entry.status = 'used';
-  codes[code] = entry;
+  // Mark code as used
+  codes[code].status = 'used';
   saveReferralCodes(codes);
 
   const referrals = getReferrals();
   referrals.push({
+    id: 'ref_' + Date.now(),
     code,
     referrerId: entry.userId,
     referredId: user.id,
-    status: 'linked',      // -> 'completed' once first deposit clears
+    status: 'pending', // → 'verified' once friend completes goal
     createdAt: new Date().toISOString(),
-    completedAt: null
+    completedAt: null,
   });
   saveReferrals(referrals);
 
-  if (statusEl) {
-    statusEl.textContent = 'Code applied! Make your first deposit to unlock tickets for you both.';
-  }
-  const inputEl = document.getElementById('input-referral-code');
-  if (inputEl) inputEl.value = '';
+  return { ok: true, msg: "Code applied! Complete a savings goal (3+ months) to activate your referrer's reward." };
 }
 
-function awardTicket(userId) {
-  const tickets = JSON.parse(localStorage.getItem(TICKETS_KEY) || '{}');
-  tickets[userId] = (tickets[userId] || 0) + 1;
-  localStorage.setItem(TICKETS_KEY, JSON.stringify(tickets));
-}
-
-function getTicketCount(userId) {
-  const tickets = JSON.parse(localStorage.getItem(TICKETS_KEY) || '{}');
-  return tickets[userId] || 0;
-}
-
-// Call this from your Collections API success callback, once the recipient's
-// first deposit into a PLS pocket clears.
-function completeReferral(referredUserId) {
+// Called when the referred user completes a goal
+// SINGLE-SIDED: only the REFERRER gets a ticket
+function completeReferralForUser(referredUserId) {
   const referrals = getReferrals();
-  const r = referrals.find(r => r.referredId === referredUserId && r.status === 'linked');
-  if (!r) return; // no pending referral for this user — nothing to do
+  const ref = referrals.find(r => r.referredId === referredUserId && r.status === 'pending');
+  if (!ref) return;
 
-  r.status = 'completed';
-  r.completedAt = new Date().toISOString();
+  ref.status = 'verified';
+  ref.completedAt = new Date().toISOString();
   saveReferrals(referrals);
 
-  awardTicket(r.referrerId);
-  awardTicket(r.referredId);
+  // Award flat-rate scratch card to REFERRER ONLY
+  issueTicket(ref.referrerId, 'referral', 'flat', ref.id);
 
-  // Referrer's spent code stays retired; generate them a fresh one automatically
+  // Generate fresh code for referrer
   const codes = getReferralCodes();
-  const codeEntry = codes[r.code];
-  const last4 = codeEntry ? codeEntry.last4 : '0000';
-  createNewReferralCode(r.referrerId, last4);
+  const codeEntry = codes[ref.code];
+  if (codeEntry) {
+    generateReferralCode(ref.referrerId, codeEntry.last4);
+  }
 }
 
-function renderReferralPage() {
+function forfeitReferralForUser(userId) {
+  const referrals = getReferrals();
+  const ref = referrals.find(r => r.referredId === userId && r.status === 'pending');
+  if (!ref) return;
+  ref.status = 'forfeited';
+  ref.forfeitedAt = new Date().toISOString();
+  saveReferrals(referrals);
+}
+
+/* ================================================
+   UI RENDERING
+   ================================================ */
+
+function updateAllUI() {
+  updateHeaderWallet();
+  updateDrawerCode();
+  renderHomePage();
+  renderSavingsPage();
+  renderGamePage();
+  renderReferralsPage();
+}
+
+function updateHeaderWallet() {
+  const els = document.querySelectorAll('#header-wallet-amount, .wallet-amount');
+  const val = fmt(getWalletBalance());
+  els.forEach(el => { el.textContent = val; });
+}
+
+function updateDrawerCode() {
+  const el = document.getElementById('drawer-user-code');
+  if (!el) return;
   const user = getCurrentUser();
-  const code = getActiveReferralCode(user);
-  const codeEl = document.getElementById('my-referral-code');
-  if (codeEl) codeEl.textContent = code;
+  el.textContent = getActiveCode(user);
+}
 
-  const referrals = getReferrals().filter(r => r.referrerId === user.id);
-  const verifiedCount = referrals.filter(r => r.status === 'completed').length;
-  const pct = Math.min((verifiedCount / 10) * 100, 100);
-  
-  const fillEl = document.getElementById('milestone-fill');
-  if (fillEl) fillEl.style.width = pct + '%';
-  
-  const labelEl = document.getElementById('milestone-label');
-  if (labelEl) labelEl.textContent = `${verifiedCount} / 10 verified referrals to earn a bonus ticket`;
+/* ---- HOME PAGE ---- */
+function renderHomePage() {
+  const user = getCurrentUser();
+  const goals = getGoals().filter(g => g.userId === user.id && !g.isWithdrawnEarly);
+  const groups = getGroups().filter(g => g.members.some(m => m.userId === user.id) && !g.isWithdrawnEarly);
+  const tickets = getUserTickets(user.id);
+  const referrals = getReferrals();
+  const verifiedRefs = referrals.filter(r => r.referrerId === user.id && r.status === 'verified');
 
-  const ticketCount = getTicketCount(user.id);
-  const ticketCountEl = document.getElementById('my-ticket-count');
-  if (ticketCountEl) {
-    ticketCountEl.textContent = `You have ${ticketCount} ticket${ticketCount === 1 ? '' : 's'}`;
+  // Hero stats
+  const totalSavings = goals.reduce((s, g) => s + g.currentBalance, 0)
+    + groups.reduce((s, g) => {
+        const me = g.members.find(m => m.userId === user.id);
+        return s + (me ? me.contribution : 0);
+      }, 0);
+  const totalInterest = goals.reduce((s, g) => s + calcInterest(g), 0)
+    + groups.reduce((s, g) => s + calcGroupInterest(g) / g.members.length, 0);
+
+  setEl('hero-savings-amount', totalSavings.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+  setEl('hero-tickets', `${tickets.length} 🎟`);
+  setEl('hero-goals', `${goals.filter(g => !g.isCompleted).length + groups.filter(g => !g.isCompleted).length} Active`);
+  setEl('hero-referrals', `${verifiedRefs.length} Verified`);
+  setEl('hero-yield-pct', '5.50%');
+
+  // Cards
+  setEl('wallet-balance-card', fmt(getWalletBalance()));
+  setEl('total-savings-card', fmt(totalSavings));
+  setEl('tickets-count-card', tickets.length);
+  setEl('referrals-count-card', `${verifiedRefs.length} / 10`);
+
+  // Interest & tier
+  setEl('home-interest-earned', fmt(totalInterest));
+  const homeTierEl = document.getElementById('home-tier-badge');
+  if (homeTierEl) {
+    const bestGoal = goals.reduce((best, g) => g.targetAmount > (best?.targetAmount || 0) ? g : best, null);
+    const tier = bestGoal ? getGoalTier(bestGoal.targetAmount) : 'none';
+    if (tier !== 'none') {
+      homeTierEl.innerHTML = `<span class="tier-badge ${tierBadgeClass(tier)}">${tierLabel(tier)}</span>`;
+    } else {
+      homeTierEl.innerHTML = `<span class="tier-badge tier-badge--locked">No active goals</span>`;
+    }
   }
 
-  const listEl = document.getElementById('referral-list');
-  if (listEl) {
-    if (referrals.length === 0) {
-      listEl.innerHTML = `<div class="activity-item"><span class="activity-desc">No referrals yet</span><span class="activity-amount">--</span></div>`;
-    } else {
-      listEl.innerHTML = referrals.map(r => {
-        const badge = r.status === 'completed' 
-          ? '<span class="status-badge status-badge--verified">Verified · +1 Ticket</span>' 
-          : '<span class="status-badge status-badge--pending">Pending Deposit</span>';
-        const date = new Date(r.createdAt).toLocaleDateString();
-        return `<div class="referral-list-item">
-          <div class="referral-info">
-            <span class="referral-avatar">👤</span>
-            <div>
-              <span class="activity-desc">Invited Friend</span>
-              <span class="referral-date">Sent on ${date}</span>
-            </div>
-          </div>
-          <span class="activity-amount">${badge}</span>
+  // Active goals preview
+  const goalsListEl = document.getElementById('home-goals-list');
+  if (goalsListEl) {
+    if (goals.length === 0 && groups.length === 0) {
+      goalsListEl.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🏦</div>
+          <div class="empty-state-title">No savings goals yet</div>
+          <div class="empty-state-text">Create your first goal to start earning scratch cards and guaranteed prizes!</div>
+          <a href="savings.html" class="btn btn--primary">Start Saving</a>
         </div>`;
+    } else {
+      goalsListEl.innerHTML = goals.slice(0, 3).map(g => {
+        const pct = Math.min(100, (g.currentBalance / g.targetAmount) * 100);
+        const tier = getGoalTier(g.targetAmount);
+        return `
+          <div class="goal-card" style="margin-bottom:var(--space-sm);">
+            <div class="goal-card-header">
+              <div>
+                <div class="goal-card-title">${g.name}</div>
+                <div class="goal-card-type"><span class="tier-badge ${tierBadgeClass(tier)}">${tierLabel(tier)}</span></div>
+              </div>
+              <div class="goal-card-amount">
+                <span>${fmt(g.currentBalance)}</span>
+                <small style="font-size:0.7rem;font-weight:500;color:var(--text-secondary);">of ${fmt(g.targetAmount)}</small>
+              </div>
+            </div>
+            <div class="goal-progress-bar">
+              <div class="goal-progress-fill ${g.isCompleted ? 'complete' : ''}" style="width:${pct}%;"></div>
+            </div>
+            <div class="goal-progress-labels">
+              <span>${pct.toFixed(0)}% saved</span>
+              <span>${isLockComplete(g) ? '🔓 Lock complete' : `🔒 ${daysRemaining(g.endDate)}d left`}</span>
+            </div>
+          </div>`;
+      }).join('') + (goals.length > 3 ? `<p style="text-align:center;font-size:0.8rem;color:var(--text-secondary);margin-top:var(--space-sm);">+${goals.length - 3} more goals — <a href="savings.html" style="color:var(--black);font-weight:700;">View all</a></p>` : '');
+    }
+  }
+
+  // Recent activity
+  const activityEl = document.getElementById('home-activity-list');
+  if (activityEl) {
+    const txns = getTransactions().slice(0, 5);
+    if (txns.length === 0) {
+      activityEl.innerHTML = `
+        <div class="activity-item">
+          <div class="activity-icon">📭</div>
+          <div class="activity-info">
+            <div class="activity-desc">No transactions yet</div>
+            <div class="activity-date">Start saving to see activity</div>
+          </div>
+          <div class="activity-amount">--</div>
+        </div>`;
+    } else {
+      activityEl.innerHTML = txns.map(t => {
+        const icons = { debit: '📤', credit: '📥', prize: '🎟', referral: '👥', interest: '💰' };
+        const isPos = t.type === 'credit' || t.type === 'prize' || t.type === 'referral';
+        return `
+          <div class="activity-item">
+            <div class="activity-icon">${icons[t.type] || '📋'}</div>
+            <div class="activity-info">
+              <div class="activity-desc">${t.description}</div>
+              <div class="activity-date">${formatDate(t.date)}</div>
+            </div>
+            <div class="activity-amount ${isPos ? 'positive' : 'negative'}">${isPos ? '+' : '−'}${fmt(t.amount)}</div>
+          </div>`;
       }).join('');
     }
   }
 }
 
-// --- Copy Referral Code ---
-const copyBtn = document.getElementById('btn-copy-code');
-if (copyBtn) {
-  copyBtn.addEventListener('click', () => {
-    const codeEl = document.getElementById('my-referral-code');
-    if (codeEl) {
-      navigator.clipboard.writeText(codeEl.textContent).then(() => {
-        copyBtn.textContent = 'Copied!';
-        setTimeout(() => { copyBtn.textContent = 'Copy Code'; }, 1500);
-      }).catch(() => {});
+/* ---- SAVINGS PAGE ---- */
+function renderSavingsPage() {
+  const user = getCurrentUser();
+  const goals = getGoals().filter(g => g.userId === user.id);
+  const groups = getGroups().filter(g => g.members.some(m => m.userId === user.id));
+
+  // Personal Goals
+  const personalEl = document.getElementById('personal-goals-list');
+  const personalEmpty = document.getElementById('personal-goals-empty');
+  if (personalEl) {
+    const active = goals.filter(g => !g.isWithdrawnEarly);
+    if (active.length === 0) {
+      if (personalEmpty) personalEmpty.style.display = '';
+    } else {
+      if (personalEmpty) personalEmpty.style.display = 'none';
+      const goalsHtml = active.map(g => renderGoalCard(g)).join('');
+      // Insert before empty state
+      const existing = personalEl.querySelectorAll('.goal-card');
+      existing.forEach(el => el.remove());
+      personalEl.insertAdjacentHTML('afterbegin', goalsHtml);
+      // Re-attach action buttons
+      attachGoalCardButtons(active, user);
     }
+  }
+
+  // Group Goals
+  const groupEl = document.getElementById('group-list');
+  const groupEmpty = document.getElementById('group-goals-empty');
+  if (groupEl) {
+    const active = groups.filter(g => !g.isWithdrawnEarly);
+    if (active.length === 0) {
+      if (groupEmpty) groupEmpty.style.display = '';
+    } else {
+      if (groupEmpty) groupEmpty.style.display = 'none';
+      const groupsHtml = active.map(g => renderGroupCard(g, user.id)).join('');
+      const existing = groupEl.querySelectorAll('.group-card');
+      existing.forEach(el => el.remove());
+      groupEl.insertAdjacentHTML('afterbegin', groupsHtml);
+      attachGroupCardButtons(active, user);
+    }
+  }
+}
+
+function renderGoalCard(goal) {
+  const pct = Math.min(100, (goal.currentBalance / goal.targetAmount) * 100);
+  const tier = getGoalTier(goal.targetAmount);
+  const interest = calcInterest(goal);
+  const cd = countdown(goal.endDate);
+  const locked = !isLockComplete(goal);
+  const completed = goal.isCompleted;
+
+  return `
+    <div class="goal-card" id="goal-card-${goal.id}">
+      <div class="goal-card-header">
+        <div>
+          <div class="goal-card-title">${goal.name}</div>
+          <div class="goal-card-type" style="margin-top:4px;">
+            <span class="tier-badge ${tierBadgeClass(tier)}">${tierLabel(tier)}</span>
+            ${completed ? '<span class="status-badge status-badge--verified" style="margin-left:4px;">✓ Complete</span>' : ''}
+          </div>
+        </div>
+        <div class="goal-card-amount">
+          <span>${fmt(goal.currentBalance)}</span>
+          <small style="font-size:0.7rem;font-weight:500;color:var(--text-secondary);">of ${fmt(goal.targetAmount)}</small>
+        </div>
+      </div>
+
+      <div class="goal-progress-bar">
+        <div class="goal-progress-fill ${completed ? 'complete' : ''}" style="width:${pct}%;"></div>
+      </div>
+      <div class="goal-progress-labels">
+        <span>${pct.toFixed(0)}% saved</span>
+        <span>${completed ? 'Completed' : (locked ? `Locked — ${cd.days}d ${cd.hours}h remaining` : 'Lock period done')}</span>
+      </div>
+
+      <div class="goal-meta">
+        <div class="goal-meta-item">
+          <div class="goal-meta-label">End Date</div>
+          <div class="goal-meta-value" style="font-size:0.75rem;">${formatDate(goal.endDate)}</div>
+        </div>
+        <div class="goal-meta-item">
+          <div class="goal-meta-label">Monthly</div>
+          <div class="goal-meta-value">${fmtShort(goal.monthlyContribution)}</div>
+        </div>
+        <div class="goal-meta-item">
+          <div class="goal-meta-label">Interest</div>
+          <div class="goal-meta-value" style="color:var(--success);">${fmt(interest)}</div>
+        </div>
+      </div>
+
+      ${!completed && !goal.isWithdrawnEarly ? `
+        <div class="goal-card-actions">
+          <button class="btn btn--primary btn--sm" data-action="deposit" data-goal-id="${goal.id}">+ Deposit</button>
+          <button class="btn btn--outline btn--sm" data-action="withdraw" data-goal-id="${goal.id}" style="color:var(--danger);border-color:var(--danger);">Withdraw</button>
+          ${pct >= 100 && !locked ? `<button class="btn btn--primary btn--sm" data-action="complete" data-goal-id="${goal.id}" style="background:var(--success);">Claim Ticket</button>` : ''}
+        </div>` : ''}
+      ${completed ? `<div class="info-box info-box--success" style="margin-top:var(--space-md);"><span class="info-box-icon">+</span><span>Ticket earned! Go to <a href="game.html" style="color:#065F46;font-weight:700;">Tickets</a> to play.</span></div>` : ''}
+      ${goal.isWithdrawnEarly ? `<div class="info-box info-box--warning" style="margin-top:var(--space-md);"><span class="info-box-icon">!</span><span>Early withdrawal — interest &amp; tickets forfeited.</span></div>` : ''}
+    </div>`;
+}
+
+function attachGoalCardButtons(goals, user) {
+  goals.forEach(goal => {
+    const card = document.getElementById(`goal-card-${goal.id}`);
+    if (!card) return;
+    card.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.getAttribute('data-action');
+        const gId = btn.getAttribute('data-goal-id');
+        if (action === 'deposit') openGoalDepositModal(gId, user);
+        if (action === 'withdraw') openGoalWithdrawModal(gId, user);
+        if (action === 'complete') forceCompleteGoal(gId, user);
+      });
+    });
   });
 }
 
-// --- Share Modal Dialog Trigger ---
-const shareBtn = document.getElementById('btn-share-code');
-const shareModal = document.getElementById('modal-share');
-const closeShareModalBtn = document.getElementById('btn-close-share-modal');
-const copyShareLinkBtn = document.getElementById('btn-copy-share-link');
+function renderGroupCard(group, userId) {
+  const pct = Math.min(100, (group.pooledBalance / group.targetAmount) * 100);
+  const tier = getGroupTier(group.pooledBalance);
+  const myContribution = group.members.find(m => m.userId === userId)?.contribution || 0;
+  const interest = calcGroupInterest(group);
+  const cd = countdown(group.endDate);
+  const locked = !isLockComplete(group);
+  const completed = group.isCompleted;
 
+  const discountInfo = { bronze: '5%', silver: '10%', gold: '20%', none: '—' };
+
+  return `
+    <div class="group-card" id="group-card-${group.id}">
+      <div class="group-card-header">
+        <div>
+          <div class="group-name">${group.name}</div>
+          <div class="group-members-avatars" style="margin-top:4px;">
+            ${group.members.slice(0, 5).map(m => `<div class="member-avatar">${m.role === 'admin' ? 'ADM' : 'MBR'}</div>`).join('')}
+            ${group.members.length > 5 ? `<div class="member-avatar member-avatar--overflow">+${group.members.length - 5}</div>` : ''}
+          </div>
+          <div style="margin-top:6px;">
+            <span class="group-code-display">${group.code}</span>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div class="group-pooled-label">Pooled Balance</div>
+          <div class="group-pooled-balance">${fmt(group.pooledBalance)}</div>
+          <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:2px;">of ${fmt(group.targetAmount)}</div>
+          ${completed ? '<span class="status-badge status-badge--verified" style="margin-top:4px;display:inline-flex;">✓ Complete</span>' : ''}
+        </div>
+      </div>
+
+      <div class="goal-progress-bar">
+        <div class="goal-progress-fill ${completed ? 'complete' : ''}" style="width:${pct}%;"></div>
+      </div>
+      <div class="goal-progress-labels">
+        <span>${pct.toFixed(0)}% pooled • ${group.members.length} members</span>
+        <span>${locked ? `Locked — ${cd.days}d left` : 'Unlocked'}</span>
+      </div>
+
+      <div class="goal-meta">
+        <div class="goal-meta-item">
+          <div class="goal-meta-label">Your Share</div>
+          <div class="goal-meta-value">${fmt(myContribution)}</div>
+        </div>
+        <div class="goal-meta-item">
+          <div class="goal-meta-label">Voucher Tier</div>
+          <div class="goal-meta-value">${discountInfo[tier] || '—'} Off</div>
+        </div>
+        <div class="goal-meta-item">
+          <div class="goal-meta-label">Interest</div>
+          <div class="goal-meta-value" style="color:var(--success);">${fmt(interest / group.members.length)}</div>
+        </div>
+      </div>
+
+      ${completed ? `
+        <div class="discount-voucher-card" style="margin-top:var(--space-md);">
+          <div class="discount-percentage">${discountInfo[tier]}</div>
+          <div class="discount-label">Retail Category Discount</div>
+          <div class="discount-vendor">${GROUP_PRIZES[tier]?.vendor || 'Partner Retail Stores'}</div>
+        </div>` : ''}
+
+      ${!completed && !group.isWithdrawnEarly ? `
+        <div class="goal-card-actions">
+          <button class="btn btn--primary btn--sm" data-gaction="deposit" data-group-id="${group.id}">+ Contribute</button>
+          ${pct >= 100 && !locked ? `<button class="btn btn--primary btn--sm" data-gaction="complete" data-group-id="${group.id}" style="background:var(--success);">Claim Voucher</button>` : ''}}
+        </div>` : ''}
+    </div>`;
+}
+
+function attachGroupCardButtons(groups, user) {
+  groups.forEach(group => {
+    const card = document.getElementById(`group-card-${group.id}`);
+    if (!card) return;
+    card.querySelectorAll('[data-gaction]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.getAttribute('data-gaction');
+        const gId = btn.getAttribute('data-group-id');
+        if (action === 'deposit') openGroupDepositModal(gId, user);
+        if (action === 'complete') forceCompleteGroup(gId, user);
+      });
+    });
+  });
+}
+
+/* ---- GAME PAGE ---- */
+let activeTicketId = null;
+let gameActive = true;
+
+function renderGamePage() {
+  const user = getCurrentUser();
+  const tickets = getUserTickets(user.id);
+
+  const select = document.getElementById('ticket-code-select');
+  if (select) {
+    const prev = select.value;
+    select.innerHTML = '<option value="" disabled>— Select a card —</option>';
+    if (tickets.length === 0) {
+      select.innerHTML += '<option value="" disabled>No cards available — complete a savings goal!</option>';
+    } else {
+      tickets.forEach(t => {
+        const src = { personal_savings: '🏦 Personal', group_savings: '👥 Group', referral: '🎁 Referral' }[t.source] || t.source;
+        select.innerHTML += `<option value="${t.id}">${src} • ${tierLabel(t.tier)} • ${t.id.slice(-6)}</option>`;
+      });
+      if (prev && tickets.find(t => t.id === prev)) select.value = prev;
+      else select.value = tickets[0].id;
+    }
+    updateActiveTicketBanner();
+  }
+
+  const countEl = document.getElementById('game-tickets-count');
+  if (countEl) countEl.textContent = tickets.length;
+
+  // Prize history
+  const allTickets = getTickets().filter(t => t.userId === user.id && t.isScratched);
+  const histEl = document.getElementById('prize-history-list');
+  if (histEl) {
+    const emptyEl = document.getElementById('prize-history-empty');
+    if (allTickets.length === 0) {
+      if (emptyEl) emptyEl.style.display = '';
+    } else {
+      if (emptyEl) emptyEl.style.display = 'none';
+      const existing = histEl.querySelectorAll('.activity-item:not(#prize-history-empty)');
+      existing.forEach(el => el.remove());
+      allTickets.slice(0, 10).reverse().forEach(t => {
+        const r = t.reward;
+        if (!r) return;
+        const item = document.createElement('div');
+        item.className = 'activity-item';
+        item.innerHTML = `
+          <div class="activity-icon">${r.icon || 'TKT'}</div>
+          <div class="activity-info">
+            <div class="activity-desc">${r.prize}</div>
+            <div class="activity-date">${formatDate(t.scratchedAt)} · ${tierLabel(t.tier)}</div>
+          </div>
+          <div class="activity-amount positive">${r.type === 'retail_discount' ? r.discount + '% Off' : fmt(r.valueZar)}</div>`;
+        histEl.insertAdjacentElement('afterbegin', item);
+      });
+    }
+  }
+}
+
+function updateActiveTicketBanner() {
+  const select = document.getElementById('ticket-code-select');
+  const bannerEl = document.getElementById('active-ticket-banner');
+  const activeTextEl = document.getElementById('active-ticket-text');
+  const poolTypeEl = document.getElementById('active-pool-type');
+
+  if (!select || !select.value) {
+    if (bannerEl) bannerEl.textContent = 'Select a scratch card above to begin';
+    if (poolTypeEl) poolTypeEl.textContent = '—';
+    return;
+  }
+
+  activeTicketId = select.value;
+  const user = getCurrentUser();
+  const ticket = getUserTickets(user.id).find(t => t.id === activeTicketId);
+  if (!ticket) return;
+
+  const srcLabels = { personal_savings: 'PERSONAL SAVINGS', group_savings: 'GROUP / STOKVEL', referral: 'REFERRAL' };
+  if (activeTextEl) activeTextEl.textContent = `Using: ${tierLabel(ticket.tier)} (${srcLabels[ticket.source] || ''} · #${ticket.id.slice(-6)})`;
+  if (poolTypeEl) poolTypeEl.textContent = srcLabels[ticket.source] || ticket.source;
+}
+
+/* ---- REFERRALS PAGE ---- */
+function renderReferralsPage() {
+  const user = getCurrentUser();
+  const code = getActiveCode(user);
+
+  setEl('my-referral-code', code);
+  if (document.getElementById('drawer-user-code')) {
+    document.getElementById('drawer-user-code').textContent = code;
+  }
+
+  const referrals = getReferrals();
+  const myReferrals = referrals.filter(r => r.referrerId === user.id);
+  const verified = myReferrals.filter(r => r.status === 'verified');
+  const pending = myReferrals.filter(r => r.status === 'pending');
+  const total = myReferrals.length;
+
+  // Update stats summary pills
+  const totalStatEl = document.getElementById('stat-total-referred');
+  const verifiedStatEl = document.getElementById('stat-verified-referred');
+  const pendingStatEl = document.getElementById('stat-pending-referred');
+  if (totalStatEl) totalStatEl.textContent = total;
+  if (verifiedStatEl) verifiedStatEl.textContent = verified.length;
+  if (pendingStatEl) pendingStatEl.textContent = pending.length;
+
+  const pct = Math.min((verified.length / 10) * 100, 100);
+
+  const fillEl = document.getElementById('milestone-fill');
+  if (fillEl) fillEl.style.width = pct + '%';
+  const labelEl = document.getElementById('milestone-label');
+  if (labelEl) labelEl.textContent = `${verified.length} / 10 verified referrals to earn a bonus ticket`;
+
+  const ticketCountEl = document.getElementById('my-ticket-count');
+  if (ticketCountEl) {
+    const n = getUserTickets(user.id).length;
+    ticketCountEl.textContent = `You have ${n} ticket${n !== 1 ? 's' : ''} available`;
+  }
+
+  const listEl = document.getElementById('referral-list');
+  if (listEl) {
+    if (myReferrals.length === 0) {
+      listEl.innerHTML = `
+        <div class="activity-item">
+          <div class="activity-icon">--</div>
+          <div class="activity-info">
+            <div class="activity-desc">No referrals yet</div>
+            <div class="activity-date">Share your code or direct link to invite friends</div>
+          </div>
+          <div class="activity-amount">0</div>
+        </div>`;
+    } else {
+      const statusBadge = {
+        verified: '<span class="status-badge status-badge--verified">Verified - Ticket Earned</span>',
+        pending:  '<span class="status-badge status-badge--pending">Pending Goal</span>',
+        forfeited:'<span class="status-badge status-badge--forfeited">Forfeited</span>',
+        linked:   '<span class="status-badge status-badge--pending">Code Applied</span>',
+      };
+      listEl.innerHTML = myReferrals.map(r => `
+        <div class="referral-list-item">
+          <div class="referral-info">
+            <div class="referral-avatar">REF</div>
+            <div>
+              <div class="activity-desc">Invited Friend (${r.code})</div>
+              <div class="referral-date">${formatDate(r.createdAt)}</div>
+            </div>
+          </div>
+          <div>${statusBadge[r.status] || statusBadge.pending}</div>
+        </div>`).join('');
+    }
+  }
+}
+
+/* ================================================
+   MODAL HELPERS
+   ================================================ */
+let _goalDepositTarget = null;
+let _goalWithdrawTarget = null;
+let _groupDepositTarget = null;
+
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add('modal-overlay--active');
+}
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('modal-overlay--active');
+}
+
+function openGoalDepositModal(goalId, user) {
+  _goalDepositTarget = goalId;
+  const goal = getGoals().find(g => g.id === goalId);
+  if (!goal) return;
+  setEl('deposit-goal-name-label', `Depositing into: <strong>${goal.name}</strong>`);
+  const el = document.getElementById('deposit-amount');
+  if (el) { el.value = goal.monthlyContribution || ''; }
+  openModal('modal-goal-deposit');
+}
+function openGoalWithdrawModal(goalId, user) {
+  _goalWithdrawTarget = goalId;
+  const goal = getGoals().find(g => g.id === goalId);
+  if (!goal) return;
+  setEl('withdraw-goal-name-label', `Withdrawing from: <strong>${goal.name}</strong>`);
+  setEl('withdraw-balance-hint', `Available: ${fmt(goal.currentBalance)}`);
+  openModal('modal-goal-withdraw');
+}
+function openGroupDepositModal(groupId, user) {
+  _groupDepositTarget = groupId;
+  const group = getGroups().find(g => g.id === groupId);
+  if (!group) return;
+  setEl('group-deposit-name-label', `Group: <strong>${group.name}</strong>`);
+  openModal('modal-group-deposit');
+}
+
+function forceCompleteGoal(goalId, user) {
+  const goals = getGoals();
+  const idx = goals.findIndex(g => g.id === goalId && g.userId === user.id);
+  if (idx === -1) return;
+  const msg = completeGoal(goals, idx, user.id);
+  saveGoals(goals);
+  if (msg) showToast(msg, 'success', 4000);
+  updateAllUI();
+}
+
+function forceCompleteGroup(groupId, user) {
+  const groups = getGroups();
+  const idx = groups.findIndex(g => g.id === groupId);
+  if (idx === -1) return;
+  const msg = completeGroup(groups, idx);
+  saveGroups(groups);
+  if (msg) showToast(msg, 'success', 4000);
+  updateAllUI();
+}
+
+/* ================================================
+   GAME LOGIC
+   ================================================ */
+function setupGamePage() {
+  const gameCards = document.querySelectorAll('.game-card');
+  const winResultBox = document.getElementById('win-result-box');
+  const winBadge = document.getElementById('win-badge');
+  const winTitle = document.getElementById('win-title');
+  const winPrize = document.getElementById('win-prize');
+  const winSplitDetails = document.getElementById('win-split-details');
+  const deliveryStatusCard = document.getElementById('delivery-status-card');
+  const deliveryBadge = document.getElementById('delivery-status-badge');
+  const winPhoneText = document.getElementById('win-phone-text');
+  const winSmsText = document.getElementById('win-sms-text');
+  const playAgainBtn = document.getElementById('btn-play-again');
+  const gameInstruction = document.getElementById('game-instruction');
+  const scratchArea = document.getElementById('scratch-card-area');
+  const scratchOverlay = document.getElementById('scratch-overlay');
+  const scratchReveal = document.getElementById('scratch-reveal');
+  const scratchWrapper = document.getElementById('scratch-card-wrapper');
+
+  let pickedCard = false;
+
+  function resetGame() {
+    gameCards.forEach(card => {
+      card.classList.remove('game-card--flipped');
+      card.disabled = false;
+    });
+    if (winResultBox) winResultBox.style.display = 'none';
+    if (scratchArea) scratchArea.style.display = 'none';
+    if (scratchOverlay) scratchOverlay.classList.remove('scratched');
+    if (gameInstruction) gameInstruction.textContent = 'Choose 1 of the 3 cards to reveal your guaranteed prize!';
+    pickedCard = false;
+    gameActive = true;
+  }
+
+  gameCards.forEach(card => {
+    card.addEventListener('click', () => {
+      if (!gameActive || pickedCard) return;
+
+      const user = getCurrentUser();
+      const tickets = getUserTickets(user.id);
+
+      if (!activeTicketId) {
+        showToast('Please select a scratch card from the dropdown above!', 'warning');
+        return;
+      }
+      const ticket = tickets.find(t => t.id === activeTicketId);
+      if (!ticket) {
+        showToast('That card has already been scratched or is unavailable.', 'warning');
+        renderGamePage();
+        return;
+      }
+
+      pickedCard = true;
+      gameActive = false;
+
+      // Flip the picked card
+      card.classList.add('game-card--flipped');
+      gameCards.forEach(c => { if (c !== card) c.disabled = true; });
+
+      // Update card back text
+      const backText = card.querySelector('.reward-text');
+      if (backText) backText.textContent = '🎉 WINNER!';
+
+      // Show scratch card area with a delay
+      setTimeout(() => {
+        const result = scratchTicket(activeTicketId, user.id);
+        if (!result) { showToast('Error loading ticket. Please refresh.', 'error'); return; }
+
+        const { reward } = result;
+
+        // Pre-fill scratch card reveal content
+        const prizeIconEl = document.getElementById('scratch-prize-icon');
+        const prizeTextEl = document.getElementById('scratch-prize-text');
+        const prizeSubEl  = document.getElementById('scratch-prize-sub');
+        const tierBadgeEl = document.getElementById('scratch-tier-badge');
+
+        if (prizeIconEl)  prizeIconEl.textContent = reward.icon || 'WIN';
+        if (prizeTextEl)  prizeTextEl.textContent  = reward.prize;
+        if (prizeSubEl)   prizeSubEl.textContent   = reward.splitDetails || '';
+        if (tierBadgeEl)  tierBadgeEl.innerHTML = `<span class="tier-badge ${reward.badgeClass.replace('win-badge', 'tier-badge')}">${reward.tierLabel}</span>`;
+
+        if (scratchArea) scratchArea.style.display = 'flex';
+        if (scratchOverlay) scratchOverlay.classList.remove('scratched');
+        if (gameInstruction) gameInstruction.textContent = 'Tap the silver card to scratch and reveal your prize!';
+
+        // Scratch interaction
+        if (scratchWrapper) {
+          const doScratch = () => {
+            if (scratchOverlay && !scratchOverlay.classList.contains('scratched')) {
+              scratchOverlay.classList.add('scratched');
+              setTimeout(() => showFullResult(reward, user), 700);
+            }
+          };
+          scratchWrapper.addEventListener('click', doScratch, { once: true });
+          scratchWrapper.addEventListener('touchstart', doScratch, { once: true, passive: true });
+        }
+      }, 700);
+
+      function showFullResult(reward, user) {
+        // Result box
+        if (winBadge) { winBadge.textContent = reward.tierLabel; winBadge.className = `win-badge ${reward.badgeClass}`; }
+        if (winTitle) winTitle.textContent = reward.prize;
+        if (winPrize) winPrize.textContent = reward.type === 'retail_discount' ? `${reward.discount}% off at ${reward.vendor}` : `Value: ~${fmt(reward.valueZar)}`;
+        if (winSplitDetails) winSplitDetails.textContent = reward.splitDetails;
+
+        if (deliveryStatusCard) {
+          deliveryStatusCard.style.display = 'block';
+          if (deliveryBadge) { deliveryBadge.textContent = 'DELIVERED'; deliveryBadge.className = 'delivery-status-badge delivery-status-badge--delivered'; }
+          if (winPhoneText) winPhoneText.textContent = reward.type === 'retail_discount'
+            ? `Recipients: All group members`
+            : `Recipient: ${user.phone} (MTN MoMo SIM)`;
+          if (winSmsText) winSmsText.textContent = generateSmsAlert(reward, user.phone);
+        }
+
+        if (winResultBox) winResultBox.style.display = 'block';
+        if (gameInstruction) gameInstruction.textContent = 'Congratulations! Your prize has been credited.';
+
+        // Refresh UI
+        activeTicketId = null;
+        renderGamePage();
+        updateHeaderWallet();
+      }
+    });
+  });
+
+  if (playAgainBtn) {
+    playAgainBtn.addEventListener('click', resetGame);
+  }
+
+  const ticketSelect = document.getElementById('ticket-code-select');
+  if (ticketSelect) {
+    ticketSelect.addEventListener('change', () => {
+      activeTicketId = ticketSelect.value || null;
+      updateActiveTicketBanner();
+    });
+  }
+
+  const addTicketBtn = document.getElementById('btn-add-ticket');
+  if (addTicketBtn) {
+    addTicketBtn.addEventListener('click', () => {
+      const user = getCurrentUser();
+      issueTicket(user.id, 'personal_savings', 'bronze', 'demo');
+      showToast('Demo Bronze scratch card added!', 'success');
+      renderGamePage();
+    });
+  }
+}
+
+/* ================================================
+   SHARE MODAL
+   ================================================ */
 function openShareModal() {
-  if (!shareModal) return;
-  
-  const codeEl = document.getElementById('my-referral-code');
-  const code = codeEl ? codeEl.textContent : "MOMO-0000-000";
-  const shareUrl = `https://www.mtn.co.za/home/momo/?ref=${code}`;
-  const shareText = `Join me on MoMo Save & Win! Use my referral code ${code} to earn a free ticket:`;
-  
-  // Set direct link input value
+  const modal = document.getElementById('modal-share');
+  if (!modal) return;
+  const user = getCurrentUser();
+  const code = getActiveCode(user);
+  const shareUrl = `${window.location.origin}${window.location.pathname}?ref=${code}`;
+  const shareText = `Join me on MTN MoMo Prize-Linked Savings! Use my code ${code} to start saving:`;
+
   const linkInput = document.getElementById('share-link-input');
   if (linkInput) linkInput.value = shareUrl;
-  
-  // Set social links
-  const whatsappLink = document.getElementById('share-whatsapp');
-  if (whatsappLink) whatsappLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
-  
-  const telegramLink = document.getElementById('share-telegram');
-  if (telegramLink) telegramLink.href = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
-  
-  const xLink = document.getElementById('share-x');
-  if (xLink) xLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
-  
-  const facebookLink = document.getElementById('share-facebook');
-  if (facebookLink) facebookLink.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-  
-  const smsLink = document.getElementById('share-sms');
-  if (smsLink) smsLink.href = `sms:?body=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
-  
-  // Show modal overlay
-  shareModal.classList.add('modal-overlay--active');
+
+  const links = {
+    'share-whatsapp': `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
+    'share-telegram': `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`,
+    'share-x':        `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+    'share-facebook': `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+    'share-sms':      `sms:?body=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
+  };
+  Object.entries(links).forEach(([id, href]) => {
+    const el = document.getElementById(id);
+    if (el) el.href = href;
+  });
+
+  modal.classList.add('modal-overlay--active');
 }
 
 function closeShareModal() {
-  if (shareModal) shareModal.classList.remove('modal-overlay--active');
+  const modal = document.getElementById('modal-share');
+  if (modal) modal.classList.remove('modal-overlay--active');
 }
 
-if (shareBtn) {
-  shareBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    openShareModal();
-  });
-}
-
-if (closeShareModalBtn) {
-  closeShareModalBtn.addEventListener('click', closeShareModal);
-}
-
-if (shareModal) {
-  shareModal.addEventListener('click', (e) => {
-    if (e.target === shareModal) closeShareModal();
-  });
-}
-
-if (copyShareLinkBtn) {
-  copyShareLinkBtn.addEventListener('click', () => {
-    const linkInput = document.getElementById('share-link-input');
-    if (linkInput) {
-      navigator.clipboard.writeText(linkInput.value).then(() => {
-        copyShareLinkBtn.textContent = 'Copied!';
-        setTimeout(() => { copyShareLinkBtn.textContent = 'Copy Link'; }, 1500);
-      }).catch(() => {});
-    }
-  });
-}
-
-// --- Submit entered code ---
-const submitBtn = document.getElementById('btn-submit-code');
-if (submitBtn) {
-  submitBtn.addEventListener('click', () => {
-    const input = document.getElementById('input-referral-code');
-    if (input && input.value.trim()) {
-      submitReferralCode(input.value, getCurrentUser());
-      renderReferralPage();
-    }
-  });
-}
-
-// --- Savings Balance State & Auto-Referral Completion Flow ---
-const SAVINGS_KEY = 'momo_savings_balance';
-
-function getSavingsBalance(userId) {
-  try {
-    const balance = JSON.parse(localStorage.getItem(SAVINGS_KEY) || '{}');
-    if (balance[userId] === undefined) {
-      balance[userId] = 0.00;
-    }
-    return balance[userId];
-  } catch (e) {
-    return 0.00;
-  }
-}
-
-function setSavingsBalance(userId, amount) {
-  try {
-    const balance = JSON.parse(localStorage.getItem(SAVINGS_KEY) || '{}');
-    balance[userId] = amount;
-    localStorage.setItem(SAVINGS_KEY, JSON.stringify(balance));
-  } catch (e) {
-    const balance = {};
-    balance[userId] = amount;
-    localStorage.setItem(SAVINGS_KEY, JSON.stringify(balance));
-  }
-}
-
-function updateSavingsUI() {
-  const user = getCurrentUser();
-  const balance = getSavingsBalance(user.id);
-  const formatted = `R${balance.toFixed(2)}`;
-  
-  const savingsSummaryEl = document.querySelector('#card-savings-summary .card-value');
-  const mySavingsBalanceEl = document.querySelector('#section-personal-savings .card .card-value');
-  
-  if (savingsSummaryEl) savingsSummaryEl.textContent = formatted;
-  if (mySavingsBalanceEl) mySavingsBalanceEl.textContent = formatted;
-}
-
-// Deposit event handler
-const depositBtn = document.getElementById('btn-deposit-personal');
-if (depositBtn) {
-  depositBtn.addEventListener('click', () => {
-    const user = getCurrentUser();
-    const currentBalance = getSavingsBalance(user.id);
-    const amountStr = prompt("Enter deposit amount into your Savings Pocket (ZAR):", "1000.00");
-    if (!amountStr) return;
-    
-    const amount = parseFloat(amountStr);
-    if (isNaN(amount) || amount <= 0) {
-      alert("Please enter a valid positive amount.");
-      return;
-    }
-    
-    const newBalance = currentBalance + amount;
-    setSavingsBalance(user.id, newBalance);
-    updateSavingsUI();
-    
-    // Automatically trigger referral completion on savings deposit!
-    const referrals = getReferrals();
-    const r = referrals.find(ref => ref.referredId === user.id && ref.status === 'linked');
-    
-    if (r) {
-      completeReferral(user.id);
-      availableTickets++;
-      saveAvailableTickets();
-      updateTicketUI();
-      renderReferralPage();
-      alert(`Deposit of R${amount.toFixed(2)} successful! Your referral code ${r.code} has been verified automatically, and you earned a game ticket!`);
-    } else {
-      alert(`Deposit of R${amount.toFixed(2)} successful!`);
-    }
-  });
-}
-
-// Withdraw event handler
-const withdrawBtn = document.getElementById('btn-withdraw-personal');
-if (withdrawBtn) {
-  withdrawBtn.addEventListener('click', () => {
-    const user = getCurrentUser();
-    const currentBalance = getSavingsBalance(user.id);
-    const amountStr = prompt("Enter withdrawal amount from your Savings Pocket (ZAR):", "500.00");
-    if (!amountStr) return;
-    
-    const amount = parseFloat(amountStr);
-    if (isNaN(amount) || amount <= 0) {
-      alert("Please enter a valid positive amount.");
-      return;
-    }
-    
-    if (amount > currentBalance) {
-      alert("Insufficient savings balance.");
-      return;
-    }
-    
-    const newBalance = currentBalance - amount;
-    setSavingsBalance(user.id, newBalance);
-    updateSavingsUI();
-    alert(`Withdrawal of R${amount.toFixed(2)} successful!`);
-  });
-}
-
-// --- URL Referral Parameter Detection & Welcome Modal ---
-function checkUrlReferralCode() {
+/* ================================================
+   URL REFERRAL DETECTION & ONBOARDING
+   ================================================ */
+function checkUrlReferral() {
   const params = new URLSearchParams(window.location.search);
   const refCode = params.get('ref') || params.get('code');
   if (!refCode) return;
 
-  const normalized = normalizeCode(refCode);
   const user = getCurrentUser();
+  const normalized = normalizeCode(refCode);
+
   const codes = getReferralCodes();
-  let entry = codes[normalized];
+  const entry = codes[normalized];
+  if (entry && entry.userId === user.id) { clearUrlParams(); return; }
+  if (getReferrals().some(r => r.referredId === user.id)) { clearUrlParams(); return; }
 
-  // If own code, just clear URL and ignore
-  if (entry && entry.userId === user.id) {
-    clearUrlParams();
-    return;
-  }
-
-  // If already referred, just clear URL and ignore
-  if (getReferrals().some(r => r.referredId === user.id)) {
-    clearUrlParams();
-    return;
-  }
-
-  // Open Welcome Modal
   const welcomeModal = document.getElementById('modal-welcome');
-  const welcomeCodeDisplay = document.getElementById('welcome-referral-code');
-  
-  if (welcomeModal && welcomeCodeDisplay) {
-    welcomeCodeDisplay.textContent = normalized;
+  const welcomeCode  = document.getElementById('welcome-referral-code');
+  if (welcomeModal && welcomeCode) {
+    welcomeCode.textContent = normalized;
     welcomeModal.classList.add('modal-overlay--active');
-    
-    const applyBtn = document.getElementById('btn-apply-welcome-code');
+
+    // CTA 1: Download MTN MoMo App
+    const downloadBtn = document.getElementById('btn-welcome-download');
+    if (downloadBtn) {
+      const nbDownload = downloadBtn.cloneNode(true);
+      downloadBtn.parentNode.replaceChild(nbDownload, downloadBtn);
+      nbDownload.addEventListener('click', () => {
+        // Detect OS or redirect to MTN MoMo App store page
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const storeUrl = isIOS
+          ? 'https://apps.apple.com/za/app/mtn-momo-south-africa/id1494883464'
+          : 'https://play.google.com/store/apps/details?id=za.co.mtn.momo';
+        window.open(storeUrl, '_blank', 'noopener');
+        showToast('Redirecting to MTN MoMo in the App Store...', 'default');
+      });
+    }
+
+    // CTA 2: Register / Sign Up with Referral Code
+    const signupBtn = document.getElementById('btn-welcome-signup');
+    if (signupBtn) {
+      const nbSignup = signupBtn.cloneNode(true);
+      signupBtn.parentNode.replaceChild(nbSignup, signupBtn);
+      nbSignup.addEventListener('click', () => {
+        welcomeModal.classList.remove('modal-overlay--active');
+        openRegisterModal(normalized);
+      });
+    }
+
+    // Secondary CTA / Close: Maybe Later
     const closeBtn = document.getElementById('btn-close-welcome-modal');
-    
-    if (applyBtn) {
-      const newApplyBtn = applyBtn.cloneNode(true);
-      applyBtn.parentNode.replaceChild(newApplyBtn, applyBtn);
-      
-      newApplyBtn.addEventListener('click', () => {
-        submitReferralCode(normalized, user);
-        renderReferralPage();
-        welcomeModal.classList.remove('modal-overlay--active');
-        clearUrlParams();
-        navigateTo('referrals');
-      });
-    }
-    
     if (closeBtn) {
-      const newCloseBtn = closeBtn.cloneNode(true);
-      closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
-      
-      newCloseBtn.addEventListener('click', () => {
+      const nc = closeBtn.cloneNode(true);
+      closeBtn.parentNode.replaceChild(nc, closeBtn);
+      nc.addEventListener('click', () => {
         welcomeModal.classList.remove('modal-overlay--active');
         clearUrlParams();
       });
     }
+  }
+}
+
+function openRegisterModal(prefillCode) {
+  const regModal = document.getElementById('modal-register');
+  const regCodeInput = document.getElementById('reg-referral-code');
+  if (regCodeInput) regCodeInput.value = prefillCode || '';
+  if (regModal) regModal.classList.add('modal-overlay--active');
+}
+
+function closeRegisterModal() {
+  const regModal = document.getElementById('modal-register');
+  if (regModal) regModal.classList.remove('modal-overlay--active');
+}
+
+function handleRegistrationWithCode() {
+  const nameInput = document.getElementById('reg-full-name');
+  const phoneInput = document.getElementById('reg-phone-number');
+  const codeInput = document.getElementById('reg-referral-code');
+
+  const fullName = nameInput?.value.trim() || 'MoMo User';
+  const phone = phoneInput?.value.trim() || '083' + Math.floor(1000000 + Math.random() * 9000000);
+  const rawCode = codeInput?.value.trim();
+
+  // Create new registered user
+  const newUser = {
+    id: 'usr_' + Math.random().toString(36).slice(2, 10),
+    phone: phone,
+    name: fullName,
+    createdAt: new Date().toISOString(),
+  };
+  save(KEYS.USER, newUser);
+
+  // Auto issue initial referral code for this new user
+  generateReferralCode(newUser.id, phone.slice(-4));
+
+  // Automatically bind to the referrer
+  let bindResult = null;
+  if (rawCode) {
+    bindResult = submitReferralCode(rawCode, newUser);
+  }
+
+  closeRegisterModal();
+  clearUrlParams();
+  updateAllUI();
+
+  if (bindResult && bindResult.ok) {
+    showToast(`Welcome, ${fullName}! Account created and bound to code ${normalizeCode(rawCode)}.`, 'success', 5000);
+  } else if (bindResult) {
+    showToast(`Account registered for ${fullName}! Note: ${bindResult.msg}`, 'warning', 4000);
+  } else {
+    showToast(`Welcome to Prized Linked Savings, ${fullName}!`, 'success');
   }
 }
 
@@ -825,68 +1569,307 @@ function clearUrlParams() {
   const url = new URL(window.location);
   url.searchParams.delete('ref');
   url.searchParams.delete('code');
-  window.history.replaceState({}, document.title, url.pathname + url.search);
+  window.history.replaceState({}, document.title, url.pathname + (url.search === '?' ? '' : url.search));
 }
 
-// Initial render
+/* ================================================
+   HELPER: Set element content
+   ================================================ */
+function setEl(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html;
+}
+
+/* ================================================
+   NAVIGATION DRAWER
+   ================================================ */
+function setupDrawer() {
+  const navDrawer = document.getElementById('nav-drawer');
+  const openBtn   = document.getElementById('btn-open-menu');
+  const closeBtn  = document.getElementById('btn-close-menu');
+  const overlay   = document.getElementById('drawer-overlay');
+
+  const open  = () => navDrawer?.classList.add('nav-drawer--active');
+  const close = () => navDrawer?.classList.remove('nav-drawer--active');
+
+  if (openBtn)  openBtn.addEventListener('click', open);
+  if (closeBtn) closeBtn.addEventListener('click', close);
+  if (overlay)  overlay.addEventListener('click', close);
+}
+
+/* ================================================
+   MODAL EVENT BINDINGS
+   ================================================ */
+function setupModals() {
+  const user = getCurrentUser();
+
+  // --- Add Funds (Home) ---
+  const addFundsModal    = document.getElementById('modal-add-funds');
+  const addFundsAmountEl = document.getElementById('add-funds-amount');
+  const addFundsPartner  = document.getElementById('add-funds-partner');
+  document.getElementById('btn-close-add-funds')?.addEventListener('click',  () => closeModal('modal-add-funds'));
+  document.getElementById('btn-cancel-add-funds')?.addEventListener('click', () => closeModal('modal-add-funds'));
+  document.getElementById('btn-confirm-add-funds')?.addEventListener('click', () => {
+    const amount = parseFloat(addFundsAmountEl?.value || 0);
+    if (!amount || amount <= 0) { showToast('Enter a valid amount.', 'warning'); return; }
+    const partner = addFundsPartner?.value || 'Retail Partner';
+    addToWallet(amount);
+    addTransaction('credit', amount, `Cash in via ${partner}`);
+    showToast(`${fmt(amount)} added to your wallet from ${partner}.`, 'success');
+    closeModal('modal-add-funds');
+    updateAllUI();
+  });
+  if (addFundsModal) addFundsModal.addEventListener('click', e => { if (e.target === addFundsModal) closeModal('modal-add-funds'); });
+
+  // --- Personal Goal Creation ---
+  const goalNameEl     = document.getElementById('goal-name');
+  const goalTargetEl   = document.getElementById('goal-target');
+  const goalMonthsEl   = document.getElementById('goal-months');
+  const goalMonthlyEl  = document.getElementById('goal-monthly');
+  const goalInitialEl  = document.getElementById('goal-initial');
+  const tierPreviewEl  = document.getElementById('goal-tier-preview');
+  const yieldPreview   = document.getElementById('goal-yield-preview');
+  const projTotalEl    = document.getElementById('goal-projected-total');
+  const projInterestEl = document.getElementById('goal-projected-interest');
+
+  function updateGoalPreview() {
+    const target  = parseFloat(goalTargetEl?.value || 0);
+    const months  = parseInt(goalMonthsEl?.value || 12);
+    const initial = parseFloat(goalInitialEl?.value || 0);
+    if (goalMonthlyEl) goalMonthlyEl.value = target > 0 ? Math.ceil(Math.max(0, target - initial) / months) : '';
+    if (tierPreviewEl) {
+      const tier = getGoalTier(target);
+      tierPreviewEl.innerHTML = tier !== 'none'
+        ? `<span class="tier-badge ${tierBadgeClass(tier)}">${tierLabel(tier)}</span>`
+        : '(below R1,000 minimum)';
+    }
+    if (target >= 1000 && yieldPreview) {
+      yieldPreview.style.display = 'block';
+      const effectiveRate = 3.75 / 100;
+      const interest = target * effectiveRate * (months / 12);
+      if (projTotalEl)    projTotalEl.textContent    = fmt(target + interest);
+      if (projInterestEl) projInterestEl.textContent = fmt(interest);
+    } else if (yieldPreview) {
+      yieldPreview.style.display = 'none';
+    }
+  }
+
+  goalTargetEl?.addEventListener('input', updateGoalPreview);
+  goalMonthsEl?.addEventListener('change', updateGoalPreview);
+  goalInitialEl?.addEventListener('input', updateGoalPreview);
+
+  document.getElementById('btn-create-personal-goal')?.addEventListener('click', () => openModal('modal-personal-goal'));
+  document.getElementById('btn-close-personal-goal')?.addEventListener('click',  () => closeModal('modal-personal-goal'));
+  document.getElementById('btn-cancel-personal-goal')?.addEventListener('click', () => closeModal('modal-personal-goal'));
+  document.getElementById('modal-personal-goal')?.addEventListener('click', e => { if (e.target.id === 'modal-personal-goal') closeModal('modal-personal-goal'); });
+
+  document.getElementById('btn-confirm-personal-goal')?.addEventListener('click', () => {
+    const name    = goalNameEl?.value.trim();
+    const target  = parseFloat(goalTargetEl?.value || 0);
+    const months  = parseInt(goalMonthsEl?.value || 12);
+    const initial = parseFloat(goalInitialEl?.value || 0);
+
+    if (!name)          { showToast('Please enter a goal name.', 'warning'); return; }
+    if (target < 1000)  { showToast('Minimum goal target is R1,000.', 'warning'); return; }
+    if (months < 3)     { showToast('Minimum lock-up period is 3 months.', 'warning'); return; }
+    if (initial > getWalletBalance()) { showToast(`Insufficient wallet balance. Available: ${fmt(getWalletBalance())}`, 'warning'); return; }
+
+    createGoal(user.id, name, target, months, initial);
+    showToast(`Goal "${name}" created! ${initial > 0 ? fmt(initial) + ' deposited.' : ''}`, 'success');
+    if (goalNameEl)    goalNameEl.value    = '';
+    if (goalTargetEl)  goalTargetEl.value  = '';
+    if (goalMonthsEl)  goalMonthsEl.value  = '12';
+    if (goalInitialEl) goalInitialEl.value = '';
+    closeModal('modal-personal-goal');
+    updateAllUI();
+  });
+
+  // --- Goal Deposit ---
+  document.getElementById('btn-close-goal-deposit')?.addEventListener('click',  () => closeModal('modal-goal-deposit'));
+  document.getElementById('btn-cancel-goal-deposit')?.addEventListener('click', () => closeModal('modal-goal-deposit'));
+  document.getElementById('btn-confirm-goal-deposit')?.addEventListener('click', () => {
+    const amount = parseFloat(document.getElementById('deposit-amount')?.value || 0);
+    if (!amount || amount <= 0) { showToast('Enter a valid deposit amount.', 'warning'); return; }
+    const result = depositToGoal(_goalDepositTarget, amount, user.id);
+    if (!result.ok) { showToast(result.msg, 'error'); return; }
+    showToast(`${fmt(amount)} deposited! 💰`, 'success');
+    if (result.completionMsg) setTimeout(() => showToast(result.completionMsg, 'success', 5000), 500);
+    closeModal('modal-goal-deposit');
+    updateAllUI();
+  });
+
+  // --- Goal Withdraw ---
+  document.getElementById('btn-close-goal-withdraw')?.addEventListener('click',  () => closeModal('modal-goal-withdraw'));
+  document.getElementById('btn-cancel-goal-withdraw')?.addEventListener('click', () => closeModal('modal-goal-withdraw'));
+  document.getElementById('btn-confirm-goal-withdraw')?.addEventListener('click', () => {
+    const amount = parseFloat(document.getElementById('withdraw-amount')?.value || 0);
+    if (!amount || amount <= 0) { showToast('Enter a valid withdrawal amount.', 'warning'); return; }
+    const result = withdrawFromGoal(_goalWithdrawTarget, amount, user.id);
+    if (!result.ok) { showToast(result.msg, 'error'); return; }
+    if (result.isEarly) {
+      showToast(`⚠️ ${fmt(amount)} withdrawn. Interest & scratch cards forfeited (early withdrawal).`, 'warning', 5000);
+    } else {
+      showToast(`${fmt(amount)} returned to your wallet.`, 'success');
+    }
+    closeModal('modal-goal-withdraw');
+    updateAllUI();
+  });
+
+  // --- Create Group ---
+  const groupNameEl    = document.getElementById('group-name');
+  const groupTargetEl  = document.getElementById('group-target');
+  const groupTierPrvEl = document.getElementById('group-tier-preview');
+  const groupDurEl     = document.getElementById('group-duration');
+  const groupInitEl    = document.getElementById('group-initial');
+
+  function updateGroupPreview() {
+    const target = parseFloat(groupTargetEl?.value || 0);
+    if (groupTierPrvEl) {
+      const tier = getGroupTier(target);
+      const discounts = { gold: '20%', silver: '10%', bronze: '5%', none: 'Below minimum' };
+      groupTierPrvEl.textContent = discounts[tier];
+    }
+  }
+  groupTargetEl?.addEventListener('input', updateGroupPreview);
+
+  document.getElementById('btn-create-group')?.addEventListener('click', () => openModal('modal-create-group'));
+  document.getElementById('btn-close-create-group')?.addEventListener('click',  () => closeModal('modal-create-group'));
+  document.getElementById('btn-cancel-create-group')?.addEventListener('click', () => closeModal('modal-create-group'));
+  document.getElementById('modal-create-group')?.addEventListener('click', e => { if (e.target.id === 'modal-create-group') closeModal('modal-create-group'); });
+
+  document.getElementById('btn-confirm-create-group')?.addEventListener('click', () => {
+    const name    = groupNameEl?.value.trim();
+    const target  = parseFloat(groupTargetEl?.value || 0);
+    const months  = parseInt(groupDurEl?.value || 6);
+    const initial = parseFloat(groupInitEl?.value || 0);
+
+    if (!name)         { showToast('Please enter a group name.', 'warning'); return; }
+    if (target < 1000) { showToast('Minimum pool target is R1,000.', 'warning'); return; }
+    if (initial > getWalletBalance()) { showToast(`Insufficient wallet balance. Available: ${fmt(getWalletBalance())}`, 'warning'); return; }
+
+    const group = createGroup(user.id, name, target, months, initial);
+    showToast(`Group "${name}" created! Code: ${group.code}`, 'success', 5000);
+    if (groupNameEl)   groupNameEl.value   = '';
+    if (groupTargetEl) groupTargetEl.value = '';
+    if (groupInitEl)   groupInitEl.value   = '';
+    closeModal('modal-create-group');
+    updateAllUI();
+  });
+
+  // --- Join Group ---
+  document.getElementById('btn-join-group')?.addEventListener('click', () => openModal('modal-join-group'));
+  document.getElementById('btn-close-join-group')?.addEventListener('click',  () => closeModal('modal-join-group'));
+  document.getElementById('btn-cancel-join-group')?.addEventListener('click', () => closeModal('modal-join-group'));
+  document.getElementById('modal-join-group')?.addEventListener('click', e => { if (e.target.id === 'modal-join-group') closeModal('modal-join-group'); });
+
+  document.getElementById('btn-confirm-join-group')?.addEventListener('click', () => {
+    const code = document.getElementById('join-group-code')?.value.trim();
+    const amount = parseFloat(document.getElementById('join-group-contribution')?.value || 0);
+    const statusEl = document.getElementById('join-group-status');
+
+    if (!code) { showToast('Enter a group code.', 'warning'); return; }
+    if (!amount || amount <= 0) { showToast('Enter your contribution amount.', 'warning'); return; }
+
+    const result = joinGroup(user.id, code, amount);
+    if (!result.ok) {
+      if (statusEl) { statusEl.textContent = result.msg; statusEl.className = 'enter-code-status text-danger'; }
+      return;
+    }
+    showToast(`Joined "${result.group.name}"! ${fmt(amount)} contributed.`, 'success');
+    closeModal('modal-join-group');
+    updateAllUI();
+  });
+
+  // --- Group Deposit ---
+  document.getElementById('btn-close-group-deposit')?.addEventListener('click',  () => closeModal('modal-group-deposit'));
+  document.getElementById('btn-cancel-group-deposit')?.addEventListener('click', () => closeModal('modal-group-deposit'));
+  document.getElementById('btn-confirm-group-deposit')?.addEventListener('click', () => {
+    const amount = parseFloat(document.getElementById('group-deposit-amount')?.value || 0);
+    if (!amount || amount <= 0) { showToast('Enter a valid amount.', 'warning'); return; }
+    const result = depositToGroup(_groupDepositTarget, amount, user.id);
+    if (!result.ok) { showToast(result.msg, 'error'); return; }
+    showToast(`${fmt(amount)} contributed to group!`, 'success');
+    if (result.completionMsg) setTimeout(() => showToast(result.completionMsg, 'success', 5000), 500);
+    closeModal('modal-group-deposit');
+    updateAllUI();
+  });
+
+  // --- Referral Submit ---
+  document.getElementById('btn-submit-code')?.addEventListener('click', () => {
+    const input = document.getElementById('input-referral-code');
+    const statusEl = document.getElementById('enter-code-status');
+    if (!input?.value.trim()) return;
+    const result = submitReferralCode(input.value, user);
+    if (statusEl) {
+      statusEl.textContent = result.msg;
+      statusEl.className = `enter-code-status ${result.ok ? 'text-success' : 'text-danger'}`;
+    }
+    if (result.ok) { input.value = ''; renderReferralsPage(); }
+  });
+
+  // --- Copy referral code ---
+  document.getElementById('btn-copy-code')?.addEventListener('click', () => {
+    const codeEl = document.getElementById('my-referral-code');
+    if (codeEl) navigator.clipboard.writeText(codeEl.textContent)
+      .then(() => showToast('Code copied!', 'success'))
+      .catch(() => showToast('Copy failed — please copy manually.', 'warning'));
+  });
+
+  // --- Share modal ---
+  document.getElementById('btn-share-code')?.addEventListener('click', e => { e.preventDefault(); openShareModal(); });
+  document.getElementById('btn-close-share-modal')?.addEventListener('click', closeShareModal);
+  document.getElementById('modal-share')?.addEventListener('click', e => { if (e.target.id === 'modal-share') closeShareModal(); });
+
+  // --- Copy share link ---
+  document.getElementById('btn-copy-share-link')?.addEventListener('click', () => {
+    const linkInput = document.getElementById('share-link-input');
+    if (linkInput) navigator.clipboard.writeText(linkInput.value)
+      .then(() => showToast('Link copied!', 'success'))
+      .catch(() => showToast('Copy failed.', 'warning'));
+  });
+
+  // --- Welcome modal (from referrals page) ---
+  document.getElementById('btn-close-welcome-modal')?.addEventListener('click', () => closeModal('modal-welcome'));
+
+  // --- Register modal bindings ---
+  document.getElementById('btn-close-register-modal')?.addEventListener('click', closeRegisterModal);
+  document.getElementById('btn-cancel-register')?.addEventListener('click', closeRegisterModal);
+  document.getElementById('btn-confirm-register')?.addEventListener('click', handleRegistrationWithCode);
+  document.getElementById('modal-register')?.addEventListener('click', e => {
+    if (e.target.id === 'modal-register') closeRegisterModal();
+  });
+}
+
+/* ================================================
+   SHOW ADD FUNDS MODAL (called from inline onclick)
+   ================================================ */
+window.showAddFundsModal = function() { openModal('modal-add-funds'); };
+
+/* ================================================
+   BOOT
+   ================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   const user = getCurrentUser();
-  
-  // Requirement: "when i refresh or relog it must generate the new referral code"
-  // So on refresh (DOMContentLoaded), we generate a new active code
-  createNewReferralCode(user.id, user.phone.slice(-4));
-  
-  // Render referral page state
-  renderReferralPage();
-  
-  // Render savings state
-  updateSavingsUI();
-  
-  // Look for any incoming referral code from URL parameters
-  checkUrlReferralCode();
+
+  // Ensure user has an active referral code
+  getActiveCode(user);
+
+  // Setup navigation drawer
+  setupDrawer();
+
+  // Setup modal events
+  setupModals();
+
+  // Setup game page interactions
+  setupGamePage();
+
+  // Render all UI
+  updateAllUI();
+
+  // Check for incoming referral URL param
+  checkUrlReferral();
+
+  console.log('🚀 MTN MoMo Prize-Linked Savings — loaded');
+  console.log(`👤 User: ${user.id} | Phone: ${user.phone}`);
+  console.log(`💰 Wallet: ${fmt(getWalletBalance())} | Tickets: ${getUserTickets(user.id).length}`);
 });
-
-// --- Placeholder Button Alerts ---
-const placeholderButtons = [
-  'btn-send-money',
-  'btn-buy-airtime',
-  'btn-pay-bills',
-  'btn-cash-in',
-  'btn-create-group',
-  'btn-join-group'
-  // Note: 'btn-share-code' removed to prevent double-binding
-];
-
-placeholderButtons.forEach(id => {
-  const btn = document.getElementById(id);
-  if (btn) {
-    btn.addEventListener('click', () => {
-      const label = btn.querySelector('.action-btn-label')?.textContent || btn.textContent;
-      console.log(`[Placeholder] "${label}" action triggered. To be implemented.`);
-    });
-  }
-});
-
-
-
-// --- Navigation Drawer open/close ---
-const openMenuBtn = document.getElementById('btn-open-menu');
-const closeMenuBtn = document.getElementById('btn-close-menu');
-const drawerOverlay = document.getElementById('drawer-overlay');
-const navDrawer = document.getElementById('nav-drawer');
-
-function openDrawer() {
-  if (navDrawer) navDrawer.classList.add('nav-drawer--active');
-}
-
-function closeDrawer() {
-  if (navDrawer) navDrawer.classList.remove('nav-drawer--active');
-}
-
-if (openMenuBtn) openMenuBtn.addEventListener('click', openDrawer);
-if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeDrawer);
-if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
-
-console.log('MTN MoMo Enhanced Mini App loaded.');
-console.log('Pages: Home | Savings | The Ruler | Referrals');
-console.log('All interactions are placeholders for future implementation.');

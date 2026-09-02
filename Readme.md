@@ -1,7 +1,57 @@
-# MTN MoMo Enhanced: Comprehensive Product Specification
+# MTN MoMo Enhanced: Prize-Linked Savings (PLS) Mini App
 
-> **MTN Fintech Summit 2026 -- 24-Hour Hackathon Entry**  
+> **MTN Fintech Summit 2026 — 24-Hour Hackathon Entry**  
 > *From Wallet to Wealth + Fun — Built in South Africa. Built for Africa.*
+
+---
+
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+
+# Open in browser
+# → http://localhost:5173
+```
+
+---
+
+## Implementation Status
+
+| Feature | Status |
+|:---|:---:|
+| Personal savings goals (goal creation, deposits, withdrawals) | Live |
+| Group / Stokvel savings (create, join, contribute) | Live |
+| 3-month minimum lock-up enforcement | Live |
+| Early withdrawal penalties (forfeit interest + tickets) | Live |
+| Interest rate display (2.00%–5.50% p.a. after −2.00% offset) | Live |
+| Savings tier badges (Bronze/Silver/Gold) | Live |
+| Guaranteed-win ticket engine (100% win rate) | Live |
+| 3-card pick mechanic with flip animation | Live |
+| Animated scratch reveal (silver overlay → prize) | Live |
+| Ticket tiers: Bronze / Silver / Gold / Group Voucher | Live |
+| Single-sided referral system (referrer earns ticket only) | Live |
+| Referral code generation (`MOMO-[Last4]-[Suffix]`) | Live |
+| URL-based referral code detection with Onboarding Welcome Flow & 2 CTAs | Live |
+| Referral registration & automatic account binding | Live |
+| Referral statistics (Total Referred, Verified, Pending, and ticket progress) | Live |
+| Referral status tracking (Pending / Verified / Forfeited) | Live |
+| Referral forfeiture on early withdrawal | Live |
+| Real-time wallet balance + transaction history | Live |
+| Add funds via retail partner modal | Live |
+| Social share modal (WhatsApp, Telegram, X, Facebook, SMS) | Live |
+| Navigation drawer | Live |
+| Toast notification system | Live |
+| Home page hero banner with live stats | Live |
+| Prize history on tickets page | Live |
+| SMS alert simulation on prize win | Live |
+| Group discount voucher display (5% / 10% / 20%) | Live |
+| Reward matrix reference table | Live |
+| Responsive design (mobile + desktop) | Live |
 
 ---
 
@@ -123,7 +173,7 @@ Scratch cards earned through completed savings goals scale in value based on the
 - **Single-Sided:** Only the **referrer** receives a scratch ticket. The referred friend receives no referral ticket.
 - **No Tiers for Referrals:** The size of the friend's investment does not affect the referrer's card — referring someone who saves R20,000 awards the same standard scratch card as referring someone who saves R1,000.
 - **Activation Criteria:** For the referrer's ticket to be issued, the referred user must:
-  1. Register using the referral code (`MOMO-[Last4Digits]`)
+  1. Register using the referral code (`MOMO-[Last4Digits]-[Suffix]`)
   2. Complete their chosen savings goal with a minimum lock period of **>30 days / 3 months**
   3. Reach their promised target savings amount **without early withdrawal**
 - **Reward Cap:** Always yields a random airtime, voice minute, or data prize **under R50 in value**.
@@ -165,7 +215,7 @@ CREATE TABLE referrals (
     referrer_id UUID REFERENCES users(id),
     referred_id UUID REFERENCES users(id),
     code_used VARCHAR(20) NOT NULL,
-    status VARCHAR(20) DEFAULT 'pending',       -- 'pending', 'activated', 'forfeited'
+    status VARCHAR(20) DEFAULT 'pending',       -- 'pending', 'verified', 'forfeited'
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -174,7 +224,7 @@ CREATE TABLE tickets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id),
     source VARCHAR(20) NOT NULL,                -- 'personal_savings', 'group_savings', 'referral'
-    tier VARCHAR(20) DEFAULT 'flat_rate',       -- 'flat_rate' (referral), 'bronze', 'silver', 'gold'
+    tier VARCHAR(20) DEFAULT 'flat',            -- 'flat' (referral), 'bronze', 'silver', 'gold'
     reward_type VARCHAR(20) NOT NULL,           -- 'data', 'minutes', 'airtime', 'retail_discount'
     reward_value_zar NUMERIC(5,2),              -- Max 49.99 ZAR for personal/referrals
     discount_percentage INT DEFAULT 0,          -- 5, 10, or 20 for group cards
@@ -183,13 +233,15 @@ CREATE TABLE tickets (
 );
 ```
 
+> **Frontend localStorage implementation** mirrors this exact schema for the hackathon demo. All keys are prefixed with `pls_` and stored as JSON.
+
 ---
 
 ## 7. The Growth & Engagement Loop
 
 ```
 +------------------------------------------------------------------------------------+
-|                                THE MOMO REWARD LOOP                                 |
+|                             THE MOMO PLS REWARD LOOP                               |
 +------------------------------------------------------------------------------------+
 |                                                                                    |
 |    1. Set Target Goal (Min 3-Month Lock)                                           |
@@ -205,7 +257,7 @@ CREATE TABLE tickets (
 |            v                                   v                                   v
 |    [Personal Savings]                  [Group / Stokvel]                   [Referral Engine]
 |    Earn Tiered Scratch Card            Earn Group Retail Voucher           Referrer Earns Flat Card
-|    (Bronze/Silver/Gold < R50)          (5%, 10%, 20% Category Off)         (Data/Minutes/Airtime < R50)
+|    (Bronze/Silver/Gold < R50)          (5%, 10%, 20% Category Off)        (Data/Minutes/Airtime < R50)
 |            |                                   |                                   |
 |            +-----------------------------------+-----------------------------------+
 |                                                |
@@ -226,7 +278,7 @@ CREATE TABLE tickets (
 | **Unbanked / Underbanked** | Cash in/out via local retail stores (PEP, Shoprite, Usave, Boxer, Pick n Pay) with regulated security through African Bank. |
 | **Disciplined Savers** | Goal-based target accounts offering competitive yield (`2.00% – 5.50% p.a.`) plus guaranteed digital scratch rewards. |
 | **Stokvels & Social Groups** | Modernized group savings with transparent tracking and bulk retail category discount vouchers (5%–20%). |
-| **Network Growth Advocates** | Clean, single-sided referral incentives (`MOMO-[Last4Digits]`) rewarding verified long-term savings behavior. |
+| **Network Growth Advocates** | Clean, single-sided referral incentives (`MOMO-[Last4Digits]-[Suffix]`) rewarding verified long-term savings behavior. |
 
 ---
 
