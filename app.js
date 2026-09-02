@@ -327,7 +327,7 @@ function addPrizeToHistory(reward) {
   if (reward.isWin) {
     item.innerHTML = `
       <span class="activity-desc"><strong>[${reward.code}] ${reward.tier}:</strong> ${reward.prize} <br><small style="color:#666;">${reward.splitDetails}</small></span>
-      <span class="activity-amount" style="color: #000; font-weight:700;">WON</span>
+      <span class="activity-amount" style="color: #004f71; font-weight:700;">WON</span>
     `;
   } else {
     item.innerHTML = `
