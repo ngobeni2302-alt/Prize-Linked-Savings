@@ -502,9 +502,9 @@ h1, h2, h3, h4 {
 }
 
 .status-badge--locked {
-  background-color: #EDE9FE;
-  color: #6D28D9;
-  border: 1px solid #C4B5FD;
+  background-color: var(--yellow-light);
+  color: var(--black);
+  border: 1px solid var(--yellow-dark);
 }
 
 .pocket-category-pill {
