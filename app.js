@@ -510,7 +510,9 @@ function renderPocketsHub() {
     card.addEventListener('click', (e) => {
       e.preventDefault();
       const pId = card.getAttribute('data-pocket-id');
-      if (pId) openPocketDashboard(pId);
+      if (pId) {
+        window.location.href = `pocket-detail.html?id=${encodeURIComponent(pId)}`;
+      }
     });
   });
 }
@@ -523,6 +525,12 @@ function escapeHtml(str) {
 
 // --- Pocket Detail View (Dashboard) ---
 function openPocketDashboard(pocketId) {
+  // If called from another page (like savings.html), navigate to dedicated pocket-detail.html page
+  if (!window.location.pathname.includes('pocket-detail')) {
+    window.location.href = `pocket-detail.html?id=${encodeURIComponent(pocketId)}`;
+    return;
+  }
+
   const pockets = getPockets();
   const pocket = pockets.find(p => p.id === pocketId);
   if (!pocket) return;
@@ -532,7 +540,7 @@ function openPocketDashboard(pocketId) {
   const metrics = calculatePocketMetrics(pocket, user);
   const cat = CATEGORY_MAP[pocket.purpose_category] || CATEGORY_MAP.other;
 
-  // Swap containers
+  // Swap containers if present on same page
   const pocketsViewContainer = document.getElementById('pockets-view-container');
   const pocketDetailView = document.getElementById('pocket-detail-view');
   if (pocketsViewContainer) pocketsViewContainer.style.display = 'none';
@@ -898,12 +906,11 @@ if (btnCancelCreatePocket) btnCancelCreatePocket.addEventListener('click', close
 
       renderPocketsHub();
       updateActiveTicketOptionsFromPockets();
-      openPocketDashboard(newPocket.id);
       showToast(`Pocket "${name}" created! Join Code: ${joinCode}`);
 
-      // Auto-open invite modal with the new unique code and multi-platform links
+      // Open in dedicated pocket-detail page
       setTimeout(() => {
-        openInviteModal();
+        window.location.href = `pocket-detail.html?id=${encodeURIComponent(newPocket.id)}`;
       }, 400);
     });
   });
@@ -1057,8 +1064,12 @@ if (btnConfirmJoinPocket) {
       savePockets(pockets);
       renderPocketsHub();
       updateActiveTicketOptionsFromPockets();
-      openPocketDashboard(pocket.id);
       showToast(`Successfully joined "${pocket.name}"!`);
+
+      // Open in dedicated pocket-detail page
+      setTimeout(() => {
+        window.location.href = `pocket-detail.html?id=${encodeURIComponent(pocket.id)}`;
+      }, 400);
     });
   });
 }
@@ -1594,16 +1605,16 @@ if (btnConfirmClosePocket) {
       const remainingPockets = pockets.filter(p => p.id !== pocket.id);
       savePockets(remainingPockets);
 
-      // 3. Close dashboard & return to pockets view
-      closePocketDashboard();
-      renderPocketsHub();
-      updateActiveTicketOptionsFromPockets();
-
       if (totalPayout > 0) {
         showToast(`Pocket "${pocket.name}" closed! R${totalPayout.toFixed(2)} refunded to your MoMo wallet.`);
       } else {
         showToast(`Pocket "${pocket.name}" successfully closed.`);
       }
+
+      // Return to All Pockets Hub page
+      setTimeout(() => {
+        window.location.href = 'savings.html';
+      }, 400);
     });
   });
 }
@@ -2212,6 +2223,17 @@ function initApp() {
   updateActiveTicketOptionsFromPockets();
   renderReferralPage();
   updatePersonalSavingsUI();
+
+  // If on pocket-detail.html page, load the pocket from query param or storage
+  if (window.location.pathname.includes('pocket-detail')) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pocketId = urlParams.get('id');
+    const pockets = getPockets();
+    const targetId = pocketId || (pockets[0] ? pockets[0].id : null);
+    if (targetId) {
+      openPocketDashboard(targetId);
+    }
+  }
 }
 
 if (document.readyState === 'loading') {

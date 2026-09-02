@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pocket Dashboard - MTN MoMo Group Savings</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ===== APP HEADER ===== -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-left">
+        <button class="menu-trigger-btn" id="btn-open-menu" aria-label="Open Navigation Menu">
+          <span class="btn-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></span>
+        </button>
+        <div class="header-brand">
+          <span class="brand-badge">MoMo</span>
+          <span class="brand-title">Pockets</span>
+        </div>
+      </div>
+      <div class="header-wallet">
+        <span class="wallet-label">MoMo Balance</span>
+        <span class="wallet-amount" id="header-wallet-amount">R5,450.00</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="app-main">
+    <section class="page page--savings" style="max-width: 900px; width: 100%;">
+      
+      <!-- Back Link & Header Action Bar -->
+      <div class="pocket-detail-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md);">
+        <a href="savings.html" class="btn-back-link" id="btn-back-to-pockets" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--black);">
+          <span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></span> Back to All Pockets
+        </a>
+        <div class="pocket-detail-admin-actions" id="pocket-admin-controls">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Selected Pocket Dashboard / Detail View -->
+      <div class="pocket-detail-view" id="pocket-detail-view" style="display: block;">
+
+        <!-- Pocket Hero Banner -->
+        <div class="pocket-hero-card" id="pocket-hero-card">
+          <div class="pocket-hero-top">
+            <div class="pocket-hero-icon-title">
+              <span class="pocket-category-icon-large" id="pocket-detail-icon">
+                <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </span>
+              <div>
+                <div class="pocket-hero-badge-row">
+                  <span class="pocket-category-pill" id="pocket-detail-category">Travel & Holidays</span>
+                  <span class="pocket-role-pill" id="pocket-detail-role">Admin</span>
+                  <span class="pocket-status-pill" id="pocket-detail-status">90-Day Lock Active</span>
+                </div>
+                <h2 class="pocket-hero-title" id="pocket-detail-name">December Cape Town Trip</h2>
+                <p class="pocket-hero-note" id="pocket-detail-note">Holiday villa booking & travel expenses</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Target Goal & Progress Bar -->
+          <div class="pocket-hero-progress-section">
+            <div class="progress-labels-row">
+              <span class="progress-title-text">Goal Progress: <strong id="pocket-progress-percent">0%</strong></span>
+              <span class="progress-amount-text"><span id="pocket-detail-pooled">R0.00</span> / <span id="pocket-detail-goal">R0.00</span></span>
+            </div>
+            <div class="pocket-progress-bar">
+              <div class="pocket-progress-fill" id="pocket-progress-fill" style="width: 0%;"></div>
+            </div>
+            <div class="progress-sublabel-row">
+              <span id="pocket-remaining-text">R0.00 remaining to reach goal</span>
+              <span id="pocket-members-count-text">
+                <span class="btn-icon" style="width: 14px; height: 14px; vertical-align: middle; display: inline-flex;"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                1 Member
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pocket 4-Card Metric Grid -->
+        <div class="pocket-stats-grid">
+          <div class="pocket-stat-card">
+            <span class="pocket-stat-label">Total Group Pot</span>
+            <span class="pocket-stat-value" id="pocket-stat-group-pot">R0.00</span>
+            <span class="pocket-stat-sub">Across all members</span>
+          </div>
+
+          <div class="pocket-stat-card pocket-stat-card--highlight">
+            <span class="pocket-stat-label">My Contribution</span>
+            <span class="pocket-stat-value" id="pocket-stat-my-share">R0.00</span>
+            <span class="pocket-stat-sub" id="pocket-stat-my-pct">0% of group pot</span>
+          </div>
+
+          <div class="pocket-stat-card">
+            <span class="pocket-stat-label">Accrued Interest (5.5%)</span>
+            <span class="pocket-stat-value text-success" id="pocket-stat-interest">+R0.00</span>
+            <span class="pocket-stat-sub" id="pocket-stat-interest-note">Earned on maturity</span>
+          </div>
+
+          <div class="pocket-stat-card">
+            <span class="pocket-stat-label">Lock Period Clock</span>
+            <span class="pocket-stat-value" id="pocket-stat-lock-days">90 Days</span>
+            <span class="pocket-stat-sub" id="pocket-stat-maturity-date">Matures in 90 days</span>
+          </div>
+        </div>
+
+        <!-- Quick Action Buttons for this Pocket -->
+        <div class="pocket-action-toolbar">
+          <button class="btn btn--primary btn--flex" id="btn-pocket-contribute">
+            <span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span> Contribute Funds
+          </button>
+          <button class="btn btn--outline btn--flex" id="btn-pocket-withdraw">
+            <span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span> Request Withdrawal
+          </button>
+          <button class="btn btn--outline btn--flex" id="btn-pocket-invite">
+            <span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Invite Friends
+          </button>
+          <button class="btn btn--outline btn--flex" id="btn-pocket-statement">
+            <span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span> Statement
+          </button>
+          <button class="btn btn--outline btn--flex" id="btn-pocket-close" style="color: #E11D48; border-color: #E11D48;" title="Close & Settle Pocket">
+            <span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span> Close Pocket
+          </button>
+        </div>
+
+        <!-- Transparency Ledger Section -->
+        <div class="pocket-detail-section" id="section-transparency-ledger">
+          <div class="section-title-with-toggle">
+            <div>
+              <h3 class="section-title" style="margin-bottom: 2px;">Transparency Ledger</h3>
+              <p class="section-subtitle">Real-time member contribution breakdown & accountability</p>
+            </div>
+            <span class="status-badge status-badge--verified" id="pocket-transparency-badge">Full Visibility</span>
+          </div>
+
+          <div class="transparency-table-container" id="transparency-table-container">
+            <!-- Dynamic Member Ledger Table Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Audit Trail / Group Activity Timeline -->
+        <div class="pocket-detail-section" id="section-pocket-audit">
+          <h3 class="section-title">Pocket Audit Trail</h3>
+          <p class="section-subtitle">Immutable chronological record of deposits, joins, and payouts</p>
+          <div class="pocket-audit-list" id="pocket-audit-list">
+            <!-- Dynamic Audit Items Rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== NAVIGATION DRAWER ===== -->
+  <div class="nav-drawer" id="nav-drawer">
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <div class="drawer-brand">
+          <span class="brand-badge">MoMo</span>
+          <span class="brand-title">Menu</span>
+        </div>
+        <button class="drawer-close-btn" id="btn-close-menu">&times;</button>
+      </div>
+      
+      <div class="drawer-user-info">
+        <div class="drawer-avatar">
+          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div>
+          <h4 class="drawer-username">Nkosana Dlamini</h4>
+          <span class="drawer-phone">+27 83 *** 4921</span>
+        </div>
+      </div>
+
+      <nav class="drawer-nav">
+        <a href="index.html" class="drawer-link">
+          <span class="drawer-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+          <span class="drawer-link-text">Home Dashboard</span>
+        </a>
+        <a href="savings.html" class="drawer-link drawer-link--active">
+          <span class="drawer-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h.5c1.5 0 2.5-1 2.5-2.5V8c0-1.5-1.5-3-4-3z"/><circle cx="16" cy="11" r="1"/></svg></span>
+          <span class="drawer-link-text">Savings & Pockets</span>
+        </a>
+        <a href="game.html" class="drawer-link">
+          <span class="drawer-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <span class="drawer-link-text">The Ruler Game</span>
+        </a>
+        <a href="referrals.html" class="drawer-link">
+          <span class="drawer-icon"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          <span class="drawer-link-text">Referrals & Rewards</span>
+        </a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Contribute to Pocket ===== -->
+  <div class="modal-overlay" id="modal-pocket-contribute">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="btn-close-contribute-modal">&times;</button>
+      <div class="modal-header-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      </div>
+      <h3 class="modal-title">Contribute to Pocket</h3>
+      <p class="modal-subtitle" id="contribute-modal-pocket-name">December Cape Town Trip</p>
+
+      <div class="wallet-balance-pill" style="margin-bottom: var(--space-md);">
+        <span>Available MoMo Wallet:</span>
+        <strong id="contribute-momo-balance">R5,450.00</strong>
+      </div>
+
+      <div class="form-group">
+        <label for="input-contribute-amount" class="form-label">Contribution Amount (ZAR)</label>
+        <input type="number" id="input-contribute-amount" class="input-field input-field--large" placeholder="0.00" min="10" step="10">
+        <div class="amount-chips-row">
+          <button type="button" class="chip-btn" data-amt="100">+R100</button>
+          <button type="button" class="chip-btn" data-amt="250">+R250</button>
+          <button type="button" class="chip-btn" data-amt="500">+R500</button>
+          <button type="button" class="chip-btn" data-amt="1000">+R1,000</button>
+        </div>
+      </div>
+
+      <div class="contribution-summary-box">
+        <div class="contrib-row">
+          <span>New Personal Total:</span>
+          <strong id="preview-new-personal-total">R0.00</strong>
+        </div>
+        <div class="contrib-row">
+          <span>New Group Pot Total:</span>
+          <strong id="preview-new-group-total">R0.00</strong>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: var(--space-lg);">
+        <button type="button" class="btn btn--primary" id="btn-proceed-contribute">Confirm & Pay</button>
+        <button type="button" class="btn btn--outline" id="btn-cancel-contribute">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Request Withdrawal from Pocket ===== -->
+  <div class="modal-overlay" id="modal-pocket-withdraw">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="btn-close-withdraw-modal">&times;</button>
+      <div class="modal-header-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </div>
+      <h3 class="modal-title">Request Pocket Withdrawal</h3>
+      <p class="modal-subtitle" id="withdraw-modal-pocket-name">December Cape Town Trip</p>
+
+      <div class="withdrawal-breakdown-card">
+        <div class="withdrawal-lock-banner" id="withdraw-lock-banner">
+          <!-- Dynamic banner based on maturity -->
+        </div>
+        <div class="breakdown-row">
+          <span>My Contributed Principal:</span>
+          <strong id="withdraw-principal-val">R0.00</strong>
+        </div>
+        <div class="breakdown-row">
+          <span>Accrued Interest (5.5% p.a.):</span>
+          <strong id="withdraw-interest-val" class="text-success">+R0.00</strong>
+        </div>
+        <div class="breakdown-row text-danger" id="withdraw-penalty-row" style="display: none;">
+          <span>Early Withdrawal Forfeiture:</span>
+          <strong id="withdraw-forfeit-val">-R0.00</strong>
+        </div>
+        <div class="breakdown-divider"></div>
+        <div class="breakdown-row breakdown-row--total">
+          <span>Total Payout to MoMo:</span>
+          <strong id="withdraw-payout-total">R0.00</strong>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: var(--space-md);">
+        <label for="input-withdraw-amount" class="form-label">Withdrawal Amount (ZAR)</label>
+        <input type="number" id="input-withdraw-amount" class="input-field" placeholder="Enter amount to withdraw">
+        <p class="form-hint">Maximum withdrawable: <span id="withdraw-max-text">R0.00</span> (your contributed principal)</p>
+      </div>
+
+      <div class="payout-destination-box">
+        <span class="payout-dest-label">Payout Destination:</span>
+        <div class="payout-dest-val">
+          <span class="momo-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>
+          <span>MTN MoMo Wallet (+27 83 *** 4921)</span>
+        </div>
+        <p class="payout-security-note">Payouts are strictly credited directly to your registered MoMo number.</p>
+      </div>
+
+      <div class="modal-actions" style="margin-top: var(--space-md);">
+        <button type="button" class="btn btn--primary" id="btn-proceed-withdraw">Confirm Withdrawal</button>
+        <button type="button" class="btn btn--outline" id="btn-cancel-withdraw">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Invite Friends & Join Code ===== -->
+  <div class="modal-overlay" id="modal-pocket-invite">
+    <div class="modal-card modal-card--invite">
+      <button class="modal-close-btn" id="btn-close-invite-modal">&times;</button>
+      <div class="modal-header-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h3 class="modal-title">Invite Friends to Pocket</h3>
+      <p class="modal-subtitle" id="invite-pocket-name-label">December Cape Town Trip</p>
+
+      <div class="invite-code-container">
+        <span class="invite-code-label">Pocket Join Code</span>
+        <div class="invite-code-box" id="display-pocket-join-code">POCK-XXXX-XXXX</div>
+        <button class="btn btn--primary" id="btn-copy-pocket-code" style="margin-top: var(--space-sm); width: 100%;">
+          <span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span> Copy Join Code
+        </button>
+      </div>
+
+      <div class="invite-meta-box">
+        <div class="invite-meta-item">
+          <span>Yield:</span>
+          <strong>5.50% p.a.</strong>
+        </div>
+        <div class="invite-meta-item">
+          <span>Capacity:</span>
+          <strong id="invite-capacity-text">5 / 20 Members</strong>
+        </div>
+      </div>
+
+      <div class="share-grid" style="margin-top: var(--space-md);">
+        <a href="#" class="share-option share-option--whatsapp" id="pocket-share-whatsapp" target="_blank" rel="noopener">
+          <span class="share-icon"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12.031 2c-5.516 0-9.988 4.471-9.988 9.986 0 1.764.46 3.42 1.258 4.877L2 22l5.289-1.387c1.4.764 2.99 1.198 4.678 1.198 5.516 0 9.99-4.471 9.99-9.986S17.547 2 12.031 2zm0 18.286c-1.579 0-3.08-.432-4.38-1.25l-.314-.19-3.255.854.87-3.17-.208-.332c-.896-1.425-1.369-3.08-1.369-4.79 0-4.57 3.71-8.28 8.28-8.28 4.567 0 8.28 3.71 8.28 8.28 0 4.57-3.713 8.28-8.28 8.28z"/></svg></span>
+          <span class="share-label">WhatsApp</span>
+        </a>
+        <a href="#" class="share-option share-option--facebook" id="pocket-share-facebook" target="_blank" rel="noopener">
+          <span class="share-icon"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.8c4.56-.93 8-4.96 8-9.8z"/></svg></span>
+          <span class="share-label">Facebook</span>
+        </a>
+        <a href="#" class="share-option share-option--x" id="pocket-share-x" target="_blank" rel="noopener">
+          <span class="share-icon"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>
+          <span class="share-label">Twitter / X</span>
+        </a>
+        <a href="#" class="share-option share-option--telegram" id="pocket-share-telegram" target="_blank" rel="noopener">
+          <span class="share-icon"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.24-5.54 3.65-.52.36-.97.53-1.34.52-.42-.01-1.22-.24-1.82-.44-.73-.24-1.31-.37-1.26-.78.03-.22.33-.44.9-.67 3.52-1.53 5.87-2.54 7.04-3.03 3.35-1.39 4.05-1.63 4.5-.18v-.01z"/></svg></span>
+          <span class="share-label">Telegram</span>
+        </a>
+        <a href="#" class="share-option share-option--sms" id="pocket-share-sms">
+          <span class="share-icon"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg></span>
+          <span class="share-label">SMS</span>
+        </a>
+      </div>
+
+      <div class="share-link-box" style="margin-top: var(--space-md);">
+        <label for="pocket-share-link-input" class="share-link-label" style="font-size: 0.75rem; font-weight: 700; color: var(--black); display: block; margin-bottom: 4px;">Direct Pocket Join Link:</label>
+        <div class="share-link-input-group" style="display: flex; gap: 8px;">
+          <input type="text" id="pocket-share-link-input" class="input-field" readonly value="https://www.mtn.co.za/momo/pockets/?code=POCK-XXXX-XXXX" style="font-size: 0.8rem; padding: 8px 10px;">
+          <button class="btn btn--primary" id="btn-copy-pocket-link" style="white-space: nowrap; padding: 8px 14px; font-size: 0.8rem;">Copy Link</button>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: var(--space-md);">
+        <button type="button" class="btn btn--outline" id="btn-done-invite" style="width: 100%;">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Statement Export ===== -->
+  <div class="modal-overlay" id="modal-pocket-statement">
+    <div class="modal-card modal-card--statement">
+      <button class="modal-close-btn" id="btn-close-statement-modal">&times;</button>
+      <div class="modal-header-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <h3 class="modal-title">Pocket Audit Statement</h3>
+      <p class="modal-subtitle" id="statement-pocket-name">December Cape Town Trip</p>
+
+      <div class="statement-preview-box" id="statement-preview-content">
+        <!-- Statement formatted text rendered here -->
+      </div>
+
+      <div class="modal-actions" style="margin-top: var(--space-md);">
+        <button type="button" class="btn btn--primary" id="btn-download-statement-csv">
+          <span class="btn-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+          Download CSV Statement
+        </button>
+        <button type="button" class="btn btn--outline" id="btn-close-statement-view">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Close & Settle Pocket ===== -->
+  <div class="modal-overlay" id="modal-close-pocket">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="btn-close-close-pocket-modal">&times;</button>
+      <div class="modal-header-icon" style="background-color: #FEE2E2; border-color: #E11D48; color: #E11D48;">
+        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <h3 class="modal-title">Close & Settle Pocket</h3>
+      <p class="modal-subtitle" id="close-pocket-modal-subtitle">Are you sure you want to close this pocket?</p>
+
+      <div class="withdrawal-breakdown-card" style="margin-top: var(--space-sm);">
+        <div class="breakdown-row">
+          <span>Pocket:</span>
+          <strong id="close-pocket-name-val">December Cape Town Trip</strong>
+        </div>
+        <div class="breakdown-row">
+          <span>Lock Status:</span>
+          <strong id="close-pocket-lock-status">Active</strong>
+        </div>
+        <div class="breakdown-row">
+          <span>My Contributed Principal:</span>
+          <strong id="close-pocket-principal-val">R0.00</strong>
+        </div>
+        <div class="breakdown-row" id="close-pocket-interest-row">
+          <span>Accrued Interest (5.5%):</span>
+          <strong id="close-pocket-interest-val" class="text-success">+R0.00</strong>
+        </div>
+        <div class="breakdown-divider"></div>
+        <div class="breakdown-row breakdown-row--total">
+          <span>Total Payout to MoMo Wallet:</span>
+          <strong id="close-pocket-payout-total" style="color: var(--black);">R0.00</strong>
+        </div>
+      </div>
+
+      <div class="payout-destination-box" style="margin-top: var(--space-sm);">
+        <span class="payout-dest-label">Payout Destination:</span>
+        <div class="payout-dest-val">
+          <span class="momo-icon"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>
+          <span>MTN MoMo Wallet (+27 83 *** 4921)</span>
+        </div>
+        <p class="payout-security-note">All remaining contributed funds and applicable interest will be automatically settled and credited directly to your registered MoMo account.</p>
+      </div>
+
+      <div class="modal-actions" style="margin-top: var(--space-lg);">
+        <button type="button" class="btn btn--primary" id="btn-confirm-close-pocket" style="background-color: #E11D48; color: #FFFFFF; border-color: #9F1239;">Close & Disburse Payout</button>
+        <button type="button" class="btn btn--outline" id="btn-cancel-close-pocket">Keep Pocket Open</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Universal 4-Digit MoMo PIN Authentication ===== -->
+  <div class="modal-overlay" id="modal-momo-pin">
+    <div class="modal-card modal-card--pin">
+      <button class="modal-close-btn" id="btn-close-pin-modal">&times;</button>
+      <div class="pin-header-lock">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h3 class="modal-title">Enter MoMo PIN</h3>
+      <p class="modal-subtitle" id="pin-prompt-action">Confirm MoMo Transaction</p>
+
+      <div class="pin-dots-display" id="pin-dots">
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+        <span class="pin-dot"></span>
+      </div>
+
+      <div class="pin-keypad">
+        <button class="key-btn" data-num="1">1</button>
+        <button class="key-btn" data-num="2">2</button>
+        <button class="key-btn" data-num="3">3</button>
+        <button class="key-btn" data-num="4">4</button>
+        <button class="key-btn" data-num="5">5</button>
+        <button class="key-btn" data-num="6">6</button>
+        <button class="key-btn" data-num="7">7</button>
+        <button class="key-btn" data-num="8">8</button>
+        <button class="key-btn" data-num="9">9</button>
+        <button class="key-btn key-btn--action" id="btn-pin-clear">C</button>
+        <button class="key-btn" data-num="0">0</button>
+        <button class="key-btn key-btn--action" id="btn-pin-backspace" style="display: flex; align-items: center; justify-content: center;">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
+        </button>
+      </div>
+      <p class="form-hint" style="text-align: center; margin-top: var(--space-sm);">Demo PIN: Any 4 digits (e.g. 1234)</p>
+    </div>
+  </div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
