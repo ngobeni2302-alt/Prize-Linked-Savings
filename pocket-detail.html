@@ -8,6 +8,23 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    (function() {
+      try {
+        var bal = localStorage.getItem('momo_wallet_balance');
+        if (bal === null) {
+          bal = '5450.00';
+          localStorage.setItem('momo_wallet_balance', bal);
+        }
+        var num = parseFloat(bal) || 0;
+        var formatted = 'R' + num.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.addEventListener('DOMContentLoaded', function() {
+          var els = document.querySelectorAll('.wallet-amount, #header-wallet-amount');
+          els.forEach(function(el) { el.textContent = formatted; });
+        });
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
 
@@ -26,9 +43,9 @@
       <div class="header-wallet" style="display: flex; align-items: center; gap: 8px;">
         <div>
           <span class="wallet-label">MoMo Balance</span>
-          <span class="wallet-amount" id="header-wallet-amount">R5,450.00</span>
+          <span class="wallet-amount" id="header-wallet-amount">--</span>
         </div>
-        <button class="btn btn--primary" id="btn-header-topup" style="padding: 4px 8px; font-size: 0.7rem; font-weight: 800; height: auto; box-shadow: 1.5px 1.5px 0 var(--black);">+ Top Up</button>
+        <button class="btn btn--primary btn-header-topup" id="btn-header-topup" style="padding: 4px 8px; font-size: 0.7rem; font-weight: 800; height: auto; box-shadow: 1.5px 1.5px 0 var(--black);">+ Top Up</button>
       </div>
     </div>
   </header>

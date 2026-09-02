@@ -834,7 +834,9 @@ function closeTopupModal() {
   if (modalTopup) modalTopup.classList.remove('modal-overlay--active');
 }
 
-if (btnHeaderTopup) btnHeaderTopup.addEventListener('click', openTopupModal);
+document.querySelectorAll('.btn-header-topup, #btn-header-topup').forEach(btn => {
+  btn.addEventListener('click', openTopupModal);
+});
 if (btnTopupFromCreate) {
   btnTopupFromCreate.addEventListener('click', () => {
     closeCreatePocketModal();
