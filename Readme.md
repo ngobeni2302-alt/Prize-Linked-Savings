@@ -106,15 +106,10 @@ If a user or group withdraws funds before reaching their chosen end date or mini
 Scratch cards earned through completed savings goals scale in value based on the total target amount saved upon fulfilling the minimum 3-month lock.
 
 #### Personal Target Savings (Minimum 3-Month Lock)
-- **Bronze Tier (Targets `R1,000 – R4,999`):**
-  * **Reward Value Range:** R0 – R50
-  * **Reward Types:** Small MTN Airtime top-ups, basic Data Bundles, or Voice Minutes.
-- **Silver Tier (Targets `R5,000 – R14,999`):**
-  * **Reward Value Range:** R50 – R100
-  * **Reward Types:** High-capacity MTN Data packages, large Voice Minute bundles, or higher Airtime top-ups.
-- **Gold Tier (Targets `R15,000+`):**
-  * **Reward Value Range:** R100 – R500
-  * **Exclusive Feature:** Includes digital Retail Discount Vouchers (e.g., Pick n Pay, Shoprite, Boxer, or PEP store codes) alongside high-value Airtime or Data packages.
+- **Bronze Tier (`R1,000 – R4,999`):** Tier 1 scratch cards (e.g., R15 – R25 Airtime / Data)
+- **Silver Tier (`R5,000 – R14,999`):** Tier 2 scratch cards (e.g., R30 Voice Minutes / Airtime)
+- **Gold Tier (`R15,000+`):** Tier 3 scratch cards (e.g., R45 Airtime / High-Value Data)
+- **Constraint:** *All personal rewards are strictly capped under R50 in value.*
 
 #### Group / Stokvel Savings (Minimum 3-Month Lock)
 - **Bronze Group Tier (`R1,000 – R9,999 pooled`):** Unlocks a **5% Category Discount Voucher**
@@ -139,7 +134,7 @@ Scratch cards earned through completed savings goals scale in value based on the
 
 | Action Taken | Minimum Lock / Condition | Ticket Tiering | Revealed Reward | Prize Value Limit |
 |:---|:---|:---:|:---|:---:|
-| **Personal Saving** | Complete goal (Min. 3 months) | **Tiered**<br>(Bronze, Silver, Gold) | Data, Voice Minutes, Airtime, or Retail Vouchers | **R0 – R500 (Tiered)** |
+| **Personal Saving** | Complete goal (Min. 3 months) | **Tiered**<br>(Bronze, Silver, Gold) | Data, Voice Minutes, or Airtime | **Under R50** |
 | **Group Saving** | Complete goal (Min. 3 months) | **Tiered**<br>(Bronze, Silver, Gold) | Retail Category Discount Vouchers (5%–20%) | **Scales with Group Tier** |
 | **Refer a Friend** | Friend hits goal & min. lock time | **Untiered / Flat Rate** | Data, Voice Minutes, or Airtime | **Under R50** |
 
@@ -181,7 +176,7 @@ CREATE TABLE tickets (
     source VARCHAR(20) NOT NULL,                -- 'personal_savings', 'group_savings', 'referral'
     tier VARCHAR(20) DEFAULT 'flat_rate',       -- 'flat_rate' (referral), 'bronze', 'silver', 'gold'
     reward_type VARCHAR(20) NOT NULL,           -- 'data', 'minutes', 'airtime', 'retail_discount'
-    reward_value_zar NUMERIC(5,2),              -- Uncapped for personal savings, max R49.99 for referrals
+    reward_value_zar NUMERIC(5,2),              -- Max 49.99 ZAR for personal/referrals
     discount_percentage INT DEFAULT 0,          -- 5, 10, or 20 for group cards
     is_scratched BOOLEAN DEFAULT FALSE,         -- Updated to TRUE upon scratch action in PWA
     created_at TIMESTAMP DEFAULT NOW()
@@ -210,7 +205,7 @@ CREATE TABLE tickets (
 |            v                                   v                                   v
 |    [Personal Savings]                  [Group / Stokvel]                   [Referral Engine]
 |    Earn Tiered Scratch Card            Earn Group Retail Voucher           Referrer Earns Flat Card
-|    (Bronze/Silver/Gold Uncapped)       (5%, 10%, 20% Category Off)         (Data/Minutes/Airtime < R50)
+|    (Bronze/Silver/Gold < R50)          (5%, 10%, 20% Category Off)         (Data/Minutes/Airtime < R50)
 |            |                                   |                                   |
 |            +-----------------------------------+-----------------------------------+
 |                                                |

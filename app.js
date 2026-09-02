@@ -8,8 +8,7 @@ function navigateTo(pageName) {
   const mapping = {
     'home': 'index.html',
     'savings': 'savings.html',
-    'ticket': 'ticket.html',
-    'game': 'ticket.html',
+    'game': 'game.html',
     'referrals': 'referrals.html'
   };
   window.location.href = mapping[pageName] || 'index.html';
@@ -27,26 +26,11 @@ function saveAvailableTickets() {
 function updateTicketUI() {
   const gameTicketsEl = document.getElementById('game-tickets-count');
   const homeTicketsEl = document.getElementById('home-tickets-count');
-  const scratchTicketsEl = document.getElementById('scratch-tickets-left');
+  const homeCardValue = document.querySelector('#card-tickets-summary .card-value');
 
   if (gameTicketsEl) gameTicketsEl.textContent = availableTickets;
   if (homeTicketsEl) homeTicketsEl.textContent = availableTickets;
   if (homeCardValue) homeCardValue.textContent = availableTickets;
-  if (scratchTicketsEl) scratchTicketsEl.textContent = availableTickets;
-}
-
-// Expose ticket state and methods globally for ticket module
-if (typeof window !== 'undefined') {
-  window.ticketState = {
-    get availableTickets() { return availableTickets; },
-    set availableTickets(val) {
-      availableTickets = val;
-      saveAvailableTickets();
-      updateTicketUI();
-    },
-    saveAvailableTickets,
-    updateTicketUI
-  };
 }
 
 updateTicketUI();
@@ -566,7 +550,7 @@ function renderReferralPage() {
         const date = new Date(r.createdAt).toLocaleDateString();
         return `<div class="referral-list-item">
           <div class="referral-info">
-            <span class="referral-avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span>
+            <span class="referral-avatar">👤</span>
             <div>
               <span class="activity-desc">Invited Friend</span>
               <span class="referral-date">Sent on ${date}</span>
@@ -904,5 +888,5 @@ if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeDrawer);
 if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
 
 console.log('MTN MoMo Enhanced Mini App loaded.');
-console.log('Pages: Home | Savings | Ticket | Referrals');
+console.log('Pages: Home | Savings | The Ruler | Referrals');
 console.log('All interactions are placeholders for future implementation.');
