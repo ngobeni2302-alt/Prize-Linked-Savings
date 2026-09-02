@@ -57,7 +57,7 @@ MTN_MOMO_MINI-APP/
 |---|---|
 | **Home** | Dashboard with wallet balance, savings summary, tickets, referrals, quick actions, recent activity, and jackpot counter |
 | **Savings** | Personal savings account, group savings / stockvel, and milestone progress bar |
-| **The Ruler** | 3-card rewards game with ticket info, card pick area, prize history, and jackpot section |
+| **Ticket** | 3-card rewards game with ticket info, card pick area, prize history, and jackpot section |
 | **Referrals** | Unique referral code, progress tracker (0/10), referral list, and how-it-works steps |
 
 ## Notes
