@@ -1,0 +1,393 @@
+/* MTN MoMo Enhanced - Wallet & Savings CSS */
+
+/* Main Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* MoMo Physical/Digital Card */
+.momo-virtual-card {
+  background: linear-gradient(135deg, #FFCC00 0%, #E5B800 60%, #B8860B 100%);
+  border-radius: var(--border-radius-xl);
+  padding: 24px;
+  color: var(--momo-dark);
+  box-shadow: 0 12px 30px rgba(255, 204, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 200px;
+}
+
+.momo-virtual-card::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.momo-virtual-card::after {
+  content: 'MoMo';
+  position: absolute;
+  right: 15px;
+  bottom: 5px;
+  font-size: 5rem;
+  font-weight: 900;
+  font-family: var(--font-heading);
+  color: rgba(0, 0, 0, 0.07);
+  pointer-events: none;
+  line-height: 1;
+}
+
+.card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  z-index: 1;
+}
+
+.card-brand {
+  font-weight: 900;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-tier-pill {
+  background: rgba(0, 0, 0, 0.85);
+  color: #FFCC00;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--border-radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card-balance-block {
+  margin: 16px 0;
+  z-index: 1;
+}
+
+.card-balance-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card-balance-amount {
+  font-size: 2.2rem;
+  font-weight: 800;
+  font-family: var(--font-heading);
+  letter-spacing: -0.03em;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.card-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  z-index: 1;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.card-partner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.85;
+}
+
+/* Quick Action Buttons Grid */
+.quick-services-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.service-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--momo-dark-border);
+  padding: 14px 8px;
+  border-radius: var(--border-radius-lg);
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.service-btn:hover {
+  background: rgba(255, 204, 0, 0.12);
+  border-color: rgba(255, 204, 0, 0.4);
+  transform: translateY(-2px);
+  color: var(--momo-yellow);
+}
+
+.service-icon-box {
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.service-btn:hover .service-icon-box {
+  background: var(--momo-yellow);
+  color: var(--momo-dark);
+}
+
+/* Savings Section: Personal ("Me Money") */
+.savings-metric-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--momo-dark-border);
+  border-radius: var(--border-radius-lg);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.savings-metric-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.savings-icon-circle {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 204, 0, 0.2), rgba(0, 79, 113, 0.3));
+  border: 1px solid var(--momo-yellow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: var(--momo-yellow);
+}
+
+.savings-amount-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+}
+
+/* Ticket Milestone Progress Bar */
+.milestone-container {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--momo-dark-border);
+  border-radius: var(--border-radius-lg);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.milestone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+}
+
+.progress-track {
+  height: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FFCC00, #F59E0B);
+  border-radius: var(--border-radius-full);
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 12px var(--momo-yellow-glow);
+}
+
+.milestone-caption {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Stokvel / Group Savings ("We Money") */
+.stokvel-group-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--momo-dark-border);
+  border-radius: var(--border-radius-lg);
+  padding: 18px;
+  margin-bottom: 14px;
+  transition: all var(--transition-fast);
+}
+
+.stokvel-group-card:hover {
+  border-color: rgba(255, 204, 0, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.stokvel-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.stokvel-group-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stokvel-group-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px 14px;
+  border-radius: var(--border-radius-md);
+  margin-bottom: 12px;
+}
+
+.stokvel-stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.stokvel-stat-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stokvel-members-avatar-list {
+  display: flex;
+  align-items: center;
+  gap: -8px;
+}
+
+.stokvel-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--momo-dark-card);
+  background: var(--momo-blue);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -6px;
+}
+
+.stokvel-avatar:first-child {
+  margin-left: 0;
+}
+
+/* Transactions Table */
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.transaction-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--momo-dark-border);
+  border-radius: var(--border-radius-md);
+  transition: background var(--transition-fast);
+}
+
+.transaction-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tx-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tx-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.tx-icon.deposit { background: var(--color-success-bg); color: var(--color-success); }
+.tx-icon.withdraw { background: rgba(239, 68, 68, 0.15); color: var(--color-danger); }
+.tx-icon.reward { background: var(--momo-yellow-subtle); color: var(--momo-yellow); }
+.tx-icon.stokvel { background: rgba(0, 79, 113, 0.25); color: #38BDF8; }
+
+.tx-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tx-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.tx-right {
+  text-align: right;
+}
+
+.tx-amount {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.tx-amount.positive { color: var(--color-success); }
+.tx-amount.negative { color: var(--text-primary); }
+
+.tx-ticket-earned {
+  font-size: 0.72rem;
+  color: var(--momo-yellow);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}

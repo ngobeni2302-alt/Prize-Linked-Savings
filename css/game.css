@@ -1,0 +1,388 @@
+/* MTN MoMo Enhanced - "The Ruler" 3-Card Game & 1M Jackpot CSS */
+
+/* Game Section Container */
+.ruler-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* Jackpot Banner */
+.jackpot-banner {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(255, 204, 0, 0.15) 0%, rgba(0, 79, 113, 0.3) 50%, rgba(139, 92, 246, 0.2) 100%);
+  border: 2px solid var(--momo-yellow);
+  border-radius: var(--border-radius-xl);
+  padding: 24px;
+  text-align: center;
+  margin-bottom: 30px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 35px rgba(255, 204, 0, 0.2);
+}
+
+.jackpot-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(255, 204, 0, 0.08) 60deg, transparent 120deg);
+  animation: rotateGlow 10s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes rotateGlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.jackpot-badge {
+  background: var(--momo-yellow);
+  color: var(--momo-dark);
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 0.85rem;
+  padding: 6px 16px;
+  border-radius: var(--border-radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.jackpot-title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  margin-bottom: 6px;
+}
+
+.jackpot-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto 16px auto;
+}
+
+/* 1-in-a-Million Counter Display */
+.jackpot-counter-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--momo-dark-border-highlight);
+  padding: 10px 20px;
+  border-radius: var(--border-radius-lg);
+  margin-bottom: 14px;
+}
+
+.counter-digit {
+  background: #090D16;
+  border: 1px solid rgba(255, 204, 0, 0.4);
+  color: var(--momo-yellow);
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 6px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.counter-separator {
+  color: var(--text-muted);
+  font-weight: 800;
+  font-size: 1.4rem;
+}
+
+.counter-target {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+/* Pool Switcher (Personal vs Group Tickets) */
+.pool-selector-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.pool-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: var(--momo-dark-card);
+  border: 2px solid var(--momo-dark-border);
+  border-radius: var(--border-radius-xl);
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  font-weight: 700;
+  transition: all var(--transition-fast);
+}
+
+.pool-btn:hover {
+  border-color: rgba(255, 204, 0, 0.4);
+  color: var(--text-primary);
+}
+
+.pool-btn.active {
+  background: rgba(255, 204, 0, 0.12);
+  border-color: var(--momo-yellow);
+  color: var(--momo-yellow);
+  box-shadow: 0 4px 16px var(--momo-yellow-glow);
+}
+
+.pool-ticket-count {
+  background: var(--momo-yellow);
+  color: var(--momo-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: var(--border-radius-full);
+}
+
+/* 3-Card Deck Area */
+.cards-deck-stage {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 900px;
+  margin: 10px auto 30px auto;
+  perspective: 1200px;
+}
+
+/* 3D Flip Card Item */
+.ruler-card-wrapper {
+  width: 100%;
+  aspect-ratio: 3 / 4.4;
+  cursor: pointer;
+  position: relative;
+  transition: transform var(--transition-fast);
+}
+
+.ruler-card-wrapper:hover:not(.disabled):not(.flipped) {
+  transform: translateY(-8px) scale(1.02);
+}
+
+.ruler-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-style: preserve-3d;
+  border-radius: var(--border-radius-xl);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+}
+
+.ruler-card-wrapper.flipped .ruler-card-inner {
+  transform: rotateY(180deg);
+}
+
+/* Card Front (Hidden Face / Deck Back) */
+.ruler-card-front, .ruler-card-back {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: var(--border-radius-xl);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 16px;
+  overflow: hidden;
+}
+
+.ruler-card-front {
+  background: linear-gradient(145deg, #182236 0%, #0B101D 100%);
+  border: 2px solid rgba(255, 204, 0, 0.4);
+}
+
+.ruler-card-front::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed rgba(255, 204, 0, 0.3);
+  border-radius: calc(var(--border-radius-xl) - 4px);
+  pointer-events: none;
+}
+
+.ruler-card-front::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.08) 45%,
+    rgba(255, 204, 0, 0.15) 50%,
+    transparent 55%
+  );
+  transform: rotate(25deg);
+  transition: transform 0.6s ease;
+}
+
+.ruler-card-wrapper:hover .ruler-card-front::after {
+  transform: translateY(20%) rotate(25deg);
+}
+
+.card-number-badge {
+  background: rgba(255, 204, 0, 0.15);
+  color: var(--momo-yellow);
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: var(--border-radius-full);
+  align-self: center;
+  border: 1px solid rgba(255, 204, 0, 0.3);
+}
+
+.card-center-crest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.crown-icon {
+  font-size: 3rem;
+  filter: drop-shadow(0 4px 12px var(--momo-yellow-glow));
+  animation: floatCrown 3s ease-in-out infinite;
+}
+
+@keyframes floatCrown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.card-prompt-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card-bottom-indicator {
+  font-size: 0.72rem;
+  color: var(--momo-yellow);
+  font-weight: 700;
+}
+
+/* Card Back (Revealed Prize) */
+.ruler-card-back {
+  background: linear-gradient(145deg, #1C2B49 0%, #0E1626 100%);
+  border: 2px solid var(--momo-yellow);
+  transform: rotateY(180deg);
+  box-shadow: inset 0 0 25px rgba(255, 204, 0, 0.2);
+}
+
+.prize-icon-display {
+  font-size: 3.2rem;
+  margin: 10px 0;
+  filter: drop-shadow(0 4px 15px rgba(255, 204, 0, 0.5));
+}
+
+.prize-title-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--momo-yellow);
+  margin-bottom: 4px;
+}
+
+.prize-desc-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+/* Winning celebration state */
+.ruler-card-wrapper.winner .ruler-card-back {
+  border-color: #10B981;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+}
+
+/* Game Controls & Play Button */
+.game-play-action-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* Confetti Canvas */
+#confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Live Winners Ticker */
+.recent-winners-panel {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--momo-dark-border);
+  border-radius: var(--border-radius-lg);
+  padding: 14px 20px;
+  margin-top: 30px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.recent-winners-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--momo-yellow);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.winners-ticker-track {
+  display: flex;
+  gap: 20px;
+  animation: scrollTicker 28s linear infinite;
+  white-space: nowrap;
+}
+
+@keyframes scrollTicker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.winner-item {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.winner-item strong {
+  color: var(--text-primary);
+}

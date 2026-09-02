@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MTN MoMo Enhanced - From Wallet to Wealth + Fun | MTN Fintech Summit 2026</title>
+  <meta name="description" content="MTN MoMo Enhanced Prize-Linked Savings Mini App: Save R1,000 to earn game tickets, digitise your Stokvel, refer friends, and play The Ruler 3-card rewards game to win airtime, data, cash, and the 1-in-a-Million Jackpot.">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/wallet.css">
+  <link rel="stylesheet" href="css/game.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Confetti Canvas for Winners -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Main Container -->
+  <div class="app-container">
+
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+      <div class="brand-logo">
+        <div class="momo-badge">
+          <span>MoMo</span>
+          <span class="tag">Enhanced</span>
+        </div>
+        <div>
+          <div class="brand-title">MTN MoMo Enhanced</div>
+          <div class="brand-subtitle">From Wallet to Wealth + Fun · South Africa 🇿🇦</div>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button id="btn-toggle-mini-app-frame" class="btn btn-secondary btn-sm" title="Toggle between Desktop Dashboard and MoMo Mobile Mini App container">
+          📱 MoMo App View
+        </button>
+        <button id="btn-reset-demo-state" class="btn btn-secondary btn-sm" title="Reset state to default demo values">
+          🔄 Reset State
+        </button>
+        <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:var(--border-radius-full); border:1px solid var(--momo-dark-border);">
+          <div class="ref-avatar" id="user-avatar" style="width:28px; height:28px; font-size:0.75rem;">TN</div>
+          <div style="font-size:0.8rem; font-weight:700;" id="user-profile-name">Thabo Ndlovu</div>
+          <span class="badge badge-yellow" id="user-profile-tier" style="font-size:0.65rem; padding:2px 6px;">Yello Plus</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hackathon Context Ticker -->
+    <div class="hackathon-ticker">
+      <span class="pulse-dot"></span>
+      <div class="ticker-text">
+        <strong>MTN Fintech Summit 2026:</strong> 24-Hour Hackathon Entry · <em>Every R1,000 Saved (Personal or Stokvel) = 1 Ruler Game Ticket</em> · 10 Verified Referrals = 1 Free Ticket · Built for Africa
+      </div>
+    </div>
+
+    <!-- Navigation Tabs & Quick Tickets Strip -->
+    <nav class="nav-tabs-wrapper">
+      <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="overview">
+          <span>🏠 Overview & Wallet</span>
+        </button>
+        <button class="nav-tab" data-tab="ruler-game">
+          <span>👑 The Ruler Game</span>
+          <span class="nav-tab-badge">Play & Win</span>
+        </button>
+        <button class="nav-tab" data-tab="personal-savings">
+          <span>💰 Personal Savings</span>
+        </button>
+        <button class="nav-tab" data-tab="stokvels">
+          <span>🏛️ Digital Stokvel</span>
+        </button>
+        <button class="nav-tab" data-tab="referrals">
+          <span>👥 Refer & Earn</span>
+        </button>
+      </div>
+
+      <div class="ticket-summary-pill">
+        <div class="ticket-chip" title="Personal Tickets earned via Individual Savings & Referrals">
+          <span class="ticket-icon">👤</span>
+          <span><strong class="val-personal-tickets text-yellow">3</strong> Personal</span>
+        </div>
+        <div class="ticket-chip" title="Group Tickets earned collectively via Digital Stokvels">
+          <span class="ticket-icon" style="background:#004F71; color:#fff;">👥</span>
+          <span><strong class="val-group-tickets text-info">2</strong> Stokvel</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- TAB 1: OVERVIEW & WALLET -->
+    <section id="tab-overview" class="tab-content active">
+      <div class="dashboard-grid">
+        <!-- Left: Virtual MoMo Card & Services -->
+        <div>
+          <div class="momo-virtual-card">
+            <div class="card-top-row">
+              <div class="card-brand">
+                <span>MTN MoMo</span>
+                <span class="tag" style="background:#000; color:#FFCC00; font-size:0.65rem; padding:2px 6px; border-radius:4px;">SA</span>
+              </div>
+              <span class="card-tier-pill" id="card-tier-display">Yello Plus Tier</span>
+            </div>
+
+            <div class="card-balance-block">
+              <div class="card-balance-label">Available MoMo Balance</div>
+              <div class="card-balance-amount val-wallet-balance">R 4,250.00</div>
+            </div>
+
+            <div class="card-bottom-row">
+              <div>
+                <div style="font-size:0.7rem; opacity:0.8;">Account Number</div>
+                <div id="user-profile-phone">083 456 9274</div>
+              </div>
+              <div class="card-partner">
+                <span>In partnership with</span>
+                <strong>UBank</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick MoMo Services Grid -->
+          <div class="quick-services-grid">
+            <button class="service-btn" id="btn-open-deposit-modal">
+              <div class="service-icon-box">📥</div>
+              <span>Deposit</span>
+            </button>
+            <button class="service-btn" id="btn-open-withdraw-modal">
+              <div class="service-icon-box">📤</div>
+              <span>Withdraw</span>
+            </button>
+            <button class="service-btn" onclick="document.querySelector('[data-tab=\'ruler-game\']').click()">
+              <div class="service-icon-box">👑</div>
+              <span>The Ruler</span>
+            </button>
+            <button class="service-btn" id="btn-open-share-modal">
+              <div class="service-icon-box">🎁</div>
+              <span>Invite</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Savings Overview & Milestone Tracker -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">
+                <span>💰</span>
+                <span>Prize-Linked Savings</span>
+              </div>
+              <div class="card-subtitle">Every R1,000 saved unlocks 1 game ticket</div>
+            </div>
+            <button class="btn btn-outline-yellow btn-sm" onclick="document.querySelector('[data-tab=\'personal-savings\']').click()">
+              Manage
+            </button>
+          </div>
+
+          <div class="savings-metric-card">
+            <div class="savings-metric-left">
+              <div class="savings-icon-circle">💎</div>
+              <div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">Personal Savings Balance</div>
+                <div class="savings-amount-value val-savings-balance">R 2,350.00</div>
+              </div>
+            </div>
+            <span class="badge badge-yellow">Earned 3 Tickets</span>
+          </div>
+
+          <!-- Next Ticket Progress -->
+          <div class="milestone-container">
+            <div class="milestone-header">
+              <span class="fw-bold">Next Game Ticket Progress</span>
+              <span class="text-yellow fw-bold" id="savings-milestone-text">R 650 more to earn your next ticket!</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-bar-fill" id="savings-milestone-bar" style="width: 35%;"></div>
+            </div>
+            <div class="milestone-caption">
+              <span>Threshold: R 1,000 = 1 Ticket</span>
+              <span>Unlimited entries</span>
+            </div>
+          </div>
+
+          <!-- 4 Pillars Summary -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:0.8rem;">
+            <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:var(--border-radius-md); border:1px solid var(--momo-dark-border);">
+              <div class="text-yellow fw-bold">🎯 Save to Win</div>
+              <div style="color:var(--text-muted); font-size:0.75rem;">1 Ticket per R1,000 personal/stokvel</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); padding:10px; border-radius:var(--border-radius-md); border:1px solid var(--momo-dark-border);">
+              <div class="text-info fw-bold">👥 Refer to Earn</div>
+              <div style="color:var(--text-muted); font-size:0.75rem;">1 Free Ticket per 10 MoMo friends</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Transactions Activity -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>⚡</span>
+            <span>Recent Activity & Ticket Ledger</span>
+          </div>
+          <span class="badge badge-yellow">Live Updates</span>
+        </div>
+        <div class="transaction-list" id="transactions-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: "THE RULER" 3-CARD REWARDS GAME -->
+    <section id="tab-ruler-game" class="tab-content">
+      <div class="ruler-game-container">
+        <!-- 1 in a Million Global Jackpot Banner -->
+        <div class="jackpot-banner">
+          <div class="jackpot-badge">
+            <span>🏆</span>
+            <span>MTN MoMo Global Mega Jackpot</span>
+          </div>
+          <h2 class="jackpot-title">"1 IN A MILLION" JACKPOT</h2>
+          <p class="jackpot-subtitle">
+            Every 1,000,000th card played globally wins the grand prize: 
+            <strong>Brand New VW Polo Vivo + R100,000 MoMo Cash!</strong>
+          </p>
+
+          <!-- Live Counter Display -->
+          <div class="jackpot-counter-box">
+            <span style="font-size:0.85rem; color:var(--text-muted); margin-right:8px;">GLOBAL PLAYS:</span>
+            <div id="jackpot-digits-container" style="display:flex; gap:4px;">
+              <!-- Populated by JS (e.g. 0 9 9 9 9 4 2) -->
+            </div>
+            <span class="counter-target">/ 1,000,000</span>
+          </div>
+
+          <div style="font-size:0.78rem; color:var(--text-muted);">
+            Counter automatically counts across all 65M+ MoMo users in Africa. Resets after each grand jackpot winner!
+          </div>
+        </div>
+
+        <!-- Ticket Pool Selector (Personal vs Group Pool Separation) -->
+        <div class="pool-selector-wrapper">
+          <button class="pool-btn active" id="pool-btn-personal">
+            <span>👤 Personal Ticket Pool</span>
+            <span class="pool-ticket-count val-personal-tickets">3</span>
+          </button>
+          <button class="pool-btn" id="pool-btn-group">
+            <span>👥 Stokvel Group Pool</span>
+            <span class="pool-ticket-count val-group-tickets" style="background:#004F71; color:#fff;">2</span>
+          </button>
+        </div>
+
+        <!-- 3-Card Stage Area -->
+        <div class="cards-deck-stage" id="ruler-cards-stage">
+          <!-- 3 Interactive 3D Cards rendered dynamically by JS -->
+        </div>
+
+        <!-- Game Instructions & Controls -->
+        <div class="game-play-action-area">
+          <div style="color:var(--text-muted); font-size:0.85rem; text-align:center;">
+            Each play costs <strong>1 Ticket</strong>. Pick any 1 of the 3 cards above to reveal your reward instantly!
+          </div>
+          <div style="display:flex; gap:12px;">
+            <button class="btn btn-secondary btn-sm" id="btn-shuffle-deck">
+              <span>🔀 Shuffle New Cards</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Winners Ticker from across South Africa -->
+        <div class="recent-winners-panel">
+          <div class="recent-winners-title">
+            <span>🎉</span>
+            <span>Recent SA Winners:</span>
+          </div>
+          <div class="winners-ticker-track">
+            <div class="winner-item"><strong>Ayanda M. (Durban)</strong> won R500 Airtime · 2m ago</div>
+            <div class="winner-item"><strong>Jabu K. (Soweto)</strong> won 5GB MTN Data · 5m ago</div>
+            <div class="winner-item"><strong>Themba S. (Tembisa)</strong> won R1,000 Cash · 11m ago</div>
+            <div class="winner-item"><strong>Lindiwe N. (Polokwane)</strong> won R250 Shoprite Voucher · 18m ago</div>
+            <div class="winner-item"><strong>Bongani Z. (Sandton)</strong> won 10GB Data · 24m ago</div>
+            <div class="winner-item"><strong>Ayanda M. (Durban)</strong> won R500 Airtime · 2m ago</div>
+            <div class="winner-item"><strong>Jabu K. (Soweto)</strong> won 5GB MTN Data · 5m ago</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: PERSONAL SAVINGS ("ME MONEY") -->
+    <section id="tab-personal-savings" class="tab-content">
+      <div class="two-col-grid">
+        <!-- Left: Savings Wallet Management -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">
+                <span>💰</span>
+                <span>Personal Savings ("Me Money")</span>
+              </div>
+              <div class="card-subtitle">Save individually. Every R1,000 saved earns 1 Ruler Game ticket.</div>
+            </div>
+            <span class="badge badge-yellow">Zero Fees</span>
+          </div>
+
+          <div class="savings-metric-card" style="margin-bottom:20px;">
+            <div class="savings-metric-left">
+              <div class="savings-icon-circle">💳</div>
+              <div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">Current Savings Balance</div>
+                <div class="savings-amount-value val-savings-balance">R 2,350.00</div>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:0.75rem; color:var(--text-muted);">Total Tickets Earned</div>
+              <div class="text-yellow fw-bold" style="font-size:1.4rem;"><span class="val-personal-tickets">3</span> 🎟️</div>
+            </div>
+          </div>
+
+          <!-- Goal Progress -->
+          <div class="milestone-container">
+            <div class="milestone-header">
+              <span>Savings Goal: <strong>R 5,000.00</strong></span>
+              <span class="text-yellow fw-bold">47% Reached</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-bar-fill" style="width: 47%;"></div>
+            </div>
+            <div class="milestone-caption">
+              <span>Target Date: 31 Dec 2026</span>
+              <span>Next Ticket in: R 650.00</span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; margin-top:20px;">
+            <button class="btn btn-primary" style="flex:1;" id="btn-open-deposit-modal-2" onclick="document.getElementById('modal-deposit').classList.add('active')">
+              <span>📥 Deposit Savings</span>
+            </button>
+            <button class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('modal-withdraw').classList.add('active')">
+              <span>📤 Withdraw to MoMo</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: How It Works & FAQ -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>📖</span>
+              <span>How Personal Savings Works</span>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:16px; font-size:0.88rem;">
+            <div style="display:flex; gap:12px;">
+              <div class="ticket-icon" style="flex-shrink:0;">1</div>
+              <div>
+                <strong>Deposit Any Amount</strong>
+                <p style="font-size:0.8rem; margin-top:2px;">Transfer money from your MoMo Wallet, bank card, or deposit cash at any MTN store.</p>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:12px;">
+              <div class="ticket-icon" style="flex-shrink:0;">2</div>
+              <div>
+                <strong>Every R1,000 = 1 Ruler Ticket</strong>
+                <p style="font-size:0.8rem; margin-top:2px;">Once your savings crosses every R1,000 milestone (R1,000, R2,000, R3,000...), a ticket is instantly minted.</p>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:12px;">
+              <div class="ticket-icon" style="flex-shrink:0;">3</div>
+              <div>
+                <strong>Pick Cards in The Ruler Game</strong>
+                <p style="font-size:0.8rem; margin-top:2px;">Use tickets to win airtime, data, cash, and take a shot at the 1-in-a-Million Grand Jackpot.</p>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:12px;">
+              <div class="ticket-icon" style="flex-shrink:0;">4</div>
+              <div>
+                <strong>No Lock-in & No Penalties</strong>
+                <p style="font-size:0.8rem; margin-top:2px;">Your savings are 100% yours. Withdraw back to your MoMo wallet at any time without fees.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: DIGITAL STOKVEL ("WE MONEY") -->
+    <section id="tab-stokvels" class="tab-content">
+      <div class="card-header" style="margin-bottom:16px;">
+        <div>
+          <h2>Digital Stokvel & Group Savings ("We Money")</h2>
+          <p style="font-size:0.85rem;">Digitise your traditional South African stokvel. Pool money transparently and unlock shared group rewards!</p>
+        </div>
+        <button class="btn btn-primary" id="btn-open-stokvel-modal">
+          <span>+ Create New Stokvel</span>
+        </button>
+      </div>
+
+      <div class="two-col-grid">
+        <!-- Left: Active Stokvel Groups -->
+        <div>
+          <div id="stokvels-container">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Right: Why Stokvels on MoMo -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>🇿🇦</span>
+              <span>Why Digitise Your Stokvel on MoMo?</span>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:14px; font-size:0.85rem;">
+            <div style="background:rgba(255,204,0,0.06); border:1px solid rgba(255,204,0,0.2); padding:12px; border-radius:var(--border-radius-md);">
+              <div class="text-yellow fw-bold">🏛️ R50+ Billion Stokvel Economy</div>
+              <p style="font-size:0.8rem; margin-top:4px;">Stokvels are the lifeblood of South African community wealth. MoMo brings banking-grade transparency, eliminating cash theft risks.</p>
+            </div>
+
+            <div style="background:rgba(0,79,113,0.15); border:1px solid rgba(0,79,113,0.3); padding:12px; border-radius:var(--border-radius-md);">
+              <div class="text-info fw-bold">🎟️ Separate Group Prize Pool</div>
+              <p style="font-size:0.8rem; margin-top:4px;">Every R1,000 pooled by the group earns 1 Group Ticket. Win bulk grocery hampers (Checkers, Shoprite) and group cash dividends!</p>
+            </div>
+
+            <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); padding:12px; border-radius:var(--border-radius-md);">
+              <div class="text-success fw-bold">🤝 100% Transparent Ledger</div>
+              <p style="font-size:0.8rem; margin-top:4px;">Every member sees all contributions in real-time. Automated rotation payouts straight to member MoMo wallets.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: VIRAL REFERRAL GROWTH ENGINE -->
+    <section id="tab-referrals" class="tab-content">
+      <div class="referral-grid">
+        <!-- Left: Referral Share & Milestones -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">
+                <span>👥</span>
+                <span>Refer Friends & Earn Free Tickets</span>
+              </div>
+              <div class="card-subtitle">Every 10 verified MoMo users you invite = 1 Free Game Ticket!</div>
+            </div>
+            <span class="badge badge-success">Growth Engine</span>
+          </div>
+
+          <!-- Share Code Box -->
+          <div class="referral-share-box">
+            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">Your Permanent Referral Code</div>
+            <div class="referral-code-display val-referral-code">MOMO-9274</div>
+            <div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:12px;">
+              Formed automatically from your mobile number suffix: <strong>MOMO-[Last4Digits]</strong>
+            </div>
+
+            <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-primary btn-sm" id="btn-copy-code">
+                <span>📋 Copy Code</span>
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btn-share-whatsapp" style="background:#25D366; color:#000;">
+                <span>💬 WhatsApp Share</span>
+              </button>
+              <button class="btn btn-outline-yellow btn-sm" id="btn-open-share-modal">
+                <span>📱 QR Code</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Referral Milestone Progress -->
+          <div class="milestone-container">
+            <div class="milestone-header">
+              <span class="fw-bold">10-Referral Free Ticket Milestone</span>
+              <span class="text-yellow fw-bold" id="referral-milestone-text">2 more to earn your next FREE Ticket!</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-bar-fill" id="referral-milestone-bar" style="width: 80%;"></div>
+            </div>
+            <div class="milestone-caption">
+              <span>Verified MoMo Friends: <strong class="text-primary" id="val-verified-referrals">8</strong></span>
+              <span>Goal: 10 per Ticket</span>
+            </div>
+          </div>
+
+          <!-- Add Friend Referral Verification Form (Person 2 & 3 flow) -->
+          <form id="form-refer-friend" style="margin-top:20px; background:rgba(0,0,0,0.25); padding:16px; border-radius:var(--border-radius-lg); border:1px solid var(--momo-dark-border);">
+            <div class="form-label" style="color:var(--momo-yellow); font-weight:700;">Simulate Friend Referral Verification:</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+              <input type="text" class="form-control" id="input-refer-name" placeholder="Friend Name (e.g. Sindi Ndlovu)" required>
+              <input type="tel" class="form-control" id="input-refer-phone" placeholder="SA Mobile (e.g. 0831234567)" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">
+              <span>🔍 Verify & Invite via MoMo API</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Right: Verified Referrals List -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>✅</span>
+              <span>Verified Referral Roster</span>
+            </div>
+            <span class="badge badge-yellow">MoMo API Validated</span>
+          </div>
+          <div class="referral-list" id="referral-list-container">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE FAST SIMULATOR TESTING BAR (For Quick Hackathon Evaluation) -->
+    <div class="simulator-panel">
+      <div class="simulator-header">
+        <div class="simulator-title">
+          <span>⚡</span>
+          <span>Fast-Forward Simulation Bar (One-Click Hackathon Evaluation)</span>
+        </div>
+        <span style="font-size:0.75rem; color:var(--text-muted);">Easily test all state transitions in 1-click</span>
+      </div>
+      <div class="simulator-actions">
+        <button class="btn btn-secondary btn-sm" id="sim-deposit-1000">
+          <span>💰 +R1,000 Personal Deposit (Earn 1 Ticket)</span>
+        </button>
+        <button class="btn btn-secondary btn-sm" id="sim-referrals-10">
+          <span>👥 +10 Friends Verified (Earn 1 Free Ticket)</span>
+        </button>
+        <button class="btn btn-secondary btn-sm" id="sim-stokvel-deposit">
+          <span>🏛️ +R2,000 Stokvel Pool (Earn 2 Group Tickets)</span>
+        </button>
+        <button class="btn btn-secondary btn-sm" id="sim-jackpot-prime" style="border-color:var(--momo-yellow); color:var(--momo-yellow);">
+          <span>🏆 Prime Jackpot to 999,999 (Hit 1-in-a-Million Next Play)</span>
+        </button>
+      </div>
+    </div>
+
+  </div> <!-- End App Container -->
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- MODAL: Deposit Personal Savings -->
+  <div class="modal-overlay" id="modal-deposit">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📥 Deposit into Personal Savings</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <form id="form-deposit-savings">
+        <div class="form-group">
+          <label class="form-label">Deposit Amount (ZAR)</label>
+          <input type="number" class="form-control" id="input-deposit-amount" min="10" step="50" value="1000" required>
+          <div style="font-size:0.75rem; color:var(--momo-yellow); margin-top:4px;">
+            💡 Pro tip: Depositing R1,000 or multiples automatically mints Ruler Game Tickets!
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Funding Source</label>
+          <select class="form-control" id="select-deposit-source">
+            <option value="MoMo Wallet">Active MoMo Wallet Balance</option>
+            <option value="Bank Card">Debit / Credit Card (UBank / Visa / Mastercard)</option>
+            <option value="Instant EFT">Instant EFT (Capitec / FNB / Standard Bank / Absa / Nedbank)</option>
+            <option value="MTN Store">MTN Store Cash-In</option>
+          </select>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" class="btn btn-secondary btn-modal-close">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm Deposit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Withdraw Personal Savings -->
+  <div class="modal-overlay" id="modal-withdraw">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📤 Withdraw from Personal Savings</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <form id="form-withdraw-savings">
+        <div class="form-group">
+          <label class="form-label">Withdrawal Amount (ZAR)</label>
+          <input type="number" class="form-control" id="input-withdraw-amount" min="10" step="50" value="500" required>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">
+            Funds will be instantly returned to your active MoMo Wallet balance.
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" class="btn btn-secondary btn-modal-close">Cancel</button>
+          <button type="submit" class="btn btn-primary">Withdraw Funds</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Create New Stokvel Group -->
+  <div class="modal-overlay" id="modal-stokvel">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🏛️ Create New Digital Stokvel</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <form id="form-create-stokvel">
+        <div class="form-group">
+          <label class="form-label">Stokvel Group Name</label>
+          <input type="text" class="form-control" id="input-stokvel-name" placeholder="e.g. Tembisa Grocery Club" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Category / Purpose</label>
+          <select class="form-control" id="input-stokvel-type">
+            <option value="Grocery & Festive Hamper">Grocery & Festive Hamper</option>
+            <option value="Property & Investment">Property & Investment</option>
+            <option value="Family Holiday Fund">Family Holiday Fund</option>
+            <option value="Emergency & Burial Support">Emergency & Burial Support</option>
+            <option value="Small Business Pool">Small Business Pool</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Group Target Goal (ZAR)</label>
+          <input type="number" class="form-control" id="input-stokvel-goal" min="1000" step="1000" value="25000" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Payout Distribution Schedule</label>
+          <select class="form-control" id="input-stokvel-payout">
+            <option value="Monthly Rotation">Monthly Rotation (One member per month)</option>
+            <option value="Lump Sum (December)">Lump Sum (December Payout)</option>
+            <option value="Quarterly Dividend">Quarterly Dividend</option>
+          </select>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" class="btn btn-secondary btn-modal-close">Cancel</button>
+          <button type="submit" class="btn btn-primary">Launch Stokvel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Share QR & Links -->
+  <div class="modal-overlay" id="modal-share">
+    <div class="modal-content" style="text-align:center;">
+      <div class="modal-header">
+        <h3>📱 Share Your MoMo Referral</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+
+      <!-- Generated QR Visual -->
+      <div style="background:#fff; padding:20px; border-radius:var(--border-radius-lg); display:inline-block; margin:10px 0;">
+        <svg width="160" height="160" viewBox="0 0 100 100" fill="#000">
+          <rect width="100" height="100" fill="#fff"/>
+          <path d="M10 10h30v30h-30z M15 15h20v20h-20z M20 20h10v10h-10z M60 10h30v30h-30z M65 15h20v20h-20z M70 20h10v10h-10z M10 60h30v30h-30z M15 65h20v20h-20z M20 70h10v10h-10z M45 10h10v20h-10z M45 40h20v10h-20z M10 45h20v10h-20z M70 45h20v10h-20z M45 60h10v30h-10z M60 60h15v10h-15z M60 75h30v15h-30z"/>
+        </svg>
+      </div>
+
+      <div class="val-referral-code text-yellow fw-extrabold" style="font-size:1.8rem; letter-spacing:0.05em;">MOMO-9274</div>
+      <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;">
+        Scan with any mobile camera or MoMo scanner to register instantly.
+      </p>
+
+      <div style="margin-top:20px; display:flex; justify-content:center;">
+        <button class="btn btn-primary btn-modal-close">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Reward Winner Celebration -->
+  <div class="modal-overlay" id="modal-reward">
+    <div class="modal-content" style="text-align:center; border:2px solid var(--momo-yellow);">
+      <div style="font-size:4rem; margin-top:10px;" id="reward-modal-icon">🎁</div>
+      <span class="badge badge-yellow" style="margin-bottom:8px;">Winning Card Revealed!</span>
+      <h2 style="font-size:1.8rem; color:var(--momo-yellow); margin-bottom:8px;" id="reward-modal-title">R50 MTN Airtime</h2>
+      <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px;" id="reward-modal-desc">
+        Loaded instantly to your registered MoMo mobile number!
+      </p>
+
+      <div style="background:rgba(0,0,0,0.3); border:1px dashed var(--momo-yellow); padding:12px; border-radius:var(--border-radius-md); margin-bottom:20px;">
+        <div style="font-size:0.75rem; color:var(--text-muted);">VOUCHER / CLAIM CODE:</div>
+        <div style="font-family:var(--font-heading); font-size:1.1rem; font-weight:800; color:#fff;" id="reward-modal-code">MOMO-WIN-8839</div>
+      </div>
+
+      <div style="display:flex; justify-content:center; gap:10px;">
+        <button class="btn btn-primary" id="btn-reward-play-again">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/audio.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/momo-api.js"></script>
+  <script src="js/wallet.js"></script>
+  <script src="js/stokvel.js"></script>
+  <script src="js/referrals.js"></script>
+  <script src="js/ruler-game.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
