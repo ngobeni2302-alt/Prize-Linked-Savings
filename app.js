@@ -1032,7 +1032,7 @@ function renderGroupCard(group, userId) {
       ${!completed && !group.isWithdrawnEarly ? `
         <div class="goal-card-actions">
           <button class="btn btn--primary btn--sm" data-gaction="deposit" data-group-id="${group.id}">+ Contribute</button>
-          ${pct >= 100 && !locked ? `<button class="btn btn--primary btn--sm" data-gaction="complete" data-group-id="${group.id}" style="background:var(--success);">Claim Voucher</button>` : ''}}
+          ${pct >= 100 && !locked ? `<button class="btn btn--primary btn--sm" data-gaction="complete" data-group-id="${group.id}" style="background:var(--success);">Claim Voucher</button>` : ''}
         </div>` : ''}
     </div>`;
 }
@@ -1086,11 +1086,12 @@ function renderGamePage() {
     const prev = select.value;
     select.innerHTML = '<option value="" disabled>— Select a card —</option>';
     if (tickets.length === 0) {
-      select.innerHTML += '<option value="" disabled>No cards available — complete a savings goal!</option>';
+      select.innerHTML += '<option value="" disabled>No cards available — complete a savings goal or group pool!</option>';
     } else {
       tickets.forEach(t => {
-        const src = { personal_savings: '🏦 Personal', group_savings: '👥 Group', referral: '🎁 Referral' }[t.source] || t.source;
-        select.innerHTML += `<option value="${t.id}">${src} • ${tierLabel(t.tier)} • ${t.id.slice(-6)}</option>`;
+        const src = { personal_savings: 'Personal Savings', group_savings: 'Group / Stokvel', referral: 'Referral' }[t.source] || t.source;
+        const groupSuffix = t.source === 'group_savings' ? ` (Group: ${t.groupMeta?.groupName || 'Fund'})` : '';
+        select.innerHTML += `<option value="${t.id}">[${src}] ${tierLabel(t.tier)} Ticket #${t.id.slice(-6)}${groupSuffix}</option>`;
       });
       if (prev && tickets.find(t => t.id === prev)) select.value = prev;
       else select.value = tickets[0].id;
@@ -1121,7 +1122,7 @@ function renderGamePage() {
           <div class="activity-icon">${r.icon || 'TKT'}</div>
           <div class="activity-info">
             <div class="activity-desc">${r.prize}</div>
-            <div class="activity-date">${formatDate(t.scratchedAt)} · ${tierLabel(t.tier)}</div>
+            <div class="activity-date">${formatDate(t.scratchedAt)} · ${tierLabel(t.tier)} (${t.source === 'group_savings' ? 'Group Pool' : 'Personal'})</div>
           </div>
           <div class="activity-amount positive">${r.type === 'retail_discount' ? r.discount + '% Off' : fmt(r.valueZar)}</div>`;
         histEl.insertAdjacentElement('afterbegin', item);
@@ -1133,12 +1134,13 @@ function renderGamePage() {
 function updateActiveTicketBanner() {
   const select = document.getElementById('ticket-code-select');
   const bannerEl = document.getElementById('active-ticket-banner');
-  const activeTextEl = document.getElementById('active-ticket-text');
   const poolTypeEl = document.getElementById('active-pool-type');
+  const tierBadgeEl = document.getElementById('scratch-tier-badge');
 
   if (!select || !select.value) {
     if (bannerEl) bannerEl.textContent = 'Select a scratch card above to begin';
     if (poolTypeEl) poolTypeEl.textContent = '—';
+    if (tierBadgeEl) tierBadgeEl.innerHTML = `<span class="tier-badge tier-badge--locked">No Card Selected</span>`;
     return;
   }
 
@@ -1147,9 +1149,14 @@ function updateActiveTicketBanner() {
   const ticket = getUserTickets(user.id).find(t => t.id === activeTicketId);
   if (!ticket) return;
 
-  const srcLabels = { personal_savings: 'PERSONAL SAVINGS', group_savings: 'GROUP / STOKVEL', referral: 'REFERRAL' };
-  if (activeTextEl) activeTextEl.textContent = `Using: ${tierLabel(ticket.tier)} (${srcLabels[ticket.source] || ''} · #${ticket.id.slice(-6)})`;
+  const srcLabels = { personal_savings: 'Personal Savings', group_savings: 'Group / Stokvel', referral: 'Referral' };
+  const badgeClass = ticket.tier === 'gold' ? 'tier-badge--gold' : ticket.tier === 'silver' ? 'tier-badge--silver' : 'tier-badge--bronze';
+
+  if (bannerEl) bannerEl.textContent = `Selected: ${tierLabel(ticket.tier)} Ticket #${ticket.id.slice(-6)}`;
   if (poolTypeEl) poolTypeEl.textContent = srcLabels[ticket.source] || ticket.source;
+  if (tierBadgeEl) {
+    tierBadgeEl.innerHTML = `<span class="tier-badge ${badgeClass}">${srcLabels[ticket.source] || ''} • ${tierLabel(ticket.tier)} Ticket</span>`;
+  }
 }
 
 /* ---- REFERRALS PAGE ---- */
@@ -1291,7 +1298,6 @@ function forceCompleteGroup(groupId, user) {
    GAME LOGIC
    ================================================ */
 function setupGamePage() {
-  const gameCards = document.querySelectorAll('.game-card');
   const winResultBox = document.getElementById('win-result-box');
   const winBadge = document.getElementById('win-badge');
   const winTitle = document.getElementById('win-title');
@@ -1305,134 +1311,145 @@ function setupGamePage() {
   const gameInstruction = document.getElementById('game-instruction');
   const scratchArea = document.getElementById('scratch-card-area');
   const scratchOverlay = document.getElementById('scratch-overlay');
-  const scratchReveal = document.getElementById('scratch-reveal');
   const scratchWrapper = document.getElementById('scratch-card-wrapper');
-
-  let pickedCard = false;
-
-  function resetGame() {
-    gameCards.forEach(card => {
-      card.classList.remove('game-card--flipped');
-      card.disabled = false;
-    });
-    if (winResultBox) winResultBox.style.display = 'none';
-    if (scratchArea) scratchArea.style.display = 'none';
-    if (scratchOverlay) scratchOverlay.classList.remove('scratched');
-    if (gameInstruction) gameInstruction.textContent = 'Choose 1 of the 3 cards to reveal your guaranteed prize!';
-    pickedCard = false;
-    gameActive = true;
-  }
-
-  gameCards.forEach(card => {
-    card.addEventListener('click', () => {
-      if (!gameActive || pickedCard) return;
-
-      const user = getCurrentUser();
-      const tickets = getUserTickets(user.id);
-
-      if (!activeTicketId) {
-        showToast('Please select a scratch card from the dropdown above!', 'warning');
-        return;
-      }
-      const ticket = tickets.find(t => t.id === activeTicketId);
-      if (!ticket) {
-        showToast('That card has already been scratched or is unavailable.', 'warning');
-        renderGamePage();
-        return;
-      }
-
-      pickedCard = true;
-      gameActive = false;
-
-      // Flip the picked card
-      card.classList.add('game-card--flipped');
-      gameCards.forEach(c => { if (c !== card) c.disabled = true; });
-
-      // Update card back text
-      const backText = card.querySelector('.reward-text');
-      if (backText) backText.textContent = '🎉 WINNER!';
-
-      // Show scratch card area with a delay
-      setTimeout(() => {
-        const result = scratchTicket(activeTicketId, user.id);
-        if (!result) { showToast('Error loading ticket. Please refresh.', 'error'); return; }
-
-        const { reward } = result;
-
-        // Pre-fill scratch card reveal content
-        const prizeIconEl = document.getElementById('scratch-prize-icon');
-        const prizeTextEl = document.getElementById('scratch-prize-text');
-        const prizeSubEl  = document.getElementById('scratch-prize-sub');
-        const tierBadgeEl = document.getElementById('scratch-tier-badge');
-
-        if (prizeIconEl)  prizeIconEl.textContent = reward.icon || 'WIN';
-        if (prizeTextEl)  prizeTextEl.textContent  = reward.prize;
-        if (prizeSubEl)   prizeSubEl.textContent   = reward.splitDetails || '';
-        if (tierBadgeEl)  tierBadgeEl.innerHTML = `<span class="tier-badge ${reward.badgeClass.replace('win-badge', 'tier-badge')}">${reward.tierLabel}</span>`;
-
-        if (scratchArea) scratchArea.style.display = 'flex';
-        if (scratchOverlay) scratchOverlay.classList.remove('scratched');
-        if (gameInstruction) gameInstruction.textContent = 'Tap the silver card to scratch and reveal your prize!';
-
-        // Scratch interaction
-        if (scratchWrapper) {
-          const doScratch = () => {
-            if (scratchOverlay && !scratchOverlay.classList.contains('scratched')) {
-              scratchOverlay.classList.add('scratched');
-              setTimeout(() => showFullResult(reward, user), 700);
-            }
-          };
-          scratchWrapper.addEventListener('click', doScratch, { once: true });
-          scratchWrapper.addEventListener('touchstart', doScratch, { once: true, passive: true });
-        }
-      }, 700);
-
-      function showFullResult(reward, user) {
-        // Result box
-        if (winBadge) { winBadge.textContent = reward.tierLabel; winBadge.className = `win-badge ${reward.badgeClass}`; }
-        if (winTitle) winTitle.textContent = reward.prize;
-        if (winPrize) winPrize.textContent = reward.type === 'retail_discount' ? `${reward.discount}% off at ${reward.vendor}` : `Value: ~${fmt(reward.valueZar)}`;
-        if (winSplitDetails) winSplitDetails.textContent = reward.splitDetails;
-
-        if (deliveryStatusCard) {
-          deliveryStatusCard.style.display = 'block';
-          if (deliveryBadge) { deliveryBadge.textContent = 'DELIVERED'; deliveryBadge.className = 'delivery-status-badge delivery-status-badge--delivered'; }
-          if (winPhoneText) winPhoneText.textContent = reward.type === 'retail_discount'
-            ? `Recipients: All group members`
-            : `Recipient: ${user.phone} (MTN MoMo SIM)`;
-          if (winSmsText) winSmsText.textContent = generateSmsAlert(reward, user.phone);
-        }
-
-        if (winResultBox) winResultBox.style.display = 'block';
-        if (gameInstruction) gameInstruction.textContent = 'Congratulations! Your prize has been credited.';
-
-        // Refresh UI
-        activeTicketId = null;
-        renderGamePage();
-        updateHeaderWallet();
-      }
-    });
-  });
-
-  if (playAgainBtn) {
-    playAgainBtn.addEventListener('click', resetGame);
-  }
-
   const ticketSelect = document.getElementById('ticket-code-select');
+  const addTicketBtn = document.getElementById('btn-add-ticket');
+
+  let isScratchedCurrent = false;
+
+  function resetScratchCardUI() {
+    if (winResultBox) winResultBox.style.display = 'none';
+    if (scratchOverlay) scratchOverlay.classList.remove('scratched');
+    if (gameInstruction) gameInstruction.textContent = 'Tap or swipe the silver card below to scratch and reveal your prize!';
+    isScratchedCurrent = false;
+  }
+
+  function handleScratchAction() {
+    if (isScratchedCurrent) return;
+
+    const user = getCurrentUser();
+    const tickets = getUserTickets(user.id);
+
+    if (tickets.length === 0) {
+      showToast('No tickets available. Complete a personal goal or group target to earn tickets!', 'warning', 4000);
+      return;
+    }
+
+    if (!activeTicketId) {
+      activeTicketId = ticketSelect?.value || tickets[0].id;
+    }
+
+    const ticket = tickets.find(t => t.id === activeTicketId);
+    if (!ticket) {
+      showToast('Please choose an available ticket from the dropdown above.', 'warning');
+      renderGamePage();
+      return;
+    }
+
+    isScratchedCurrent = true;
+
+    // Execute scratch
+    const result = scratchTicket(ticket.id, user.id);
+    if (!result) {
+      showToast('Error scratching ticket. Please refresh.', 'error');
+      return;
+    }
+
+    const { reward } = result;
+
+    // Populate revealed reward content
+    setEl('scratch-prize-icon', reward.icon || 'WIN');
+    setEl('scratch-prize-text', reward.prize);
+    setEl('scratch-prize-sub', reward.splitDetails || '');
+    const tierBadgeEl = document.getElementById('scratch-tier-badge');
+    if (tierBadgeEl) {
+      tierBadgeEl.innerHTML = `<span class="tier-badge ${reward.badgeClass.replace('win-badge', 'tier-badge')}">${reward.tierLabel}</span>`;
+    }
+
+    // Scratch animation
+    if (scratchOverlay) scratchOverlay.classList.add('scratched');
+    if (gameInstruction) gameInstruction.textContent = 'Scratching... Revealed!';
+
+    setTimeout(() => {
+      // Display result box
+      if (winBadge) { winBadge.textContent = reward.tierLabel; winBadge.className = `win-badge ${reward.badgeClass}`; }
+      if (winTitle) winTitle.textContent = reward.prize;
+      if (winPrize) winPrize.textContent = reward.type === 'retail_discount' ? `${reward.discount}% off at ${reward.vendor}` : `Value: ~${fmt(reward.valueZar)}`;
+      if (winSplitDetails) winSplitDetails.textContent = reward.splitDetails;
+
+      if (deliveryStatusCard) {
+        deliveryStatusCard.style.display = 'block';
+        if (deliveryBadge) { deliveryBadge.textContent = 'DELIVERED'; deliveryBadge.className = 'delivery-status-badge delivery-status-badge--delivered'; }
+        if (winPhoneText) {
+          winPhoneText.textContent = reward.type === 'retail_discount'
+            ? `Recipients: All group members (${reward.vendor})`
+            : `Recipient: ${user.phone} (MTN MoMo SIM)`;
+        }
+        if (winSmsText) winSmsText.textContent = generateSmsAlert(reward, user.phone);
+      }
+
+      if (winResultBox) winResultBox.style.display = 'block';
+      if (gameInstruction) gameInstruction.textContent = 'Congratulations! Your prize has been verified and issued.';
+
+      showToast(`Congratulations! You won: ${reward.prize}!`, 'success', 5000);
+
+      // Refresh tickets list & header
+      activeTicketId = null;
+      renderGamePage();
+      updateHeaderWallet();
+    }, 650);
+  }
+
+  // Listeners for scratch interaction
+  if (scratchWrapper) {
+    scratchWrapper.addEventListener('click', handleScratchAction);
+    scratchWrapper.addEventListener('touchstart', handleScratchAction, { passive: true });
+  }
+
+  // Play again / scratch another button
+  if (playAgainBtn) {
+    playAgainBtn.addEventListener('click', () => {
+      resetScratchCardUI();
+      const user = getCurrentUser();
+      const remaining = getUserTickets(user.id);
+      if (remaining.length > 0) {
+        activeTicketId = remaining[0].id;
+        updateActiveTicketBanner();
+      } else {
+        showToast('No more tickets available. Complete another goal to earn more!', 'default');
+      }
+    });
+  }
+
+  // Dropdown selector
   if (ticketSelect) {
     ticketSelect.addEventListener('change', () => {
       activeTicketId = ticketSelect.value || null;
+      resetScratchCardUI();
       updateActiveTicketBanner();
     });
   }
 
-  const addTicketBtn = document.getElementById('btn-add-ticket');
+  // Add demo ticket helper button
   if (addTicketBtn) {
     addTicketBtn.addEventListener('click', () => {
       const user = getCurrentUser();
-      issueTicket(user.id, 'personal_savings', 'bronze', 'demo');
-      showToast('Demo Bronze scratch card added!', 'success');
+      // Alternate between personal and group demo cards
+      const existing = getUserTickets(user.id);
+      const isGroup = existing.length % 2 === 1;
+      if (isGroup) {
+        issueTicket(user.id, 'group_savings', 'silver', 'demo_group', {
+          groupName: 'Family Stokvel',
+          memberCount: 4,
+          totalPool: 15000
+        });
+        showToast('Demo Silver Group ticket added! (Retail discount voucher)', 'success');
+      } else {
+        issueTicket(user.id, 'personal_savings', 'bronze', 'demo_personal');
+        showToast('Demo Bronze Personal ticket added! (Airtime/Data)', 'success');
+      }
       renderGamePage();
+      resetScratchCardUI();
     });
   }
 }

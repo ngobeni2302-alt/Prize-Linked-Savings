@@ -31,56 +31,202 @@
   <main class="app-main" id="app-main">
     <section class="page" id="page-game">
       <div class="page-header">
-        <h1>Tickets</h1>
-        <p class="page-subtitle">Every ticket is a 100% guaranteed win &mdash; earned by completing savings goals</p>
+        <h1>Tickets &amp; Scratch Cards</h1>
+        <p class="page-subtitle">Every ticket is a 100% guaranteed win &mdash; earned by completing savings goals and group targets</p>
       </div>
 
-      <!-- Guaranteed Prizes Section -->
-      <div class="section" id="section-reward-matrix">
+      <!-- Ticket Selection & Available Cards -->
+      <div class="section" id="section-ticket-info">
+        <div class="ticket-header-card card card--highlight" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-md); margin-bottom:var(--space-md);">
+          <div>
+            <span class="wallet-label">AVAILABLE TICKETS</span>
+            <div style="display:flex; align-items:baseline; gap:var(--space-sm); margin-top:4px;">
+              <span style="font-size:2rem; font-weight:800; color:var(--navy);" id="game-tickets-count">0</span>
+              <span style="font-size:0.85rem; color:var(--text-secondary); font-weight:600;">ready to scratch</span>
+            </div>
+          </div>
+          <div style="display:flex; gap:var(--space-sm); align-items:center;">
+            <button class="btn btn--outline btn--sm" id="btn-add-ticket" title="Add a demo Bronze ticket to test scratching">+ Demo Ticket</button>
+          </div>
+        </div>
+
+        <div class="ticket-selector-card card" style="margin-bottom:var(--space-lg);">
+          <label class="form-label" for="ticket-code-select" style="font-weight:700;">Choose a Ticket to Scratch</label>
+          <div class="input-row">
+            <select id="ticket-code-select" class="form-select">
+              <option value="" disabled selected>&mdash; Select a ticket &mdash;</option>
+            </select>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:var(--space-sm);">
+            <div class="card-hint" id="active-ticket-banner" style="font-weight:700; color:var(--navy);">Select a scratch card above to begin</div>
+            <div class="card-hint">Pool Type: <strong id="active-pool-type" style="color:var(--navy);">&mdash;</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Scratch Card Arena -->
+      <div class="section" id="section-scratch-arena">
         <h2 class="section-title">
-          <span class="section-title-badge">GP</span>
-          Guaranteed Prizes Allocation
+          <span class="section-title-badge">SCR</span>
+          Scratch &amp; Win Card
+        </h2>
+        <p class="game-instruction" id="game-instruction">Tap and scratch the silver card below to reveal your prize!</p>
+
+        <!-- Scratch Card Component -->
+        <div class="ticket-card-area" id="scratch-card-area" style="display:flex;">
+          <div class="ticket-card-tier-label" id="scratch-tier-badge">
+            <span class="tier-badge tier-badge--bronze">Bronze Ticket</span>
+          </div>
+
+          <div class="ticket-card-wrapper" id="scratch-card-wrapper">
+            <!-- Hidden Revealed Content Underneath -->
+            <div class="ticket-card-reveal" id="scratch-reveal">
+              <span class="ticket-card-prize-label">100% Guaranteed Reward</span>
+              <div style="font-size:1.6rem; font-weight:800; color:var(--yellow);" id="scratch-prize-icon">WIN</div>
+              <div class="ticket-card-prize-text" id="scratch-prize-text">Scratch To Reveal</div>
+              <div class="ticket-card-prize-sub" id="scratch-prize-sub">Credited directly to your MTN MoMo account</div>
+            </div>
+
+            <!-- Silver Scratchable Overlay Surface -->
+            <div class="ticket-card-overlay" id="scratch-overlay">
+              <div class="ticket-overlay-pattern"></div>
+              <div style="font-size:1.8rem; font-weight:900; color:#444; margin-bottom:4px;">MTN</div>
+              <div class="ticket-overlay-label">SCRATCH HERE</div>
+              <div class="ticket-overlay-sub">100% Guaranteed Win</div>
+            </div>
+          </div>
+
+          <p style="font-size:0.75rem; color:var(--text-muted); text-align:center;">Click or swipe across the silver surface to scratch and reveal</p>
+        </div>
+
+        <!-- Result Box (Appears when scratched) -->
+        <div class="win-result-box" id="win-result-box" style="display:none;">
+          <div class="win-result-content">
+            <div class="win-badge win-badge--medium" id="win-badge">Guaranteed Winner</div>
+            <div class="win-title" id="win-title">Congratulations!</div>
+            <div class="win-prize" id="win-prize">Reward</div>
+            <div class="split-details-text" id="win-split-details">Credited directly to your MTN MoMo account</div>
+
+            <!-- Delivery confirmation preview -->
+            <div class="delivery-status-card" id="delivery-status-card" style="display:none;">
+              <div class="delivery-status-header">
+                <span class="delivery-status-badge delivery-status-badge--delivered" id="delivery-status-badge">DELIVERED</span>
+                <span class="delivery-status-title">Instant Fulfillment via MTN MoMo</span>
+              </div>
+              <div class="delivery-phone-text" id="win-phone-text">Recipient: Registered MTN SIM</div>
+              <div class="sms-preview-box">
+                <span class="sms-label">SMS Alert Sent:</span>
+                <span id="win-sms-text" style="font-size:0.8rem; color:var(--navy-soft); font-family:monospace;">"MTN MoMo: Reward delivered to your number."</span>
+              </div>
+            </div>
+
+            <button class="btn btn--primary" id="btn-play-again" style="margin-top:var(--space-md);">Scratch Another Card</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tier Structure Comparison: Personal vs Group -->
+      <div class="section" id="section-reward-matrix" style="margin-top:var(--space-xl);">
+        <h2 class="section-title">
+          <span class="section-title-badge">TIER</span>
+          Reward Allocation &amp; Tiers
         </h2>
         <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:var(--space-lg);">
-          Every ticket won through savings or referrals guarantees an instant reward allocation funded by the &minus;2.00% p.a. interest pool offset.
+          Remember that <strong>Personal Tiers</strong> and <strong>Group / Stokvel Tiers</strong> are structured differently. Personal goals reward individual airtime, data, and voice minutes, while Group goals unlock bulk partner retail discount vouchers (5% &ndash; 20% off) for all members.
         </p>
 
-        <div style="overflow-x:auto;">
-          <table class="reward-table">
-            <thead>
-              <tr>
-                <th>Tier</th>
-                <th>Threshold Range</th>
-                <th>Reward Allocations</th>
-                <th>Eligible Products &amp; Perks</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span class="tier-badge tier-badge--bronze">Bronze Tier</span></td>
-                <td><strong>Under R50</strong><br><small style="color:var(--text-muted);">*R50 threshold is exclusive to referrals</small></td>
-                <td>Airtime, Minutes &amp; Data Rewards</td>
-                <td>Instant top-up to registered MTN MoMo mobile number</td>
-              </tr>
-              <tr>
-                <td><span class="tier-badge tier-badge--silver">Silver Tier</span></td>
-                <td><strong>R50 &ndash; R100</strong></td>
-                <td>Scaled Airtime, Data &amp; Minutes Rewards</td>
-                <td>Enhanced bundle allocations &amp; voice minutes</td>
-              </tr>
-              <tr>
-                <td><span class="tier-badge tier-badge--gold">Gold Tier</span></td>
-                <td><strong>R100 &ndash; R200</strong></td>
-                <td>Airtime / Data / Minutes (up to R200) + Retail Discount Vouchers</td>
-                <td>Exclusive discount vouchers for MTN MoMo partner retail stores (Pick n Pay, Shoprite, Boxer, Checkers, PEP)</td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Personal Savings Tiers Table -->
+        <div class="card" style="margin-bottom:var(--space-lg);">
+          <h3 style="font-size:1.05rem; font-weight:800; color:var(--navy); margin-bottom:var(--space-sm);">Personal Savings Tiers</h3>
+          <div style="overflow-x:auto;">
+            <table class="reward-table">
+              <thead>
+                <tr>
+                  <th>Tier</th>
+                  <th>Target Threshold</th>
+                  <th>Guaranteed Win Products</th>
+                  <th>Fulfillment Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="tier-badge tier-badge--bronze">Bronze Tier</span></td>
+                  <td><strong>R1,000 &ndash; R4,999</strong><br><small style="color:var(--text-muted);">(or via Referral)</small></td>
+                  <td>100MB &ndash; 250MB Data, R15 &ndash; R20 Airtime, 20 Minutes</td>
+                  <td>Instant top-up to registered MTN SIM</td>
+                </tr>
+                <tr>
+                  <td><span class="tier-badge tier-badge--silver">Silver Tier</span></td>
+                  <td><strong>R5,000 &ndash; R14,999</strong></td>
+                  <td>500MB &ndash; 1GB Data, R25 &ndash; R30 Airtime, 50 Minutes</td>
+                  <td>Enhanced bundle directly applied</td>
+                </tr>
+                <tr>
+                  <td><span class="tier-badge tier-badge--gold">Gold Tier</span></td>
+                  <td><strong>R15,000+</strong></td>
+                  <td>2GB &ndash; 3GB Data, R40 &ndash; R45 Airtime, 100 Minutes</td>
+                  <td>Premium data &amp; voice voucher</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Group / Stokvel Savings Tiers Table -->
+        <div class="card">
+          <h3 style="font-size:1.05rem; font-weight:800; color:var(--navy); margin-bottom:var(--space-sm);">Group / Stokvel Savings Tiers</h3>
+          <div style="overflow-x:auto;">
+            <table class="reward-table">
+              <thead>
+                <tr>
+                  <th>Group Tier</th>
+                  <th>Pooled Target Threshold</th>
+                  <th>Group Retail Voucher</th>
+                  <th>Partner Stores</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="tier-badge tier-badge--bronze">Bronze Group</span></td>
+                  <td><strong>R1,000 &ndash; R9,999</strong></td>
+                  <td>5% Off Retail Category Voucher</td>
+                  <td>Shoprite, Pick n Pay</td>
+                </tr>
+                <tr>
+                  <td><span class="tier-badge tier-badge--silver">Silver Group</span></td>
+                  <td><strong>R10,000 &ndash; R49,999</strong></td>
+                  <td>10% Off Retail Category Voucher</td>
+                  <td>Shoprite, Pick n Pay, Checkers</td>
+                </tr>
+                <tr>
+                  <td><span class="tier-badge tier-badge--gold">Gold Group</span></td>
+                  <td><strong>R50,000+</strong></td>
+                  <td>20% Off Retail Category Voucher</td>
+                  <td>All Partner Stores (Pick n Pay, Shoprite, Boxer, Checkers, PEP)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div class="info-box info-box--success" style="margin-top:var(--space-lg);">
           <span class="info-box-icon">+</span>
-          <span><strong>100% Guaranteed Payout</strong> &mdash; All prize-linked savings rewards are verified and instantly disbursed to your MTN MoMo wallet upon goal completion.</span>
+          <span><strong>100% Guaranteed Payout:</strong> Both personal goals and group funds earn tickets upon completing their set amount and set months. Scratch cards reveal instant rewards funded by the &minus;2.00% p.a. pool interest offset.</span>
+        </div>
+      </div>
+
+      <!-- Scratched Ticket History -->
+      <div class="section" id="section-prize-history" style="margin-top:var(--space-xl);">
+        <h2 class="section-title">
+          <span class="section-title-badge">HIST</span>
+          Your Scratched Ticket History
+        </h2>
+        <div class="card" id="prize-history-list">
+          <div class="empty-state" id="prize-history-empty">
+            <div class="empty-state-icon">TKT</div>
+            <div class="empty-state-title">No scratched cards yet</div>
+            <div class="empty-state-text">Select an available ticket above and scratch it to see your rewards history here!</div>
+          </div>
         </div>
       </div>
 
