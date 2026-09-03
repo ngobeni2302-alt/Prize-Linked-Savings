@@ -8,6 +8,60 @@
 'use strict';
 
 /* ================================================
+   MOMO BACKEND CONFIG
+   ================================================ */
+const MOMO_BACKEND_URL = 'http://localhost:4000';
+const DEFAULT_MOMO_PHONE = '0723143541';
+
+/**
+ * Convert a locally-stored phone number (e.g. "0821234567") into the
+ * MSISDN format MTN MoMo expects (e.g. "27821234567" — no "+", no leading 0).
+ */
+function toMsisdn(phone) {
+  const digits = String(phone).replace(/\D/g, '');
+  if (digits.startsWith('27')) return digits;
+  if (digits.startsWith('0')) return '27' + digits.slice(1);
+  return '27' + digits;
+}
+
+/**
+ * Kick off a Request to Pay via our backend, then poll for its status.
+ * Resolves with the final status payload, or rejects on failure/timeout.
+ */
+async function payWithMomo(amount, phone, { pollIntervalMs = 2000, maxAttempts = 15 } = {}) {
+  const msisdn = toMsisdn(phone);
+
+  const payRes = await fetch(`${MOMO_BACKEND_URL}/api/pay`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    // NOTE: MTN's sandbox only accepts EUR — switch to 'ZAR' once on production credentials.
+    body: JSON.stringify({ amount: String(amount), currency: 'EUR', msisdn }),
+  });
+
+  if (!payRes.ok) {
+    const err = await payRes.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to initiate MoMo payment');
+  }
+
+  const { referenceId } = await payRes.json();
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    await new Promise(r => setTimeout(r, pollIntervalMs));
+
+    const statusRes = await fetch(`${MOMO_BACKEND_URL}/api/status/${referenceId}`);
+    if (!statusRes.ok) continue;
+
+    const status = await statusRes.json();
+    if (status.status === 'SUCCESSFUL' || status.status === 'FAILED') {
+      return status;
+    }
+    // else still PENDING — keep polling
+  }
+
+  throw new Error('Payment status check timed out. Please check your phone.');
+}
+
+/* ================================================
    CONSTANTS & STORAGE KEYS
    ================================================ */
 const KEYS = {
@@ -119,8 +173,10 @@ function getCurrentUser() {
   let user = load(KEYS.USER);
   if (!user) {
     const id = 'usr_' + Math.random().toString(36).slice(2, 10);
-    const phone = '082' + Math.floor(1000000 + Math.random() * 9000000);
-    user = { id, phone, name: 'MoMo User', createdAt: new Date().toISOString() };
+    user = { id, phone: DEFAULT_MOMO_PHONE, name: 'MoMo User', createdAt: new Date().toISOString() };
+    save(KEYS.USER, user);
+  } else if (user.phone && /^082\d{7}$/.test(user.phone)) {
+    user.phone = DEFAULT_MOMO_PHONE;
     save(KEYS.USER, user);
   }
   return user;
@@ -129,7 +185,7 @@ function getCurrentUser() {
 /* ================================================
    WALLET
    ================================================ */
-function getWalletBalance() { return load(KEYS.WALLET, 2450.00); }
+function getWalletBalance() { return load(KEYS.WALLET, 0); }
 function setWalletBalance(n) { save(KEYS.WALLET, Math.max(0, n)); }
 function addToWallet(amount) { setWalletBalance(getWalletBalance() + amount); }
 function deductFromWallet(amount) {
@@ -775,40 +831,67 @@ function renderHomePage() {
   const totalInterest = goals.reduce((s, g) => s + calcInterest(g), 0)
     + groups.reduce((s, g) => s + calcGroupInterest(g) / g.members.length, 0);
 
-  // Top Bar & Stat Cards
-  setEl('header-wallet-amount', fmt(getWalletBalance()));
+  setEl('hero-savings-amount', totalSavings.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+  setEl('hero-tickets', `${tickets.length} 🎟`);
+  setEl('hero-goals', `${goals.filter(g => !g.isCompleted).length + groups.filter(g => !g.isCompleted).length} Active`);
+  setEl('hero-referrals', `${verifiedRefs.length} Verified`);
+  setEl('hero-yield-pct', '5.50%');
+
+  // Cards
   setEl('wallet-balance-card', fmt(getWalletBalance()));
   setEl('total-savings-card', fmt(totalSavings));
   setEl('tickets-count-card', tickets.length);
   setEl('referrals-count-card', `${verifiedRefs.length} / 10`);
 
-  // Group Savings progress card
-  const groupNameEl = document.getElementById('home-group-name');
-  if (groupNameEl) {
-    if (groups.length > 0) {
-      const topGroup = groups[0];
-      const pooled = topGroup.members.reduce((sum, m) => sum + m.contribution, 0);
-      const pct = Math.min(100, Math.round((pooled / topGroup.targetAmount) * 100));
-      const remaining = Math.max(0, topGroup.targetAmount - pooled);
-
-      setEl('home-group-name', topGroup.name);
-      setEl('home-group-status', `${pct}% of Target Reached`);
-      setEl('home-group-balance', fmt(pooled));
-      setEl('home-group-target', `Target: ${fmt(topGroup.targetAmount)}`);
-      const fillEl = document.getElementById('home-group-fill');
-      if (fillEl) fillEl.style.width = `${pct}%`;
-      setEl('home-group-members', `${topGroup.members.length} Active Members Contributed`);
-      setEl('home-group-remaining', `${fmt(remaining)} remaining`);
+  // Interest & tier
+  setEl('home-interest-earned', fmt(totalInterest));
+  const homeTierEl = document.getElementById('home-tier-badge');
+  if (homeTierEl) {
+    const bestGoal = goals.reduce((best, g) => g.targetAmount > (best?.targetAmount || 0) ? g : best, null);
+    const tier = bestGoal ? getGoalTier(bestGoal.targetAmount) : 'none';
+    if (tier !== 'none') {
+      homeTierEl.innerHTML = `<span class="tier-badge ${tierBadgeClass(tier)}">${tierLabel(tier)}</span>`;
     } else {
-      // Default showcased fund per requirements
-      setEl('home-group-name', 'Family Holiday Fund');
-      setEl('home-group-status', '65% of Target Reached');
-      setEl('home-group-balance', 'R6 500,00');
-      setEl('home-group-target', 'Target: R10 000,00');
-      const fillEl = document.getElementById('home-group-fill');
-      if (fillEl) fillEl.style.width = '65%';
-      setEl('home-group-members', '5 Active Members Contributed');
-      setEl('home-group-remaining', 'R3 500,00 remaining');
+      homeTierEl.innerHTML = `<span class="tier-badge tier-badge--locked">No active goals</span>`;
+    }
+  }
+
+  // Active goals preview
+  const goalsListEl = document.getElementById('home-goals-list');
+  if (goalsListEl) {
+    if (goals.length === 0 && groups.length === 0) {
+      goalsListEl.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🏦</div>
+          <div class="empty-state-title">No savings goals yet</div>
+          <div class="empty-state-text">Create your first goal to start earning scratch cards and guaranteed prizes!</div>
+          <a href="savings.html" class="btn btn--primary">Start Saving</a>
+        </div>`;
+    } else {
+      goalsListEl.innerHTML = goals.slice(0, 3).map(g => {
+        const pct = Math.min(100, (g.currentBalance / g.targetAmount) * 100);
+        const tier = getGoalTier(g.targetAmount);
+        return `
+          <div class="goal-card" style="margin-bottom:var(--space-sm);">
+            <div class="goal-card-header">
+              <div>
+                <div class="goal-card-title">${g.name}</div>
+                <div class="goal-card-type"><span class="tier-badge ${tierBadgeClass(tier)}">${tierLabel(tier)}</span></div>
+              </div>
+              <div class="goal-card-amount">
+                <span>${fmt(g.currentBalance)}</span>
+                <small style="font-size:0.7rem;font-weight:500;color:var(--text-secondary);">of ${fmt(g.targetAmount)}</small>
+              </div>
+            </div>
+            <div class="goal-progress-bar">
+              <div class="goal-progress-fill ${g.isCompleted ? 'complete' : ''}" style="width:${pct}%;"></div>
+            </div>
+            <div class="goal-progress-labels">
+              <span>${pct.toFixed(0)}% saved</span>
+              <span>${isLockComplete(g) ? '🔓 Lock complete' : `🔒 ${daysRemaining(g.endDate)}d left`}</span>
+            </div>
+          </div>`;
+      }).join('') + (goals.length > 3 ? `<p style="text-align:center;font-size:0.8rem;color:var(--text-secondary);margin-top:var(--space-sm);">+${goals.length - 3} more goals — <a href="savings.html" style="color:var(--black);font-weight:700;">View all</a></p>` : '');
     }
   }
 
@@ -819,25 +902,25 @@ function renderHomePage() {
     if (txns.length === 0) {
       activityEl.innerHTML = `
         <div class="activity-item">
-          <div class="activity-icon">TX</div>
+          <div class="activity-icon">📭</div>
           <div class="activity-info">
-            <div class="activity-desc">No recent transactions</div>
-            <div class="activity-date">Your deposits, prizes, and group contributions will appear here.</div>
+            <div class="activity-desc">No transactions yet</div>
+            <div class="activity-date">Start saving to see activity</div>
           </div>
           <div class="activity-amount">--</div>
         </div>`;
     } else {
       activityEl.innerHTML = txns.map(t => {
-        const icons = { debit: 'OUT', credit: 'IN', prize: 'TKT', referral: 'REF', interest: 'INT' };
+        const icons = { debit: '📤', credit: '📥', prize: '🎟', referral: '👥', interest: '💰' };
         const isPos = t.type === 'credit' || t.type === 'prize' || t.type === 'referral';
         return `
           <div class="activity-item">
-            <div class="activity-icon">${icons[t.type] || 'TX'}</div>
+            <div class="activity-icon">${icons[t.type] || '📋'}</div>
             <div class="activity-info">
               <div class="activity-desc">${t.description}</div>
               <div class="activity-date">${formatDate(t.date)}</div>
             </div>
-            <div class="activity-amount ${isPos ? 'positive' : 'negative'}">${isPos ? '+' : '-'}${fmt(t.amount)}</div>
+            <div class="activity-amount ${isPos ? 'positive' : 'negative'}">${isPos ? '+' : '−'}${fmt(t.amount)}</div>
           </div>`;
       }).join('');
     }
@@ -1696,10 +1779,11 @@ function setupModals() {
   document.getElementById('btn-close-add-funds')?.addEventListener('click',  () => closeModal('modal-add-funds'));
   document.getElementById('btn-cancel-add-funds')?.addEventListener('click', () => closeModal('modal-add-funds'));
 
-  document.getElementById('btn-confirm-add-funds')?.addEventListener('click', () => {
+  document.getElementById('btn-confirm-add-funds')?.addEventListener('click', async () => {
     const amount = parseFloat(addFundsAmountEl?.value || 0);
     const destType = addFundsTypeEl?.value || 'personal';
     const targetId = addFundsTargetEl?.value;
+    const confirmBtn = document.getElementById('btn-confirm-add-funds');
 
     if (!amount || amount <= 0) {
       showToast('Please enter a valid amount to transfer.', 'warning');
@@ -1710,25 +1794,42 @@ function setupModals() {
       return;
     }
 
-    const walletBal = getWalletBalance();
-    if (amount > walletBal) {
-      showToast(`Insufficient MoMo wallet balance. Available: ${fmt(walletBal)}`, 'warning');
-      return;
-    }
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Waiting for MoMo approval...';
+    showToast('Check your phone to approve the MoMo payment.', 'default');
 
-    if (destType === 'personal') {
-      const res = depositToGoal(targetId, amount, user.id);
-      if (!res.ok) { showToast(res.msg, 'error'); return; }
-      showToast(`Successfully transferred ${fmt(amount)} from MoMo wallet to your personal goal!`, 'success');
-    } else {
-      const res = depositToGroup(targetId, amount, user.id);
-      if (!res.ok) { showToast(res.msg, 'error'); return; }
-      showToast(`Successfully transferred ${fmt(amount)} from MoMo wallet to group pool!`, 'success');
-      if (res.completionMsg) setTimeout(() => showToast(res.completionMsg, 'success', 5000), 500);
-    }
+    try {
+      const payment = await payWithMomo(amount, user.phone);
+      if (payment.status !== 'SUCCESSFUL') {
+        showToast('Payment was not successful. Please try again.', 'warning');
+        return;
+      }
 
-    closeModal('modal-add-funds');
-    updateAllUI();
+      // Settlement is recorded in the local wallet before reusing the existing deposit flow.
+      addToWallet(amount);
+      addTransaction('credit', amount, 'Cash in via MTN MoMo');
+
+      const result = destType === 'personal'
+        ? depositToGoal(targetId, amount, user.id)
+        : depositToGroup(targetId, amount, user.id);
+      if (!result.ok) {
+        deductFromWallet(amount);
+        showToast(result.msg, 'error');
+        return;
+      }
+
+      const destination = destType === 'personal' ? 'personal goal' : 'group pool';
+      showToast(`Successfully transferred ${fmt(amount)} to your ${destination}!`, 'success');
+      if (result.completionMsg) setTimeout(() => showToast(result.completionMsg, 'success', 5000), 500);
+      closeModal('modal-add-funds');
+      updateAllUI();
+    } catch (err) {
+      console.error('MoMo payment error:', err);
+      showToast(err.message || 'Payment failed. Please try again.', 'warning');
+    } finally {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = 'Transfer to Savings';
+    }
   });
 
   if (addFundsModal) addFundsModal.addEventListener('click', e => { if (e.target === addFundsModal) closeModal('modal-add-funds'); });
