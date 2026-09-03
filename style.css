@@ -1817,9 +1817,18 @@ h1, h2, h3, h4 { line-height: 1.25; font-weight: 700; color: var(--navy); }
 }
 .reward-table td {
   padding: var(--space-sm) var(--space-md);
-  border-bottom: 1px solid rgba(27,42,74,0.06);
+  border-bottom: 1px solid rgba(0, 79, 113, 0.08);
   color: var(--text-primary);
   font-weight: 500;
+}
+.reward-table .tier-badge {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: 0.85rem !important;
+  font-weight: 800 !important;
+  color: var(--navy) !important;
+  letter-spacing: 0.2px !important;
 }
 .reward-table tr:last-child td { border-bottom: none; }
 .reward-table tr:hover td { background-color: var(--yellow-pale); }
