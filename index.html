@@ -14,15 +14,20 @@
     <div class="header-inner">
       <div class="header-left">
         <button class="menu-trigger-btn" id="btn-open-menu" aria-label="Open menu">
-          <svg width="18" height="14" viewBox="0 0 18 14" fill="none"><rect width="18" height="2" rx="1" fill="currentColor"/><rect y="6" width="18" height="2" rx="1" fill="currentColor"/><rect y="12" width="18" height="2" rx="1" fill="currentColor"/></svg>
+          <svg width="20" height="16" viewBox="0 0 20 16" fill="none">
+            <rect width="20" height="2.5" rx="1.25" fill="currentColor"/>
+            <rect y="6.75" width="20" height="2.5" rx="1.25" fill="currentColor"/>
+            <rect y="13.5" width="20" height="2.5" rx="1.25" fill="currentColor"/>
+          </svg>
         </button>
         <div class="header-wallet">
-          <span class="wallet-label">MoMo Wallet</span>
-          <span class="wallet-amount" id="header-wallet-amount">R0.00</span>
+          <span class="wallet-label">WALLET</span>
+          <span class="wallet-amount" id="header-wallet-amount">R2 450,00</span>
+          <span class="header-subtitle">Grow your savings and stand a chance to win cash, data, and vouchers!</span>
         </div>
       </div>
       <div class="header-brand">
-        <img src="/logo.png" alt="Prized Linked Savings — Powered by MTN MoMo" />
+        <img src="/logo.png" alt="MTN MoMo Prize-Linked Savings" />
       </div>
     </div>
   </header>
@@ -31,111 +36,173 @@
   <main class="app-main" id="app-main">
     <section class="page" id="page-home">
 
-      <!-- Hero Banner -->
-      <div class="hero-banner" id="hero-banner">
-        <div class="hero-greeting">Welcome back</div>
-        <div class="hero-balance-label">Total Savings</div>
-        <div class="hero-balance"><span>R</span><span id="hero-savings-amount">0.00</span></div>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <span class="hero-stat-label">Tickets</span>
-            <span class="hero-stat-value" id="hero-tickets">0</span>
-          </div>
-          <div class="hero-stat">
-            <span class="hero-stat-label">Goals</span>
-            <span class="hero-stat-value" id="hero-goals">0 Active</span>
-          </div>
-          <div class="hero-stat">
-            <span class="hero-stat-label">Referrals</span>
-            <span class="hero-stat-value" id="hero-referrals">0 Verified</span>
-          </div>
-        </div>
-        <div class="hero-yield-badge">
-          Earning up to <span id="hero-yield-pct">5.50%</span> p.a. after &minus;2.00% reward offset
-        </div>
-      </div>
-
-      <!-- Overview Cards Grid -->
+      <!-- Top Stat Cards Grid (4 Columns) -->
       <div class="card-grid">
-        <div class="card card--highlight" id="card-wallet-summary">
-          <div class="card-icon">WLT</div>
-          <div class="card-title">MoMo Wallet</div>
-          <div class="card-value" id="wallet-balance-card">R0.00</div>
-          <div class="card-hint">Simulated balance</div>
+        <!-- Wallet Balance Card -->
+        <div class="card" id="card-wallet-summary">
+          <div class="card-badge-square">[W]</div>
+          <div class="card-title">Wallet Balance</div>
+          <div class="card-value" id="wallet-balance-card">R2 450,00</div>
+          <div class="card-hint">Available via MoMo API</div>
         </div>
+
+        <!-- Total Savings Card -->
         <div class="card" id="card-savings-summary">
-          <div class="card-icon">SAV</div>
+          <div class="card-badge-square">[S]</div>
           <div class="card-title">Total Savings</div>
-          <div class="card-value" id="total-savings-card">R0.00</div>
-          <div class="card-hint">Personal + Group</div>
+          <div class="card-value" id="total-savings-card">R0,00</div>
+          <div class="card-hint">Personal + Group Savings</div>
         </div>
+
+        <!-- Game Tickets Card -->
         <div class="card" id="card-tickets-summary">
-          <div class="card-icon">TKT</div>
-          <div class="card-title">Tickets</div>
+          <div class="card-badge-square">[T]</div>
+          <div class="card-title">Game Tickets</div>
           <div class="card-value" id="tickets-count-card">0</div>
-          <div class="card-hint">Available to play</div>
+          <div class="card-hint">Guaranteed win tickets</div>
         </div>
+
+        <!-- Referrals Card -->
         <div class="card" id="card-referral-summary">
-          <div class="card-icon">REF</div>
+          <div class="card-badge-square">[R]</div>
           <div class="card-title">Referrals</div>
           <div class="card-value" id="referrals-count-card">0 / 10</div>
-          <div class="card-hint">Verified friends</div>
+          <div class="card-hint">Active referral ratio</div>
         </div>
       </div>
 
-      <!-- Quick Actions -->
+      <!-- Quick Actions (8 Circular Buttons) -->
       <div class="section" id="section-quick-actions">
         <h2 class="section-title">
-          <span class="section-title-icon">QA</span>
+          <span class="section-title-badge">QA</span>
           Quick Actions
         </h2>
-        <div class="action-grid">
-          <button class="action-btn" id="btn-save-goal" onclick="window.location.href='savings.html'">
-            <span class="action-btn-icon">SAVE</span>
-            <span class="action-btn-label">New Goal</span>
+        <div class="quick-actions-row">
+          <!-- 1. Send Money -->
+          <button class="quick-action-item" id="btn-qa-send-money" onclick="alert('Send Money feature opens MTN MoMo transfer screen.')">
+            <div class="quick-action-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </div>
+            <span class="quick-action-label">Send Money</span>
           </button>
-          <button class="action-btn" id="btn-play-game" onclick="window.location.href='game.html'">
-            <span class="action-btn-icon">TKT</span>
-            <span class="action-btn-label">My Tickets</span>
+
+          <!-- 2. Buy Airtime -->
+          <button class="quick-action-item" id="btn-qa-buy-airtime" onclick="alert('Buy Airtime & Data bundle.')">
+            <div class="quick-action-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                <line x1="12" y1="20" x2="12.01" y2="20"></line>
+              </svg>
+            </div>
+            <span class="quick-action-label">Buy Airtime</span>
           </button>
-          <button class="action-btn" id="btn-refer-friend" onclick="window.location.href='referrals.html'">
-            <span class="action-btn-icon">REF</span>
-            <span class="action-btn-label">Refer Friend</span>
+
+          <!-- 3. Pay Bills -->
+          <button class="quick-action-item" id="btn-qa-pay-bills" onclick="alert('Pay Bills: Electricity, Water, Municipal & DSTV.')">
+            <div class="quick-action-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                <line x1="2" y1="10" x2="22" y2="10"></line>
+              </svg>
+            </div>
+            <span class="quick-action-label">Pay Bills</span>
           </button>
-          <button class="action-btn" id="btn-cash-in" onclick="showAddFundsModal()">
-            <span class="action-btn-icon">ADD</span>
-            <span class="action-btn-label">Add Funds</span>
+
+          <!-- 4. Cash In -->
+          <button class="quick-action-item" id="btn-qa-cash-in" onclick="showAddFundsModal()">
+            <div class="quick-action-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5"></line>
+                <polyline points="5 12 12 5 19 12"></polyline>
+              </svg>
+            </div>
+            <span class="quick-action-label">Cash In</span>
+          </button>
+
+          <!-- 5. New Goal -->
+          <button class="quick-action-item" id="btn-qa-new-goal" onclick="window.location.href='savings.html'">
+            <div class="quick-action-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+            </div>
+            <span class="quick-action-label">New Goal</span>
+          </button>
+
+          <!-- 6. My Tickets -->
+          <button class="quick-action-item" id="btn-qa-my-tickets" onclick="window.location.href='game.html'">
+            <div class="quick-action-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="6" width="18" height="12" rx="2"></rect>
+                <path d="M12 6v12"></path>
+                <circle cx="8" cy="12" r="1"></circle>
+                <circle cx="16" cy="12" r="1"></circle>
+              </svg>
+            </div>
+            <span class="quick-action-label">My Tickets</span>
+          </button>
+
+          <!-- 7. Refer a Friend -->
+          <button class="quick-action-item" id="btn-qa-refer-friend" onclick="window.location.href='referrals.html'">
+            <div class="quick-action-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="8.5" cy="7" r="4"></circle>
+                <line x1="20" y1="8" x2="20" y2="14"></line>
+                <line x1="23" y1="11" x2="17" y2="11"></line>
+              </svg>
+            </div>
+            <span class="quick-action-label">Refer Friend</span>
+          </button>
+
+          <!-- 8. Add Funds -->
+          <button class="quick-action-item" id="btn-qa-add-funds" onclick="showAddFundsModal()">
+            <div class="quick-action-circle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <polyline points="19 12 12 19 5 12"></polyline>
+              </svg>
+            </div>
+            <span class="quick-action-label">Add Funds</span>
           </button>
         </div>
       </div>
 
-      <!-- Interest Rate Banner -->
-      <div class="interest-banner">
-        <div>
-          <div class="interest-rate-label">Your Savings Yield</div>
-          <div class="interest-rate-value" id="interest-rate-display">2.00% &ndash; 5.50%</div>
-          <div class="interest-offset-pill">&minus;2.00% offset funds your tickets</div>
+      <!-- My Group Savings -->
+      <div class="section" id="section-my-group-savings">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-md);">
+          <h2 class="section-title" style="margin-bottom:0;">
+            <span class="section-title-badge">GS</span>
+            My Group Savings
+          </h2>
+          <a href="savings.html" style="font-size:0.8rem; font-weight:700; color:var(--navy); text-decoration:underline;">View All Groups</a>
         </div>
-        <div style="text-align:right; position: relative; z-index:1;">
-          <div class="interest-rate-label">Reward Tier</div>
-          <div id="home-tier-badge" style="margin-top:4px;"></div>
-          <div class="interest-rate-label" style="margin-top:8px;">Interest Earned</div>
-          <div style="font-size:1rem;font-weight:800;color:var(--yellow);" id="home-interest-earned">R0.00</div>
-        </div>
-      </div>
 
-      <!-- Active Goals Preview -->
-      <div class="section" id="section-active-goals">
-        <h2 class="section-title">
-          <span class="section-title-icon">GL</span>
-          Active Goals
-        </h2>
-        <div id="home-goals-list">
-          <div class="empty-state">
-            <div class="empty-state-icon">SAV</div>
-            <div class="empty-state-title">No savings goals yet</div>
-            <div class="empty-state-text">Create your first goal to start earning tickets and guaranteed prizes.</div>
-            <a href="savings.html" class="btn btn--primary">Start Saving</a>
+        <div id="home-group-savings-container">
+          <!-- Featured / Default Group Progress Card -->
+          <div class="group-fund-card">
+            <div class="group-fund-header">
+              <div class="group-fund-name" id="home-group-name">Family Holiday Fund</div>
+              <span class="group-fund-status" id="home-group-status">65% of Target Reached</span>
+            </div>
+            <div class="group-metrics">
+              <div class="group-balance" id="home-group-balance">R6 500,00</div>
+              <div class="group-target" id="home-group-target">Target: R10 000,00</div>
+            </div>
+            <div class="group-progress-track">
+              <div class="group-progress-fill" id="home-group-fill" style="width: 65%;"></div>
+            </div>
+            <div class="group-fund-footer">
+              <span id="home-group-members">5 Active Members Contributed</span>
+              <span id="home-group-remaining">R3 500,00 remaining</span>
+            </div>
           </div>
         </div>
       </div>
@@ -143,52 +210,18 @@
       <!-- Recent Activity -->
       <div class="section" id="section-recent-activity">
         <h2 class="section-title">
-          <span class="section-title-icon">TX</span>
+          <span class="section-title-badge">TX</span>
           Recent Activity
         </h2>
         <div class="activity-list" id="home-activity-list">
           <div class="activity-item">
-            <div class="activity-icon">--</div>
+            <div class="activity-icon">TX</div>
             <div class="activity-info">
-              <div class="activity-desc">No transactions yet</div>
-              <div class="activity-date">Start saving to see activity</div>
+              <div class="activity-desc">No recent transactions</div>
+              <div class="activity-date">Your deposits, prizes, and group contributions will appear here.</div>
             </div>
             <div class="activity-amount">--</div>
           </div>
-        </div>
-      </div>
-
-      <!-- How It Works -->
-      <div class="section" id="section-how-it-works">
-        <h2 class="section-title">
-          <span class="section-title-icon">?</span>
-          How Prize-Linked Savings Works
-        </h2>
-        <div class="steps-list">
-          <div class="step-item">
-            <span class="step-number">1</span>
-            <span class="step-text"><strong>Set a goal</strong> &mdash; Choose a target amount (e.g. R3,000) and a timeframe of at least 3 months.</span>
-          </div>
-          <div class="step-item">
-            <span class="step-number">2</span>
-            <span class="step-text"><strong>Save consistently</strong> &mdash; Deposit via Pick n Pay, Shoprite, Boxer, PEP, Checkers, or Usave nationwide.</span>
-          </div>
-          <div class="step-item">
-            <span class="step-number">3</span>
-            <span class="step-text"><strong>Complete your goal</strong> &mdash; No early withdrawal. After 3+ months you earn a guaranteed-win ticket.</span>
-          </div>
-          <div class="step-item">
-            <span class="step-number">4</span>
-            <span class="step-text"><strong>Play your ticket</strong> &mdash; Every ticket is a guaranteed win: airtime, data, minutes (under R50), or group retail vouchers (5&ndash;20% off).</span>
-          </div>
-          <div class="step-item">
-            <span class="step-number">5</span>
-            <span class="step-text"><strong>Refer friends</strong> &mdash; Share your code. When they complete their goal, <em>you</em> earn a free ticket.</span>
-          </div>
-        </div>
-        <div class="info-box info-box--info" style="margin-top:var(--space-md);">
-          <span class="info-box-icon">i</span>
-          <span>A &minus;2.00% annual offset from your interest funds all tickets. Standard yields: <strong>2.00%&ndash;5.50% p.a.</strong> (Personal) &middot; <strong>2.50%&ndash;6.00% p.a.</strong> (Group/Stokvel). Banking via African Bank.</span>
         </div>
       </div>
 

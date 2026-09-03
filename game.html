@@ -35,184 +35,52 @@
         <p class="page-subtitle">Every ticket is a 100% guaranteed win &mdash; earned by completing savings goals</p>
       </div>
 
-      <!-- Ticket Info & Selector -->
-      <div class="section" id="section-ticket-info">
-        <h2 class="section-title"><span class="section-title-icon">TKT</span> Your Tickets</h2>
-        <div class="ticket-selector-container">
-          <label for="ticket-code-select" class="ticket-select-label">Select Ticket to Play:</label>
-          <select id="ticket-code-select" class="ticket-select">
-            <option value="" disabled selected>&mdash; Select a ticket &mdash;</option>
-          </select>
-        </div>
-        <div class="ticket-summary-grid">
-          <div class="card card--highlight">
-            <div class="card-icon">TKT</div>
-            <div class="card-title">Unplayed Tickets</div>
-            <div class="card-value" id="game-tickets-count">0</div>
-            <div style="margin-top:8px;">
-              <button class="btn btn--outline btn--sm" id="btn-add-ticket" title="Demo: Add a test ticket">+ Demo Ticket</button>
-            </div>
-          </div>
-          <div class="card card--highlight">
-            <div class="card-icon">POOL</div>
-            <div class="card-title">Active Pool</div>
-            <div class="card-value" id="active-pool-type" style="font-size:1rem;">&mdash;</div>
-          </div>
-        </div>
-        <div class="active-ticket-banner" id="active-ticket-banner" style="margin-top:var(--space-md);">
-          <span id="active-ticket-text">Select a ticket above to begin</span>
-        </div>
-      </div>
-
-      <!-- Card Pick Game Area -->
-      <div class="section" id="section-card-game">
-        <h2 class="section-title"><span class="section-title-icon">PICK</span> Pick a Card</h2>
-        <p class="game-instruction" id="game-instruction">Choose 1 of the 3 cards to reveal your guaranteed prize.</p>
-
-        <div class="game-cards-grid" id="game-cards-grid">
-          <button class="game-card" id="game-card-1" data-card="1">
-            <div class="game-card-inner">
-              <div class="game-card-front">
-                <div class="game-card-front-main">PLS</div>
-                <div class="game-card-front-sub">Tap to pick</div>
-              </div>
-              <div class="game-card-back">
-                <span class="reward-text" id="card-1-text">WIN</span>
-              </div>
-            </div>
-          </button>
-          <button class="game-card" id="game-card-2" data-card="2">
-            <div class="game-card-inner">
-              <div class="game-card-front">
-                <div class="game-card-front-main">PLS</div>
-                <div class="game-card-front-sub">Tap to pick</div>
-              </div>
-              <div class="game-card-back">
-                <span class="reward-text" id="card-2-text">WIN</span>
-              </div>
-            </div>
-          </button>
-          <button class="game-card" id="game-card-3" data-card="3">
-            <div class="game-card-inner">
-              <div class="game-card-front">
-                <div class="game-card-front-main">PLS</div>
-                <div class="game-card-front-sub">Tap to pick</div>
-              </div>
-              <div class="game-card-back">
-                <span class="reward-text" id="card-3-text">WIN</span>
-              </div>
-            </div>
-          </button>
-        </div>
-
-        <!-- Ticket Reveal (silver overlay) -->
-        <div class="ticket-card-area" id="scratch-card-area" style="display:none;">
-          <div class="ticket-card-tier-label">
-            <span id="scratch-tier-badge"></span>
-            <span style="font-size:0.78rem;font-weight:700;color:var(--text-secondary);">Tap to reveal your prize</span>
-          </div>
-          <div class="ticket-card-wrapper" id="scratch-card-wrapper">
-            <!-- Revealed prize underneath -->
-            <div class="ticket-card-reveal" id="scratch-reveal">
-              <div class="ticket-card-prize-label">Your Prize</div>
-              <div class="ticket-card-prize-text" id="scratch-prize-text">Loading...</div>
-              <div class="ticket-card-prize-sub" id="scratch-prize-sub">Tap to reveal</div>
-            </div>
-            <!-- Silver overlay on top -->
-            <div class="ticket-card-overlay" id="scratch-overlay">
-              <div class="ticket-overlay-pattern"></div>
-              <div class="ticket-overlay-label">Tap to Reveal</div>
-              <div class="ticket-overlay-sub">Prize-Linked Savings</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Result Box -->
-        <div class="win-result-box" id="win-result-box" style="display:none;">
-          <div class="win-result-content">
-            <span class="win-badge" id="win-badge">WIN</span>
-            <h3 class="win-title" id="win-title">Prize</h3>
-            <p class="win-prize" id="win-prize">&mdash;</p>
-            <p class="split-details-text" id="win-split-details"></p>
-
-            <!-- Delivery Status -->
-            <div class="delivery-status-card" id="delivery-status-card" style="display:none;">
-              <div class="delivery-status-header">
-                <span class="delivery-status-badge" id="delivery-status-badge">DELIVERED</span>
-                <span class="delivery-status-title">Wallet &amp; SMS Alert</span>
-              </div>
-              <p class="delivery-phone-text" id="win-phone-text"></p>
-              <div class="sms-preview-box">
-                <span class="sms-label">SMS Alert Delivered:</span>
-                <p class="sms-message" id="win-sms-text"></p>
-              </div>
-            </div>
-
-            <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-lg);flex-wrap:wrap;justify-content:center;">
-              <button class="btn btn--primary" id="btn-play-again">Play Another Ticket</button>
-              <a href="savings.html" class="btn btn--outline">Save More</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Prize / Ticket History -->
-      <div class="section" id="section-prize-history">
-        <h2 class="section-title"><span class="section-title-icon">HST</span> Ticket History</h2>
-        <div class="activity-list" id="prize-history-list">
-          <div class="activity-item" id="prize-history-empty">
-            <div class="activity-icon">TKT</div>
-            <div class="activity-info">
-              <div class="activity-desc">No prizes yet</div>
-              <div class="activity-date">Complete a savings goal to earn tickets</div>
-            </div>
-            <div class="activity-amount">--</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Reward Matrix Reference -->
+      <!-- Guaranteed Prizes Section -->
       <div class="section" id="section-reward-matrix">
-        <h2 class="section-title"><span class="section-title-icon">REF</span> Guaranteed Prize Guide</h2>
+        <h2 class="section-title">
+          <span class="section-title-badge">GP</span>
+          Guaranteed Prizes Allocation
+        </h2>
+        <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:var(--space-lg);">
+          Every ticket won through savings or referrals guarantees an instant reward allocation funded by the &minus;2.00% p.a. interest pool offset.
+        </p>
+
         <div style="overflow-x:auto;">
           <table class="reward-table">
             <thead>
               <tr>
-                <th>Source</th>
-                <th>Lock / Condition</th>
                 <th>Tier</th>
-                <th>Prize</th>
-                <th>Cap</th>
+                <th>Threshold Range</th>
+                <th>Reward Allocations</th>
+                <th>Eligible Products &amp; Perks</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Personal Savings</td>
-                <td>Goal complete, min. 3 months</td>
-                <td>Bronze / Silver / Gold</td>
-                <td>Data, Airtime, Minutes</td>
-                <td>Under R50</td>
+                <td><span class="tier-badge tier-badge--bronze">Bronze Tier</span></td>
+                <td><strong>Under R50</strong><br><small style="color:var(--text-muted);">*R50 threshold is exclusive to referrals</small></td>
+                <td>Airtime, Minutes &amp; Data Rewards</td>
+                <td>Instant top-up to registered MTN MoMo mobile number</td>
               </tr>
               <tr>
-                <td>Group / Stokvel</td>
-                <td>Pool complete, min. 3 months</td>
-                <td>Bronze / Silver / Gold</td>
-                <td>Retail Discount Voucher</td>
-                <td>5% / 10% / 20%</td>
+                <td><span class="tier-badge tier-badge--silver">Silver Tier</span></td>
+                <td><strong>R50 &ndash; R100</strong></td>
+                <td>Scaled Airtime, Data &amp; Minutes Rewards</td>
+                <td>Enhanced bundle allocations &amp; voice minutes</td>
               </tr>
               <tr>
-                <td>Referral</td>
-                <td>Friend completes goal + min lock</td>
-                <td>Flat Rate (untiered)</td>
-                <td>Data, Airtime, or Minutes</td>
-                <td>Under R50</td>
+                <td><span class="tier-badge tier-badge--gold">Gold Tier</span></td>
+                <td><strong>R100 &ndash; R200</strong></td>
+                <td>Airtime / Data / Minutes (up to R200) + Retail Discount Vouchers</td>
+                <td>Exclusive discount vouchers for MTN MoMo partner retail stores (Pick n Pay, Shoprite, Boxer, Checkers, PEP)</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div class="info-box info-box--success" style="margin-top:var(--space-md);">
+
+        <div class="info-box info-box--success" style="margin-top:var(--space-lg);">
           <span class="info-box-icon">+</span>
-          <span><strong>100% Guaranteed Win</strong> &mdash; Every single ticket generated wins something. No empty tickets. No chance of losing. Funded by the &minus;2.00% p.a. interest offset.</span>
+          <span><strong>100% Guaranteed Payout</strong> &mdash; All prize-linked savings rewards are verified and instantly disbursed to your MTN MoMo wallet upon goal completion.</span>
         </div>
       </div>
 

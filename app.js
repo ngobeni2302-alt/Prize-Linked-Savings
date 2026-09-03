@@ -129,7 +129,7 @@ function getCurrentUser() {
 /* ================================================
    WALLET
    ================================================ */
-function getWalletBalance() { return load(KEYS.WALLET, 0); }
+function getWalletBalance() { return load(KEYS.WALLET, 2450.00); }
 function setWalletBalance(n) { save(KEYS.WALLET, Math.max(0, n)); }
 function addToWallet(amount) { setWalletBalance(getWalletBalance() + amount); }
 function deductFromWallet(amount) {
@@ -758,67 +758,40 @@ function renderHomePage() {
   const totalInterest = goals.reduce((s, g) => s + calcInterest(g), 0)
     + groups.reduce((s, g) => s + calcGroupInterest(g) / g.members.length, 0);
 
-  setEl('hero-savings-amount', totalSavings.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','));
-  setEl('hero-tickets', `${tickets.length} 🎟`);
-  setEl('hero-goals', `${goals.filter(g => !g.isCompleted).length + groups.filter(g => !g.isCompleted).length} Active`);
-  setEl('hero-referrals', `${verifiedRefs.length} Verified`);
-  setEl('hero-yield-pct', '5.50%');
-
-  // Cards
+  // Top Bar & Stat Cards
+  setEl('header-wallet-amount', fmt(getWalletBalance()));
   setEl('wallet-balance-card', fmt(getWalletBalance()));
   setEl('total-savings-card', fmt(totalSavings));
   setEl('tickets-count-card', tickets.length);
   setEl('referrals-count-card', `${verifiedRefs.length} / 10`);
 
-  // Interest & tier
-  setEl('home-interest-earned', fmt(totalInterest));
-  const homeTierEl = document.getElementById('home-tier-badge');
-  if (homeTierEl) {
-    const bestGoal = goals.reduce((best, g) => g.targetAmount > (best?.targetAmount || 0) ? g : best, null);
-    const tier = bestGoal ? getGoalTier(bestGoal.targetAmount) : 'none';
-    if (tier !== 'none') {
-      homeTierEl.innerHTML = `<span class="tier-badge ${tierBadgeClass(tier)}">${tierLabel(tier)}</span>`;
-    } else {
-      homeTierEl.innerHTML = `<span class="tier-badge tier-badge--locked">No active goals</span>`;
-    }
-  }
+  // Group Savings progress card
+  const groupNameEl = document.getElementById('home-group-name');
+  if (groupNameEl) {
+    if (groups.length > 0) {
+      const topGroup = groups[0];
+      const pooled = topGroup.members.reduce((sum, m) => sum + m.contribution, 0);
+      const pct = Math.min(100, Math.round((pooled / topGroup.targetAmount) * 100));
+      const remaining = Math.max(0, topGroup.targetAmount - pooled);
 
-  // Active goals preview
-  const goalsListEl = document.getElementById('home-goals-list');
-  if (goalsListEl) {
-    if (goals.length === 0 && groups.length === 0) {
-      goalsListEl.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-state-icon">🏦</div>
-          <div class="empty-state-title">No savings goals yet</div>
-          <div class="empty-state-text">Create your first goal to start earning scratch cards and guaranteed prizes!</div>
-          <a href="savings.html" class="btn btn--primary">Start Saving</a>
-        </div>`;
+      setEl('home-group-name', topGroup.name);
+      setEl('home-group-status', `${pct}% of Target Reached`);
+      setEl('home-group-balance', fmt(pooled));
+      setEl('home-group-target', `Target: ${fmt(topGroup.targetAmount)}`);
+      const fillEl = document.getElementById('home-group-fill');
+      if (fillEl) fillEl.style.width = `${pct}%`;
+      setEl('home-group-members', `${topGroup.members.length} Active Members Contributed`);
+      setEl('home-group-remaining', `${fmt(remaining)} remaining`);
     } else {
-      goalsListEl.innerHTML = goals.slice(0, 3).map(g => {
-        const pct = Math.min(100, (g.currentBalance / g.targetAmount) * 100);
-        const tier = getGoalTier(g.targetAmount);
-        return `
-          <div class="goal-card" style="margin-bottom:var(--space-sm);">
-            <div class="goal-card-header">
-              <div>
-                <div class="goal-card-title">${g.name}</div>
-                <div class="goal-card-type"><span class="tier-badge ${tierBadgeClass(tier)}">${tierLabel(tier)}</span></div>
-              </div>
-              <div class="goal-card-amount">
-                <span>${fmt(g.currentBalance)}</span>
-                <small style="font-size:0.7rem;font-weight:500;color:var(--text-secondary);">of ${fmt(g.targetAmount)}</small>
-              </div>
-            </div>
-            <div class="goal-progress-bar">
-              <div class="goal-progress-fill ${g.isCompleted ? 'complete' : ''}" style="width:${pct}%;"></div>
-            </div>
-            <div class="goal-progress-labels">
-              <span>${pct.toFixed(0)}% saved</span>
-              <span>${isLockComplete(g) ? '🔓 Lock complete' : `🔒 ${daysRemaining(g.endDate)}d left`}</span>
-            </div>
-          </div>`;
-      }).join('') + (goals.length > 3 ? `<p style="text-align:center;font-size:0.8rem;color:var(--text-secondary);margin-top:var(--space-sm);">+${goals.length - 3} more goals — <a href="savings.html" style="color:var(--black);font-weight:700;">View all</a></p>` : '');
+      // Default showcased fund per requirements
+      setEl('home-group-name', 'Family Holiday Fund');
+      setEl('home-group-status', '65% of Target Reached');
+      setEl('home-group-balance', 'R6 500,00');
+      setEl('home-group-target', 'Target: R10 000,00');
+      const fillEl = document.getElementById('home-group-fill');
+      if (fillEl) fillEl.style.width = '65%';
+      setEl('home-group-members', '5 Active Members Contributed');
+      setEl('home-group-remaining', 'R3 500,00 remaining');
     }
   }
 
@@ -829,25 +802,25 @@ function renderHomePage() {
     if (txns.length === 0) {
       activityEl.innerHTML = `
         <div class="activity-item">
-          <div class="activity-icon">📭</div>
+          <div class="activity-icon">TX</div>
           <div class="activity-info">
-            <div class="activity-desc">No transactions yet</div>
-            <div class="activity-date">Start saving to see activity</div>
+            <div class="activity-desc">No recent transactions</div>
+            <div class="activity-date">Your deposits, prizes, and group contributions will appear here.</div>
           </div>
           <div class="activity-amount">--</div>
         </div>`;
     } else {
       activityEl.innerHTML = txns.map(t => {
-        const icons = { debit: '📤', credit: '📥', prize: '🎟', referral: '👥', interest: '💰' };
+        const icons = { debit: 'OUT', credit: 'IN', prize: 'TKT', referral: 'REF', interest: 'INT' };
         const isPos = t.type === 'credit' || t.type === 'prize' || t.type === 'referral';
         return `
           <div class="activity-item">
-            <div class="activity-icon">${icons[t.type] || '📋'}</div>
+            <div class="activity-icon">${icons[t.type] || 'TX'}</div>
             <div class="activity-info">
               <div class="activity-desc">${t.description}</div>
               <div class="activity-date">${formatDate(t.date)}</div>
             </div>
-            <div class="activity-amount ${isPos ? 'positive' : 'negative'}">${isPos ? '+' : '−'}${fmt(t.amount)}</div>
+            <div class="activity-amount ${isPos ? 'positive' : 'negative'}">${isPos ? '+' : '-'}${fmt(t.amount)}</div>
           </div>`;
       }).join('');
     }
