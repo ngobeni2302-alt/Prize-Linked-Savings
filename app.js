@@ -11,7 +11,7 @@
    MOMO BACKEND CONFIG
    ================================================ */
 const MOMO_BACKEND_URL = 'http://localhost:4000';
-const DEFAULT_MOMO_PHONE = '0723143541';
+const DEFAULT_MOMO_PHONE = '46733123450'; // MTN sandbox test MSISDN → always SUCCESSFUL
 
 /**
  * Convert a locally-stored phone number (e.g. "0821234567") into the
@@ -19,9 +19,10 @@ const DEFAULT_MOMO_PHONE = '0723143541';
  */
 function toMsisdn(phone) {
   const digits = String(phone).replace(/\D/g, '');
-  if (digits.startsWith('27')) return digits;
-  if (digits.startsWith('0')) return '27' + digits.slice(1);
-  return '27' + digits;
+  if (digits.startsWith('27')) return digits;          // already SA international
+  if (digits.startsWith('0')) return '27' + digits.slice(1); // local SA → international
+  // Number already has a non-SA country code (e.g. sandbox 46733123450) — return as-is
+  return digits;
 }
 
 /**
