@@ -227,6 +227,7 @@ function createGoal(userId, name, targetAmount, months, initialDeposit) {
   if (initialDeposit > 0) {
     deductFromWallet(initialDeposit);
     addTransaction('debit', initialDeposit, `Initial deposit → ${name}`, goal.id);
+    checkReferralDepositTrigger(userId, initialDeposit);
   }
 
   return goal;
@@ -246,16 +247,8 @@ function depositToGoal(goalId, amount, userId) {
   deductFromWallet(amount);
   goals[idx].currentBalance += amount;
 
-  // Check for referral completion on first deposit
-  const referrals = getReferrals();
-  const pendingRef = referrals.find(r => r.referredId === userId && r.status === 'pending');
-  if (pendingRef) {
-    const updatedRef = referrals.find(r => r.id === pendingRef.id);
-    if (updatedRef) {
-      updatedRef.status = 'linked';
-      saveReferrals(referrals);
-    }
-  }
+  // Check deposit trigger for referral qualification (> R50 deposit)
+  checkReferralDepositTrigger(userId, amount);
 
   // Check for goal completion
   let completionMsg = null;
@@ -330,21 +323,26 @@ function generateGroupCode() {
   return code;
 }
 
-function createGroup(userId, name, targetAmount, months, initialContribution) {
+function createGroup(userId, name, targetAmount, months, initialContribution, reason = 'General Savings') {
   const groups = getGroups();
 
-  // Ensure unique code
+  // Ensure unique code across all groups
   let code;
-  do { code = generateGroupCode(); } while (groups.find(g => g.code === code));
+  let attempts = 0;
+  do {
+    code = generateGroupCode();
+    attempts++;
+  } while (groups.find(g => g.code === code) && attempts < 1000);
 
   const startDate = new Date();
   const endDate   = addMonths(startDate, months);
 
   const group = {
-    id: 'grp_' + Date.now(),
+    id: 'grp_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
     code,
     createdBy: userId,
     name,
+    reason: reason || 'School & University Fees',
     targetAmount: parseFloat(targetAmount),
     pooledBalance: parseFloat(initialContribution || 0),
     months,
@@ -674,27 +672,46 @@ function submitReferralCode(rawCode, user) {
     code,
     referrerId: entry.userId,
     referredId: user.id,
-    status: 'pending', // → 'verified' once friend completes goal
+    status: 'registered', // registered -> deposit_pending -> active (after 1 mo & >R50) -> verified (goal complete)
+    firstDepositAmount: 0,
+    firstDepositDate: null,
     createdAt: new Date().toISOString(),
     completedAt: null,
   });
   saveReferrals(referrals);
 
-  return { ok: true, msg: "Code applied! Complete a savings goal (3+ months) to activate your referrer's reward." };
+  return { ok: true, msg: "Code applied! Deposit >R50 and complete your savings goal to reward your referrer." };
 }
 
-// Called when the referred user completes a goal
+// Check deposit conditions when the referred user deposits to a goal or group
+function checkReferralDepositTrigger(userId, depositAmount) {
+  const referrals = getReferrals();
+  const ref = referrals.find(r => r.referredId === userId && (r.status === 'registered' || r.status === 'deposit_pending'));
+  if (!ref) return;
+
+  if (depositAmount > 50) {
+    ref.firstDepositAmount = depositAmount;
+    ref.firstDepositDate = new Date().toISOString();
+    ref.status = 'activated'; // Activated after deposit of > R50
+    saveReferrals(referrals);
+  } else if (ref.status === 'registered') {
+    ref.status = 'deposit_pending';
+    saveReferrals(referrals);
+  }
+}
+
+// Called when the referred user completes a goal (completing their set amount & set months)
 // SINGLE-SIDED: only the REFERRER gets a ticket
 function completeReferralForUser(referredUserId) {
   const referrals = getReferrals();
-  const ref = referrals.find(r => r.referredId === referredUserId && r.status === 'pending');
+  const ref = referrals.find(r => r.referredId === referredUserId && (r.status === 'activated' || r.status === 'pending' || r.status === 'linked' || r.status === 'registered'));
   if (!ref) return;
 
   ref.status = 'verified';
   ref.completedAt = new Date().toISOString();
   saveReferrals(referrals);
 
-  // Award flat-rate scratch card to REFERRER ONLY
+  // Award ticket to REFERRER ONLY
   issueTicket(ref.referrerId, 'referral', 'flat', ref.id);
 
   // Generate fresh code for referrer
@@ -707,7 +724,7 @@ function completeReferralForUser(referredUserId) {
 
 function forfeitReferralForUser(userId) {
   const referrals = getReferrals();
-  const ref = referrals.find(r => r.referredId === userId && r.status === 'pending');
+  const ref = referrals.find(r => r.referredId === userId && r.status !== 'verified' && r.status !== 'forfeited');
   if (!ref) return;
   ref.status = 'forfeited';
   ref.forfeitedAt = new Date().toISOString();
@@ -960,12 +977,18 @@ function renderGroupCard(group, userId) {
       <div class="group-card-header">
         <div>
           <div class="group-name">${group.name}</div>
-          <div class="group-members-avatars" style="margin-top:4px;">
+          <div style="margin-top:2px;">
+            <span class="group-code-reason" style="font-size:0.7rem; padding:2px 8px;">Reason: ${group.reason || 'General Savings'}</span>
+          </div>
+          <div class="group-members-avatars" style="margin-top:6px;">
             ${group.members.slice(0, 5).map(m => `<div class="member-avatar">${m.role === 'admin' ? 'ADM' : 'MBR'}</div>`).join('')}
             ${group.members.length > 5 ? `<div class="member-avatar member-avatar--overflow">+${group.members.length - 5}</div>` : ''}
           </div>
-          <div style="margin-top:6px;">
-            <span class="group-code-display">${group.code}</span>
+          <div style="margin-top:8px;">
+            <button class="btn-group-code" data-gaction="view-code" data-group-id="${group.id}" title="Click to view code and invite members">
+              <span>Code: ${group.code}</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            </button>
           </div>
         </div>
         <div style="text-align:right;">
@@ -1014,6 +1037,26 @@ function renderGroupCard(group, userId) {
     </div>`;
 }
 
+let _activeGroupForCode = null;
+
+function openGroupCodePopup(groupId) {
+  const groups = getGroups();
+  const group = groups.find(g => g.id === groupId);
+  if (!group) return;
+
+  _activeGroupForCode = group;
+  setEl('popup-group-title', `${group.name} - Group Code`);
+  setEl('popup-group-code', group.code);
+  setEl('popup-group-reason', `Reason: ${group.reason || 'General Savings'}`);
+
+  const phoneInput = document.getElementById('popup-invite-phone');
+  const statusEl = document.getElementById('popup-invite-status');
+  if (phoneInput) phoneInput.value = '';
+  if (statusEl) { statusEl.textContent = ''; statusEl.className = 'enter-code-status'; }
+
+  openModal('modal-group-code');
+}
+
 function attachGroupCardButtons(groups, user) {
   groups.forEach(group => {
     const card = document.getElementById(`group-card-${group.id}`);
@@ -1024,6 +1067,7 @@ function attachGroupCardButtons(groups, user) {
         const gId = btn.getAttribute('data-group-id');
         if (action === 'deposit') openGroupDepositModal(gId, user);
         if (action === 'complete') forceCompleteGroup(gId, user);
+        if (action === 'view-code') openGroupCodePopup(gId);
       });
     });
   });
@@ -1159,10 +1203,13 @@ function renderReferralsPage() {
         </div>`;
     } else {
       const statusBadge = {
-        verified: '<span class="status-badge status-badge--verified">Verified - Ticket Earned</span>',
-        pending:  '<span class="status-badge status-badge--pending">Pending Goal</span>',
-        forfeited:'<span class="status-badge status-badge--forfeited">Forfeited</span>',
-        linked:   '<span class="status-badge status-badge--pending">Code Applied</span>',
+        verified:        '<span class="status-badge status-badge--verified">Goal Completed - Ticket Earned</span>',
+        activated:       '<span class="status-badge status-badge--verified" style="background:#DBEAFE;color:#1D4ED8;">Active (>R50 Saved)</span>',
+        deposit_pending: '<span class="status-badge status-badge--pending">Deposit Required (>R50)</span>',
+        registered:      '<span class="status-badge status-badge--pending">Signed Up</span>',
+        pending:         '<span class="status-badge status-badge--pending">Pending Goal</span>',
+        forfeited:       '<span class="status-badge status-badge--forfeited">Forfeited</span>',
+        linked:          '<span class="status-badge status-badge--pending">Active</span>',
       };
       listEl.innerHTML = myReferrals.map(r => `
         <div class="referral-list-item">
@@ -1429,6 +1476,19 @@ function closeShareModal() {
    ================================================ */
 function checkUrlReferral() {
   const params = new URLSearchParams(window.location.search);
+
+  // Group invite link handling: ?joinGroup=GRP-XXXXXX
+  const groupJoinCode = params.get('joinGroup');
+  if (groupJoinCode) {
+    const cleanGroupCode = groupJoinCode.trim().toUpperCase();
+    const joinInput = document.getElementById('join-group-code');
+    if (joinInput) joinInput.value = cleanGroupCode;
+    openModal('modal-join-group');
+    showToast(`Joining group code: ${cleanGroupCode}`, 'default', 4000);
+    clearUrlParams();
+    return;
+  }
+
   const refCode = params.get('ref') || params.get('code');
   if (!refCode) return;
 
@@ -1542,6 +1602,7 @@ function clearUrlParams() {
   const url = new URL(window.location);
   url.searchParams.delete('ref');
   url.searchParams.delete('code');
+  url.searchParams.delete('joinGroup');
   window.history.replaceState({}, document.title, url.pathname + (url.search === '?' ? '' : url.search));
 }
 
@@ -1712,6 +1773,7 @@ function setupModals() {
 
   document.getElementById('btn-confirm-create-group')?.addEventListener('click', () => {
     const name    = groupNameEl?.value.trim();
+    const reason  = document.getElementById('group-reason')?.value || 'School & University Fees';
     const target  = parseFloat(groupTargetEl?.value || 0);
     const months  = parseInt(groupDurEl?.value || 6);
     const initial = parseFloat(groupInitEl?.value || 0);
@@ -1720,13 +1782,58 @@ function setupModals() {
     if (target < 1000) { showToast('Minimum pool target is R1,000.', 'warning'); return; }
     if (initial > getWalletBalance()) { showToast(`Insufficient wallet balance. Available: ${fmt(getWalletBalance())}`, 'warning'); return; }
 
-    const group = createGroup(user.id, name, target, months, initial);
+    const group = createGroup(user.id, name, target, months, initial, reason);
     showToast(`Group "${name}" created! Code: ${group.code}`, 'success', 5000);
     if (groupNameEl)   groupNameEl.value   = '';
     if (groupTargetEl) groupTargetEl.value = '';
     if (groupInitEl)   groupInitEl.value   = '';
     closeModal('modal-create-group');
     updateAllUI();
+
+    // Automatically open code popup so user can immediately invite or copy code
+    setTimeout(() => openGroupCodePopup(group.id), 400);
+  });
+
+  // --- Group Code & Invite Popup Controls ---
+  document.getElementById('btn-close-group-code')?.addEventListener('click', () => closeModal('modal-group-code'));
+  document.getElementById('btn-popup-close-code')?.addEventListener('click', () => closeModal('modal-group-code'));
+  document.getElementById('modal-group-code')?.addEventListener('click', e => {
+    if (e.target.id === 'modal-group-code') closeModal('modal-group-code');
+  });
+
+  // Option 1: Copy Code
+  document.getElementById('btn-popup-copy-code')?.addEventListener('click', () => {
+    if (!_activeGroupForCode) return;
+    const directUrl = `${window.location.origin}/savings.html?joinGroup=${_activeGroupForCode.code}`;
+    navigator.clipboard.writeText(_activeGroupForCode.code)
+      .then(() => showToast(`Group code ${_activeGroupForCode.code} copied! Share link: ${directUrl}`, 'success', 5000))
+      .catch(() => showToast(`Code: ${_activeGroupForCode.code}`, 'default'));
+  });
+
+  // Option 2: Send Direct Invite by Number
+  document.getElementById('btn-popup-send-invite')?.addEventListener('click', () => {
+    if (!_activeGroupForCode) return;
+    const phoneInput = document.getElementById('popup-invite-phone');
+    const statusEl = document.getElementById('popup-invite-status');
+    const rawPhone = (phoneInput?.value || '').trim();
+
+    if (!rawPhone || rawPhone.length < 9) {
+      if (statusEl) { statusEl.textContent = 'Please enter a valid MTN mobile number.'; statusEl.className = 'enter-code-status text-danger'; }
+      showToast('Enter a valid mobile number.', 'warning');
+      return;
+    }
+
+    const inviteLink = `${window.location.origin}/savings.html?joinGroup=${_activeGroupForCode.code}`;
+    const smsMessage = `MTN MoMo: You have been invited to join the '${_activeGroupForCode.name}' savings group (${_activeGroupForCode.reason}). Join using code: ${_activeGroupForCode.code} or link: ${inviteLink}`;
+
+    if (statusEl) {
+      statusEl.textContent = `Invite alert sent to ${rawPhone}! Direct link attached.`;
+      statusEl.className = 'enter-code-status text-success';
+    }
+
+    showToast(`Invite alert dispatched to ${rawPhone}!`, 'success', 5000);
+    console.log(`[SMS Gateway Mock] Dispatched to ${rawPhone}: "${smsMessage}"`);
+    if (phoneInput) phoneInput.value = '';
   });
 
   // --- Join Group ---

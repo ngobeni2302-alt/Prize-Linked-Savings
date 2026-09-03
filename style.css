@@ -19,19 +19,20 @@
   --yellow-pale: #FFF9E6;
   --yellow-badge: #FFCC00;
 
-  /* Typography & Dark accents */
-  --navy: #111827;
-  --navy-soft: #1F2937;
-  --navy-deep: #0B0F17;
-  --navy-muted: #6B7280;
-  --navy-light: #9CA3AF;
+  /* Brand Primary Theme (MTN Deep Teal/Navy #004f71 replacing all black/navy) */
+  --brand-primary: #004f71;
+  --navy: #004f71;
+  --navy-soft: #003d57;
+  --navy-deep: #002d40;
+  --navy-muted: #537587;
+  --navy-light: #7a9cb0;
 
   /* Aliases */
-  --black: var(--navy);
-  --black-soft: var(--navy-soft);
-  --black-deep: var(--navy-deep);
-  --black-muted: var(--navy-muted);
-  --black-light: var(--navy-light);
+  --black: #004f71;
+  --black-soft: #003d57;
+  --black-deep: #002d40;
+  --black-muted: #537587;
+  --black-light: #7a9cb0;
 
   /* Status colors */
   --success: #10B981;
@@ -55,10 +56,10 @@
   --bg-primary: var(--white);
   --bg-secondary: #F8F9FA;
   --bg-accent: var(--yellow);
-  --text-primary: #111827;
-  --text-secondary: #6B7280;
-  --text-muted: #9CA3AF;
-  --text-on-accent: #111827;
+  --text-primary: #004f71;
+  --text-secondary: #537587;
+  --text-muted: #7a9cb0;
+  --text-on-accent: #004f71;
   --text-on-dark: var(--white);
 
   /* Spacing */
@@ -1859,4 +1860,71 @@ h1, h2, h3, h4 { line-height: 1.25; font-weight: 700; color: var(--navy); }
     gap: var(--space-lg);
     align-items: start;
   }
+}
+
+/* ================================================
+   GROUP CODE BUTTON & POPUP MODAL STYLES
+   ================================================ */
+.btn-group-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--yellow-pale);
+  color: var(--navy);
+  border: 1.5px dashed var(--yellow-dark);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.btn-group-code:hover {
+  background-color: var(--yellow);
+  border-color: var(--navy);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.btn-group-code:active {
+  transform: scale(0.97);
+}
+
+.group-code-display-box {
+  background: var(--yellow-pale);
+  border: 2px dashed var(--yellow);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+.group-code-text {
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: 3px;
+  margin: var(--space-xs) 0;
+}
+.group-code-reason {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--white);
+  border: 1px solid rgba(0, 79, 113, 0.15);
+  border-radius: var(--radius-full);
+  padding: 3px 12px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-top: 6px;
+}
+
+.group-invite-section {
+  background: var(--white-off);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  margin-top: var(--space-md);
 }

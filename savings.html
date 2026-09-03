@@ -194,10 +194,27 @@
       <button class="modal-close-btn" id="btn-close-create-group">&times;</button>
       <h3 class="modal-title">Create a Group / Stokvel</h3>
       <p class="modal-subtitle">Pool your savings with friends and family to unlock bulk retail discount vouchers.</p>
+      
       <div class="form-group">
         <label class="form-label" for="group-name">Group Name</label>
         <input type="text" id="group-name" class="input-field" placeholder="e.g. Sunday Stokvel, Family Fund" maxlength="40" />
       </div>
+
+      <div class="form-group">
+        <label class="form-label" for="group-reason">Reason for Saving (Goal Purpose)</label>
+        <select id="group-reason" class="form-select">
+          <option value="School &amp; University Fees" selected>School &amp; University Fees</option>
+          <option value="Groceries &amp; Household Bulk Buying">Groceries &amp; Household Bulk Buying</option>
+          <option value="Holiday &amp; Travel Fund">Holiday &amp; Travel Fund</option>
+          <option value="Emergency &amp; Healthcare Backup">Emergency &amp; Healthcare Backup</option>
+          <option value="Wedding &amp; Family Celebrations">Wedding &amp; Family Celebrations</option>
+          <option value="Home Improvements &amp; Renovation">Home Improvements &amp; Renovation</option>
+          <option value="Small Business &amp; Equipment">Small Business &amp; Equipment</option>
+          <option value="Festive Season / Year-End Stokvel">Festive Season / Year-End Stokvel</option>
+        </select>
+        <div class="form-hint">Choose what your group is pooling funds for</div>
+      </div>
+
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" for="group-target">Pool Target (R)</label>
@@ -210,6 +227,7 @@
             <option value="3">3 months</option>
             <option value="6" selected>6 months</option>
             <option value="12">12 months</option>
+            <option value="18">18 months</option>
             <option value="24">24 months</option>
           </select>
         </div>
@@ -221,6 +239,41 @@
       <div class="modal-actions">
         <button class="btn btn--primary btn--full" id="btn-confirm-create-group">Create Group</button>
         <button class="btn btn--outline btn--full" id="btn-cancel-create-group">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Group Code & Invite Popup ===== -->
+  <div class="modal-overlay" id="modal-group-code">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="btn-close-group-code">&times;</button>
+      <h3 class="modal-title" id="popup-group-title">Group Invite &amp; Code</h3>
+      <p class="modal-subtitle">Share your unique group code or directly invite members via their MTN mobile number.</p>
+
+      <div class="group-code-display-box">
+        <span class="wallet-label">GROUP CODE</span>
+        <div class="group-code-text" id="popup-group-code">GRP-XXXXXX</div>
+        <div class="group-code-reason" id="popup-group-reason">Reason: School Fees</div>
+      </div>
+
+      <!-- Action 1: Copy Code -->
+      <div style="margin-bottom:var(--space-md);">
+        <button class="btn btn--primary btn--full" id="btn-popup-copy-code">Copy Group Code</button>
+      </div>
+
+      <!-- Action 2: Invite by Mobile Number -->
+      <div class="group-invite-section">
+        <h4 style="font-size:0.86rem; font-weight:800; color:var(--navy); margin-bottom:var(--space-xs);">Direct Invite to Group</h4>
+        <p class="card-hint" style="margin-bottom:var(--space-sm);">Enter their MTN mobile number. An instant invite alert with direct access will be sent to them.</p>
+        <div class="input-row">
+          <input type="tel" id="popup-invite-phone" class="input-field" placeholder="e.g. 083 456 7890" maxlength="14" />
+          <button class="btn btn--primary" id="btn-popup-send-invite">Invite</button>
+        </div>
+        <div id="popup-invite-status" class="enter-code-status" style="margin-top:6px;"></div>
+      </div>
+
+      <div class="modal-actions" style="margin-top:var(--space-md);">
+        <button class="btn btn--outline btn--full" id="btn-popup-close-code">Close</button>
       </div>
     </div>
   </div>
