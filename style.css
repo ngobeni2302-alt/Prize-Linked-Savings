@@ -368,6 +368,20 @@ h1, h2, h3, h4 { line-height: 1.25; font-weight: 700; color: var(--navy); }
   color: var(--navy);
   flex-shrink: 0;
 }
+.section-title-icon {
+  width: 30px;
+  height: 30px;
+  background-color: var(--yellow);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+  font-weight: 900;
+  color: var(--navy);
+  flex-shrink: 0;
+}
 
 
 /* ================================================
@@ -531,6 +545,7 @@ h1, h2, h3, h4 { line-height: 1.25; font-weight: 700; color: var(--navy); }
   flex-shrink: 0;
   letter-spacing: 0.3px;
 }
+.activity-icon svg { width: 17px; height: 17px; }
 .activity-info { flex: 1; min-width: 0; }
 .activity-desc {
   font-size: 0.85rem;
@@ -1626,6 +1641,7 @@ h1, h2, h3, h4 { line-height: 1.25; font-weight: 700; color: var(--navy); }
   letter-spacing: 0.3px;
   transition: background-color var(--transition-fast);
 }
+.drawer-icon svg { width: 18px; height: 18px; }
 .drawer-item:hover .drawer-icon,
 .drawer-item--active .drawer-icon { background-color: var(--yellow); }
 .drawer-label { font-size: 0.9rem; }
@@ -1723,7 +1739,19 @@ h1, h2, h3, h4 { line-height: 1.25; font-weight: 700; color: var(--navy); }
 .info-box--warning { background-color: var(--warning-light); border: 1px solid var(--warning); color: #92400E; }
 .info-box--success { background-color: var(--success-light); border: 1px solid var(--success); color: #065F46; }
 .info-box--info    { background-color: var(--info-light); border: 1px solid var(--info); color: #1E40AF; }
-.info-box-icon { font-size: 0.85rem; flex-shrink: 0; margin-top: 1px; font-weight: 800; }
+.info-box-icon {
+  width: 22px;
+  height: 22px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-weight: 800;
+}
 
 
 /* ================================================
@@ -1746,6 +1774,7 @@ h1, h2, h3, h4 { line-height: 1.25; font-weight: 700; color: var(--navy); }
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+.empty-state-icon svg { width: 26px; height: 26px; }
 .empty-state-title { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: var(--space-sm); }
 .empty-state-text {
   font-size: 0.875rem;

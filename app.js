@@ -137,6 +137,18 @@ function fmtShort(n) {
   return fmt(n);
 }
 
+function iconSvg(name) {
+  const paths = {
+    inbox: '<path d="M4 4h16v16H4z"/><path d="M4 13h4l1.5 2h5L16 13h4"/>',
+    debit: '<path d="M12 5v14"/><path d="m18 13-6 6-6-6"/>',
+    credit: '<path d="M12 19V5"/><path d="m6 11 6-6 6 6"/>',
+    ticket: '<path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/><path d="M12 7v10"/>',
+    users: '<circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0"/><path d="M16 11a3 3 0 0 1 5 2.2M18 19a4 4 0 0 0-2-3.5"/>',
+    money: '<circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10.5c0-1 1-1.5 2.5-1.5s2.5.5 2.5 1.5-1 1.5-2.5 1.5-2.5.5-2.5 1.5 1 1.5 2.5 1.5 2.5-.5 2.5-1.5"/>',
+  };
+  return `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths[name] || paths.inbox}</svg>`;
+}
+
 /* ================================================
    UTILITY: Date helpers
    ================================================ */
@@ -862,7 +874,7 @@ function renderHomePage() {
     if (goals.length === 0 && groups.length === 0) {
       goalsListEl.innerHTML = `
         <div class="empty-state">
-          <div class="empty-state-icon">🏦</div>
+          <div class="empty-state-icon">${iconSvg('money')}</div>
           <div class="empty-state-title">No savings goals yet</div>
           <div class="empty-state-text">Create your first goal to start earning scratch cards and guaranteed prizes!</div>
           <a href="savings.html" class="btn btn--primary">Start Saving</a>
@@ -902,7 +914,7 @@ function renderHomePage() {
     if (txns.length === 0) {
       activityEl.innerHTML = `
         <div class="activity-item">
-          <div class="activity-icon">📭</div>
+          <div class="activity-icon">${iconSvg('inbox')}</div>
           <div class="activity-info">
             <div class="activity-desc">No transactions yet</div>
             <div class="activity-date">Start saving to see activity</div>
@@ -911,11 +923,11 @@ function renderHomePage() {
         </div>`;
     } else {
       activityEl.innerHTML = txns.map(t => {
-        const icons = { debit: '📤', credit: '📥', prize: '🎟', referral: '👥', interest: '💰' };
+        const icons = { debit: 'debit', credit: 'credit', prize: 'ticket', referral: 'users', interest: 'money' };
         const isPos = t.type === 'credit' || t.type === 'prize' || t.type === 'referral';
         return `
           <div class="activity-item">
-            <div class="activity-icon">${icons[t.type] || '📋'}</div>
+            <div class="activity-icon">${iconSvg(icons[t.type])}</div>
             <div class="activity-info">
               <div class="activity-desc">${t.description}</div>
               <div class="activity-date">${formatDate(t.date)}</div>
@@ -1202,7 +1214,7 @@ function renderGamePage() {
         const item = document.createElement('div');
         item.className = 'activity-item';
         item.innerHTML = `
-          <div class="activity-icon">${r.icon || 'TKT'}</div>
+          <div class="activity-icon">${iconSvg(r.type === 'retail_discount' ? 'ticket' : 'money')}</div>
           <div class="activity-info">
             <div class="activity-desc">${r.prize}</div>
             <div class="activity-date">${formatDate(t.scratchedAt)} · ${tierLabel(t.tier)} (${t.source === 'group_savings' ? 'Group Pool' : 'Personal'})</div>
@@ -1284,7 +1296,7 @@ function renderReferralsPage() {
     if (myReferrals.length === 0) {
       listEl.innerHTML = `
         <div class="activity-item">
-          <div class="activity-icon">--</div>
+          <div class="activity-icon">${iconSvg('ticket')}</div>
           <div class="activity-info">
             <div class="activity-desc">No referrals yet</div>
             <div class="activity-date">Share your code or direct link to invite friends</div>
