@@ -67,60 +67,25 @@
         </div>
       </div>
 
-      <!-- Quick Actions (8 Circular Buttons) -->
+      <!-- Quick Actions -->
       <div class="section" id="section-quick-actions">
         <h2 class="section-title">
           <span class="section-title-badge">QA</span>
           Quick Actions
         </h2>
         <div class="quick-actions-row">
-          <!-- 1. Send Money -->
-          <button class="quick-action-item" id="btn-qa-send-money" onclick="alert('Send Money feature opens MTN MoMo transfer screen.')">
+          <!-- 1. Add Funds -->
+          <button class="quick-action-item" id="btn-qa-add-funds" onclick="showAddFundsModal()">
             <div class="quick-action-circle">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <polyline points="19 12 12 19 5 12"></polyline>
               </svg>
             </div>
-            <span class="quick-action-label">Send Money</span>
+            <span class="quick-action-label">Add Funds</span>
           </button>
 
-          <!-- 2. Buy Airtime -->
-          <button class="quick-action-item" id="btn-qa-buy-airtime" onclick="alert('Buy Airtime & Data bundle.')">
-            <div class="quick-action-circle">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
-                <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
-                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
-                <line x1="12" y1="20" x2="12.01" y2="20"></line>
-              </svg>
-            </div>
-            <span class="quick-action-label">Buy Airtime</span>
-          </button>
-
-          <!-- 3. Pay Bills -->
-          <button class="quick-action-item" id="btn-qa-pay-bills" onclick="alert('Pay Bills: Electricity, Water, Municipal & DSTV.')">
-            <div class="quick-action-circle">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                <line x1="2" y1="10" x2="22" y2="10"></line>
-              </svg>
-            </div>
-            <span class="quick-action-label">Pay Bills</span>
-          </button>
-
-          <!-- 4. Cash In -->
-          <button class="quick-action-item" id="btn-qa-cash-in" onclick="showAddFundsModal()">
-            <div class="quick-action-circle">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="19" x2="12" y2="5"></line>
-                <polyline points="5 12 12 5 19 12"></polyline>
-              </svg>
-            </div>
-            <span class="quick-action-label">Cash In</span>
-          </button>
-
-          <!-- 5. New Goal -->
+          <!-- 2. New Goal -->
           <button class="quick-action-item" id="btn-qa-new-goal" onclick="window.location.href='savings.html'">
             <div class="quick-action-circle">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -132,7 +97,7 @@
             <span class="quick-action-label">New Goal</span>
           </button>
 
-          <!-- 6. My Tickets -->
+          <!-- 3. My Tickets -->
           <button class="quick-action-item" id="btn-qa-my-tickets" onclick="window.location.href='game.html'">
             <div class="quick-action-circle">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -145,7 +110,7 @@
             <span class="quick-action-label">My Tickets</span>
           </button>
 
-          <!-- 7. Refer a Friend -->
+          <!-- 4. Refer a Friend -->
           <button class="quick-action-item" id="btn-qa-refer-friend" onclick="window.location.href='referrals.html'">
             <div class="quick-action-circle">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -156,17 +121,6 @@
               </svg>
             </div>
             <span class="quick-action-label">Refer Friend</span>
-          </button>
-
-          <!-- 8. Add Funds -->
-          <button class="quick-action-item" id="btn-qa-add-funds" onclick="showAddFundsModal()">
-            <div class="quick-action-circle">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <polyline points="19 12 12 19 5 12"></polyline>
-              </svg>
-            </div>
-            <span class="quick-action-label">Add Funds</span>
           </button>
         </div>
       </div>
@@ -228,25 +182,32 @@
   <div class="modal-overlay" id="modal-add-funds">
     <div class="modal-card">
       <button class="modal-close-btn" id="btn-close-add-funds">&times;</button>
-      <h3 class="modal-title">Add Funds to Wallet</h3>
-      <p class="modal-subtitle">Simulate a cash-in via your nearest retail partner.</p>
+      <h3 class="modal-title">Transfer Funds to Savings</h3>
+      <p class="modal-subtitle">Transfer money directly from your personal MoMo wallet to your savings account.</p>
+
       <div class="form-group">
-        <label class="form-label" for="add-funds-amount">Amount (ZAR)</label>
-        <input type="number" id="add-funds-amount" class="input-field" placeholder="500.00" min="10" step="0.01" />
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="add-funds-partner">Retail Partner</label>
-        <select id="add-funds-partner" class="form-select">
-          <option value="Pick n Pay">Pick n Pay</option>
-          <option value="Shoprite">Shoprite</option>
-          <option value="Boxer">Boxer</option>
-          <option value="Checkers">Checkers</option>
-          <option value="Usave">Usave</option>
-          <option value="PEP">PEP</option>
+        <label class="form-label" for="add-funds-destination-type">Savings Destination</label>
+        <select id="add-funds-destination-type" class="form-select">
+          <option value="personal">Personal Savings Goal</option>
+          <option value="group">Group / Stokvel Savings</option>
         </select>
       </div>
+
+      <div class="form-group" id="group-target-selector-wrapper">
+        <label class="form-label" for="add-funds-target-select" id="add-funds-target-label">Select Goal</label>
+        <select id="add-funds-target-select" class="form-select">
+          <option value="" disabled selected>— Choose destination —</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="add-funds-amount">Amount to Transfer (ZAR)</label>
+        <input type="number" id="add-funds-amount" class="input-field" placeholder="250.00" min="10" step="10" />
+        <div class="form-hint" id="add-funds-wallet-available">Available in MoMo Wallet: R2 450,00</div>
+      </div>
+
       <div class="modal-actions">
-        <button class="btn btn--primary btn--full" id="btn-confirm-add-funds">Add Funds</button>
+        <button class="btn btn--primary btn--full" id="btn-confirm-add-funds">Transfer to Savings</button>
         <button class="btn btn--outline btn--full" id="btn-cancel-add-funds">Cancel</button>
       </div>
     </div>

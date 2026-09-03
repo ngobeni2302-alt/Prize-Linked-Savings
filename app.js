@@ -1649,22 +1649,88 @@ function setupDrawer() {
 function setupModals() {
   const user = getCurrentUser();
 
-  // --- Add Funds (Home) ---
-  const addFundsModal    = document.getElementById('modal-add-funds');
-  const addFundsAmountEl = document.getElementById('add-funds-amount');
-  const addFundsPartner  = document.getElementById('add-funds-partner');
+  // --- Transfer Funds to Savings (Home) ---
+  const addFundsModal       = document.getElementById('modal-add-funds');
+  const addFundsAmountEl    = document.getElementById('add-funds-amount');
+  const addFundsTypeEl      = document.getElementById('add-funds-destination-type');
+  const addFundsTargetEl    = document.getElementById('add-funds-target-select');
+  const addFundsTargetLbl   = document.getElementById('add-funds-target-label');
+  const addFundsAvailHint   = document.getElementById('add-funds-wallet-available');
+
+  function populateAddFundsTargets() {
+    if (!addFundsTargetEl || !addFundsTypeEl) return;
+    const destType = addFundsTypeEl.value;
+    const user = getCurrentUser();
+
+    if (addFundsAvailHint) {
+      addFundsAvailHint.textContent = `Available in MoMo Wallet: ${fmt(getWalletBalance())}`;
+    }
+
+    if (destType === 'personal') {
+      if (addFundsTargetLbl) addFundsTargetLbl.textContent = 'Select Personal Goal';
+      const goals = getGoals().filter(g => g.userId === user.id && !g.isCompleted && !g.isWithdrawnEarly);
+      if (goals.length === 0) {
+        addFundsTargetEl.innerHTML = '<option value="" disabled selected>No active goals — create one first!</option>';
+      } else {
+        addFundsTargetEl.innerHTML = goals.map(g => `<option value="${g.id}">${g.name} (${fmt(g.currentBalance)} / ${fmt(g.targetAmount)})</option>`).join('');
+      }
+    } else {
+      if (addFundsTargetLbl) addFundsTargetLbl.textContent = 'Select Group / Stokvel';
+      const groups = getGroups().filter(g => g.members.some(m => m.userId === user.id) && !g.isCompleted && !g.isWithdrawnEarly);
+      if (groups.length === 0) {
+        addFundsTargetEl.innerHTML = '<option value="" disabled selected>No active groups — join or create one first!</option>';
+      } else {
+        addFundsTargetEl.innerHTML = groups.map(g => `<option value="${g.id}">${g.name} (${fmt(g.pooledBalance)} / ${fmt(g.targetAmount)})</option>`).join('');
+      }
+    }
+  }
+
+  addFundsTypeEl?.addEventListener('change', populateAddFundsTargets);
+
+  window.showAddFundsModal = function() {
+    populateAddFundsTargets();
+    if (addFundsAmountEl) addFundsAmountEl.value = '';
+    openModal('modal-add-funds');
+  };
+
   document.getElementById('btn-close-add-funds')?.addEventListener('click',  () => closeModal('modal-add-funds'));
   document.getElementById('btn-cancel-add-funds')?.addEventListener('click', () => closeModal('modal-add-funds'));
+
   document.getElementById('btn-confirm-add-funds')?.addEventListener('click', () => {
     const amount = parseFloat(addFundsAmountEl?.value || 0);
-    if (!amount || amount <= 0) { showToast('Enter a valid amount.', 'warning'); return; }
-    const partner = addFundsPartner?.value || 'Retail Partner';
-    addToWallet(amount);
-    addTransaction('credit', amount, `Cash in via ${partner}`);
-    showToast(`${fmt(amount)} added to your wallet from ${partner}.`, 'success');
+    const destType = addFundsTypeEl?.value || 'personal';
+    const targetId = addFundsTargetEl?.value;
+
+    if (!amount || amount <= 0) {
+      showToast('Please enter a valid amount to transfer.', 'warning');
+      return;
+    }
+    if (!targetId) {
+      showToast('Please select a target goal or group.', 'warning');
+      return;
+    }
+
+    const walletBal = getWalletBalance();
+    if (amount > walletBal) {
+      showToast(`Insufficient MoMo wallet balance. Available: ${fmt(walletBal)}`, 'warning');
+      return;
+    }
+
+    if (destType === 'personal') {
+      const res = depositToGoal(targetId, amount, user.id);
+      if (!res.ok) { showToast(res.msg, 'error'); return; }
+      showToast(`Successfully transferred ${fmt(amount)} from MoMo wallet to your personal goal!`, 'success');
+    } else {
+      const res = depositToGroup(targetId, amount, user.id);
+      if (!res.ok) { showToast(res.msg, 'error'); return; }
+      showToast(`Successfully transferred ${fmt(amount)} from MoMo wallet to group pool!`, 'success');
+      if (res.completionMsg) setTimeout(() => showToast(res.completionMsg, 'success', 5000), 500);
+    }
+
     closeModal('modal-add-funds');
     updateAllUI();
   });
+
   if (addFundsModal) addFundsModal.addEventListener('click', e => { if (e.target === addFundsModal) closeModal('modal-add-funds'); });
 
   // --- Personal Goal Creation ---
@@ -1932,10 +1998,6 @@ function setupModals() {
   });
 }
 
-/* ================================================
-   SHOW ADD FUNDS MODAL (called from inline onclick)
-   ================================================ */
-window.showAddFundsModal = function() { openModal('modal-add-funds'); };
 
 /* ================================================
    BOOT
