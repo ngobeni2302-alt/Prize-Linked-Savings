@@ -1335,16 +1335,11 @@ function setupGamePage() {
       return;
     }
 
-    if (!activeTicketId) {
-      activeTicketId = ticketSelect?.value || tickets[0].id;
+    if (!activeTicketId || !tickets.find(t => t.id === activeTicketId)) {
+      activeTicketId = tickets[0].id;
     }
 
-    const ticket = tickets.find(t => t.id === activeTicketId);
-    if (!ticket) {
-      showToast('Please choose an available ticket from the dropdown above.', 'warning');
-      renderGamePage();
-      return;
-    }
+    const ticket = tickets.find(t => t.id === activeTicketId) || tickets[0];
 
     isScratchedCurrent = true;
 

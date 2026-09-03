@@ -35,34 +35,6 @@
         <p class="page-subtitle">Every ticket is a 100% guaranteed win &mdash; earned by completing savings goals and group targets</p>
       </div>
 
-      <!-- Ticket Selection & Available Cards -->
-      <div class="section" id="section-ticket-info">
-        <div class="ticket-header-card card card--highlight" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-md); margin-bottom:var(--space-md);">
-          <div>
-            <span class="wallet-label">AVAILABLE TICKETS</span>
-            <div style="display:flex; align-items:baseline; gap:var(--space-sm); margin-top:4px;">
-              <span style="font-size:2rem; font-weight:800; color:var(--navy);" id="game-tickets-count">0</span>
-              <span style="font-size:0.85rem; color:var(--text-secondary); font-weight:600;">ready to scratch</span>
-            </div>
-          </div>
-          <div style="display:flex; gap:var(--space-sm); align-items:center;">
-            <button class="btn btn--outline btn--sm" id="btn-add-ticket" title="Add a demo Bronze ticket to test scratching">+ Demo Ticket</button>
-          </div>
-        </div>
-
-        <div class="ticket-selector-card card" style="margin-bottom:var(--space-lg);">
-          <label class="form-label" for="ticket-code-select" style="font-weight:700;">Choose a Ticket to Scratch</label>
-          <div class="input-row">
-            <select id="ticket-code-select" class="form-select">
-              <option value="" disabled selected>&mdash; Select a ticket &mdash;</option>
-            </select>
-          </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:var(--space-sm);">
-            <div class="card-hint" id="active-ticket-banner" style="font-weight:700; color:var(--navy);">Select a scratch card above to begin</div>
-            <div class="card-hint">Pool Type: <strong id="active-pool-type" style="color:var(--navy);">&mdash;</strong></div>
-          </div>
-        </div>
-      </div>
 
       <!-- Interactive Scratch Card Arena -->
       <div class="section" id="section-scratch-arena">
@@ -106,21 +78,6 @@
             <div class="win-title" id="win-title">Congratulations!</div>
             <div class="win-prize" id="win-prize">Reward</div>
             <div class="split-details-text" id="win-split-details">Credited directly to your MTN MoMo account</div>
-
-            <!-- Delivery confirmation preview -->
-            <div class="delivery-status-card" id="delivery-status-card" style="display:none;">
-              <div class="delivery-status-header">
-                <span class="delivery-status-badge delivery-status-badge--delivered" id="delivery-status-badge">DELIVERED</span>
-                <span class="delivery-status-title">Instant Fulfillment via MTN MoMo</span>
-              </div>
-              <div class="delivery-phone-text" id="win-phone-text">Recipient: Registered MTN SIM</div>
-              <div class="sms-preview-box">
-                <span class="sms-label">SMS Alert Sent:</span>
-                <span id="win-sms-text" style="font-size:0.8rem; color:var(--navy-soft); font-family:monospace;">"MTN MoMo: Reward delivered to your number."</span>
-              </div>
-            </div>
-
-            <button class="btn btn--primary" id="btn-play-again" style="margin-top:var(--space-md);">Scratch Another Card</button>
           </div>
         </div>
       </div>
